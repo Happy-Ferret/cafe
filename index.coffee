@@ -1,4 +1,4 @@
-{ parse }                     = require './front'
+{ parse }         = require './front'
 { codegen, emit } = require './back'
 
 emit codegen parse """
