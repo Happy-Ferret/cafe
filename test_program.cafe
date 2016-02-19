@@ -13,13 +13,18 @@
 	(io.write pchr)
 	(let ((ret (io.read)))
 		(if pred
-			(if (not (pred))
+			(if (not (pred ret))
 				(exit-with-error! "Doesn't pass predicate!")
 				ret)
 			ret)))
 
-(defn (format fmtstr ...)
-	(print (string.format fmtstr ...)))
+(defn (print! stream something)
+	(let ((choose-stream (λ (s) (if s s (io.output)))))
+		(let ((stream (choose-stream stream)))
+			(.stream write something))))
 
-(let ((my_var (prompt "enter your name: " exists?)))
-	(format "Hello, %s!" my_var))
+(defn (print-formatted! stream fmtstr ...)
+	(print! stream (.fmtstr format ...)))
+
+(let ((file (io.open "test" "w")) (name (prompt "enter your name: " exists?)))
+	(print-formatted! file "Hello, world!"))

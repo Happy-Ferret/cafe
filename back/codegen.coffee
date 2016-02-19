@@ -73,27 +73,36 @@ module.exports.codegen = (ast) ->
 		base += "#{expr.name} = #{intermediate_codegen expr.value};"
 		base
 
+	codegen_self_call = (expr) ->
+		"#{expr.name}:#{expr.keyn}(#{expr.args.map(intermediate_codegen).join ', '})"
+
 
 	intermediate_codegen = (expr) ->
-		switch expr.type
-			when 'define_function'
-				codegen_function expr
-			when 'call_function'
-				codegen_call expr
-			when 'binary_operator'
-				codegen_binary expr
-			when 'unary_operator'
-				codegen_unary expr
-			when 'assignment'
-				codegen_assignment expr
-			when 'scoped_block'
-				codegen_scoped_block expr
-			when 'conditional'
-				codegen_conditional expr
-			when 'lambda_expr'
-				codegen_lambda_expr expr
-			else
-				expr # either unimplemented construct or literal. either way, just emit.
+		if expr?.type?
+			switch expr.type
+				when 'define_function'
+					codegen_function expr
+				when 'call_function'
+					codegen_call expr
+				when 'binary_operator'
+					codegen_binary expr
+				when 'unary_operator'
+					codegen_unary expr
+				when 'assignment'
+					codegen_assignment expr
+				when 'scoped_block'
+					codegen_scoped_block expr
+				when 'conditional'
+					codegen_conditional expr
+				when 'lambda_expr'
+					codegen_lambda_expr expr
+				when 'self_call'
+					codegen_self_call expr
+				else
+					expr # either unimplemented construct or literal. either way, just emit.
+		else
+			console.error "can not generate: #{JSON.stringify expr, null, '  '}"
+			expr
 
 	ast.map intermediate_codegen
 

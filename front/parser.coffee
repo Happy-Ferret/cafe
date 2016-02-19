@@ -9,7 +9,10 @@ operator = (s) ->
 	isop
 
 symbol = (str) ->
-	str.replace(new RegExp('-', 'g'), '_').replace(/\?/g, 'qm').replace(new RegExp('!', 'g'), 'bang')
+	if str.replace?
+		str.replace(new RegExp('-', 'g'), '_').replace(/\?/g, 'qm').replace(new RegExp('!', 'g'), 'bang')
+	else
+		str
 
 module.exports.parse = (string) ->
 	str2tok = (str) ->
@@ -77,8 +80,14 @@ module.exports.parse = (string) ->
 					{
 						type: 'scoped_block'
 						vars: tokens[1].map (tok) ->
-							[tok[0], toks2ast tok[1]]
-						body: tokens.slice(2).map toks2ast
+							arr = [symbol tok[0]]
+							arr.push toks2ast tok[1]
+
+							arr
+						body: do ->
+							thing = tokens.slice(2).map toks2ast
+							# console.log thing
+							thing
 					}
 
 				else if tokens[0] is 'if'
@@ -94,6 +103,25 @@ module.exports.parse = (string) ->
 						args: tokens[1]
 						body: tokens.slice(2).map toks2ast
 					}
+				else if tokens[0] is 'sc' or tokens[0][0] is '.'
+					if tokens[0] is 'sc'
+						{
+							type: 'self_call',
+							name: symbol tokens[1]
+							keyn: symbol tokens[2]
+							args: tokens.slice(3).map toks2ast
+
+							cond: 1
+						}
+					else
+						{
+							type: 'self_call',
+							name: symbol tokens[0].slice 1
+							keyn: symbol tokens[1]
+							args: tokens.slice(2).map toks2ast
+
+							cond: 2
+						}
 				else
 					{
 						type: 'call_function'
@@ -109,6 +137,6 @@ module.exports.parse = (string) ->
 	tokens = str2tok string
 	ast = tokens.map toks2ast
 
-	console.error JSON.stringify ast, null, '\t'
+	console.error JSON.stringify ast, null, '  '
 
 	ast
