@@ -27,4 +27,4 @@
 	(print! stream (.fmtstr format ...)))
 
 (let ((file (io.open "test" "w")) (name (prompt "enter your name: " exists?)))
-	(print-formatted! file "Hello, world!"))
+	(print-formatted! file "Hello, %s!" name))
