@@ -59,6 +59,38 @@ module.exports.parse = (string) ->
 								lhs: toks2ast tokens[1]
 								rhs: toks2ast tokens[2]
 							}
+				else if tokens[0] is 'set!'
+					base = {
+						type: 'assignment'
+						name: tokens[1]
+						value: toks2ast tokens[2]
+						local: true
+					}
+					if tokens[3] is '!global'
+						base.local = false
+
+					base
+				else if tokens[0] is 'let'
+					{
+						type: 'scoped_block'
+						vars: tokens[1].map (tok) ->
+							[tok[0], toks2ast tok[1]]
+						body: tokens.slice(2).map toks2ast
+					}
+
+				else if tokens[0] is 'if'
+					{
+						type: 'conditional'
+						cond: toks2ast tokens[1]
+						trueb: toks2ast tokens[2]
+						falsb: toks2ast tokens[3]
+					}
+				else if tokens[0] in ['λ', 'lambda']
+					{
+						type: 'lambda_expr'
+						args: tokens[1]
+						body: tokens.slice(2).map toks2ast
+					}
 				else
 					{
 						type: 'call_function'
