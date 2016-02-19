@@ -19,11 +19,13 @@ module.exports.parse = (string) ->
 		sexpr = [[]]
 		word  = ''
 		in_str = false
+		in_cm = false
+
 
 		for c in str
-			if c == '(' and !in_str
+			if c == '(' and (!in_str && !in_cm)
 				sexpr.push []
-			else if c == ')' and !in_str
+			else if c == ')' and (!in_str && !in_cm)
 				if word.length > 0
 					sexpr[sexpr.length - 1].push word
 					word = ''
@@ -31,12 +33,18 @@ module.exports.parse = (string) ->
 				thing = do sexpr.pop
 				sexpr[sexpr.length - 1].push thing
 			else if c in " \r\n\t" and !in_str
-				if word.length > 0
+				if in_cm
+					if c is '\n'
+						word = ''
+						in_cm = false
+				else if word.length > 0
 					sexpr[sexpr.length - 1].push word
 					word = ''
 			else if c == '"'
 				word += c
 				in_str = !in_str
+			else if c == ';'
+				in_cm = true
 			else
 				word += c
 		sexpr[0]
