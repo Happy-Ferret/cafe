@@ -1,21 +1,25 @@
-(defn (exists n)
+(defn (exists? n)
 	(if n
 		(if (== (# n) 0)
 			false
 			true)
 		false))
 
-(defn (prompt pchr)
+(defn (exit-with-error! erfmt ...)
+	(print (string.format erfmt ...))
+	(os.exit 0))
+
+(defn (prompt pchr pred)
 	(io.write pchr)
 	(let ((ret (io.read)))
 		(if pred
-			(if (not pred)
-				(error "Doesn't pass predicate!")
+			(if (not (pred))
+				(exit-with-error! "Doesn't pass predicate!")
 				ret)
 			ret)))
 
 (defn (format fmtstr ...)
 	(print (string.format fmtstr ...)))
 
-(let ((my_var (prompt "enter your name: " exists)))
+(let ((my_var (prompt "enter your name: " exists?)))
 	(format "Hello, %s!" my_var))

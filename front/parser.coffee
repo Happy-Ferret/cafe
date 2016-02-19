@@ -8,6 +8,9 @@ operator = (s) ->
 	]
 	isop
 
+symbol = (str) ->
+	str.replace(new RegExp('-', 'g'), '_').replace(/\?/g, 'qm').replace(new RegExp('!', 'g'), 'bang')
+
 module.exports.parse = (string) ->
 	str2tok = (str) ->
 		sexpr = [[]]
@@ -41,7 +44,7 @@ module.exports.parse = (string) ->
 				if tokens[0] is 'defn'
 						{
 							type: 'define_function'
-							name: tokens[1][0]
+							name: symbol tokens[1][0]
 							args: tokens[1].slice 1
 							body: tokens.slice(2).map toks2ast
 						}
@@ -62,7 +65,7 @@ module.exports.parse = (string) ->
 				else if tokens[0] is 'set!'
 					base = {
 						type: 'assignment'
-						name: tokens[1]
+						name: symbol tokens[1]
 						value: toks2ast tokens[2]
 						local: true
 					}
@@ -94,11 +97,14 @@ module.exports.parse = (string) ->
 				else
 					{
 						type: 'call_function'
-						name: tokens[0]
+						name: symbol tokens[0]
 						args: tokens.slice(1).map toks2ast
 					}
 			when 'string'
-				tokens
+				if tokens[0] == '"' and tokens.slice(-1)[0] == '"'
+					tokens
+				else
+					symbol tokens
 
 	tokens = str2tok string
 	ast = tokens.map toks2ast
