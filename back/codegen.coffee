@@ -101,7 +101,6 @@ module.exports.codegen = (ast) ->
 				else
 					expr # either unimplemented construct or literal. either way, just emit.
 		else
-			console.error "can not generate: #{JSON.stringify expr, null, '  '}"
 			expr
 
 	ast.map intermediate_codegen
