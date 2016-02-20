@@ -29,9 +29,10 @@ module.exports.preprocess = (contents) ->
 		else if line.startsWith ';;'
 			if mkdn?
 				line = '\n' if line == ';; --'
-				mkdn_lines.push line.replace(/^;; /g, '') + '  \n'
+				mkdn_lines.push line.replace(/^;; ?/g, '') + '  \n'
 		else
 			lines.push line
 
-	fs.writeFile mkdn, mkdn_lines.join '\n', (error) -> console.error error
+	if mkdn?
+		fs.writeFile mkdn, mkdn_lines.join '', (error) -> console.error error
 	ret = lines.join '\n'

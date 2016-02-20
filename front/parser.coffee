@@ -10,7 +10,7 @@ operator = (s) ->
 
 symbol = (str) ->
 	if str.replace?
-		str.replace(new RegExp('-', 'g'), '_').replace(/\?/g, 'qm').replace(new RegExp('!', 'g'), 'bang')
+		str.replace(new RegExp('-', 'g'), '_').replace(/\?/g, 'qm').replace(new RegExp('!', 'g'), 'bang').replace(/\*/g, 'star')
 	else
 		str
 
@@ -130,6 +130,14 @@ module.exports.parse = (string) ->
 
 							cond: 2
 						}
+				else if tokens[0] is 'for'
+					{
+						type: 'for_loop'
+						name: symbol tokens[1]
+						start: toks2ast tokens[2]
+						end: toks2ast tokens[3]
+						body: tokens.slice(4).map toks2ast
+					}
 				else
 					{
 						type: 'call_function'
