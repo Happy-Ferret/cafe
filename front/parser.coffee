@@ -1,3 +1,4 @@
+{ writeFile } = require 'fs'
 operator = (s) ->
 	isop = s in [
 		'==', '!=',
@@ -23,7 +24,7 @@ symbol = (str) ->
 	else
 		str
 
-module.exports.parse = (string) ->
+module.exports.parse = (string, astf) ->
 	str2tok = (str) ->
 		sexpr = [[]]
 		word  = ''
@@ -152,6 +153,8 @@ module.exports.parse = (string) ->
 	tokens = str2tok string
 	ast = tokens.map toks2ast
 
-	console.error JSON.stringify ast, null, '  '
-
+	if astf?
+		writeFile astf, JSON.stringify(ast, null, '  '), (error) ->
+			if error?
+				console.error "Failed to write #{astf}: #{error}"
 	ast
