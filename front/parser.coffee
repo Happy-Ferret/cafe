@@ -111,25 +111,15 @@ module.exports.parse = (string) ->
 						args: tokens[1]
 						body: tokens.slice(2).map toks2ast
 					}
-				else if tokens[0] is 'sc' or tokens[0][0] is '.'
-					if tokens[0] is 'sc'
-						{
-							type: 'self_call',
-							name: symbol tokens[1]
-							keyn: symbol tokens[2]
-							args: tokens.slice(3).map toks2ast
+				else if tokens[0][0] is '.'
+					{
+						type: 'self_call',
+						name: symbol tokens[0].slice 1
+						keyn: symbol tokens[1]
+						args: tokens.slice(2).map toks2ast
 
-							cond: 1
-						}
-					else
-						{
-							type: 'self_call',
-							name: symbol tokens[0].slice 1
-							keyn: symbol tokens[1]
-							args: tokens.slice(2).map toks2ast
-
-							cond: 2
-						}
+						cond: 2
+					}
 				else if tokens[0] is 'for'
 					{
 						type: 'for_loop'
