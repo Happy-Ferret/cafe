@@ -20,12 +20,12 @@ module.exports.codegen = (ast) ->
 		else
 			last_expr = "return #{last_expr}"
 
-		"\t#{body.join '\n\t'}\n\t#{last_expr}"
+		"#{body.join ';'}#{last_expr}"
 
 	codegen_function = (expr) ->
 		body = codegen_function_body expr
 
-		"function #{expr.name}(#{expr.args.join ', '})\n#{body}\nend"
+		"function #{expr.name}(#{expr.args.join ', '})#{body};end"
 
 	codegen_call = (expr) ->
 		"#{expr.name}(#{expr.args.map(intermediate_codegen).join ', '})"
@@ -55,24 +55,24 @@ module.exports.codegen = (ast) ->
 		else
 			last_expr = "#{intermediate_codegen last_expr}"
 
-		"do\n\t#{vars.join '\n\t'}\n\t#{body}\n\t#{last_expr}\nend"
+		"do #{vars.join ';'}#{body};#{last_expr}; end"
 
 	codegen_conditional = (expr) ->
 		if expr.is_tail?
-			base = '\nreturn '
+			base = ' return '
 		else
-			base = '\n '
-		base += "(function() if #{intermediate_codegen expr.cond} then\n\t\treturn #{intermediate_codegen expr.trueb}"
+			base = ' '
+		base += "(function() if #{intermediate_codegen expr.cond} then return #{intermediate_codegen expr.trueb}"
 		if expr.falsb?
-			base += "\n\telse\n\t\treturn #{intermediate_codegen expr.falsb} end"
+			base += " else return #{intermediate_codegen expr.falsb} end"
 		else
-			base += "\nend"
+			base += " end"
 
 		base += " end)()"
 
 	codegen_lambda_expr = (expr) ->
 		body = codegen_function_body expr
-		"function(#{expr.args.join ', '})\n#{body}\nend"
+		"function(#{expr.args.join ', '}) #{body} end"
 
 	codegen_assignment = (expr) ->
 		if expr.local?
@@ -87,7 +87,7 @@ module.exports.codegen = (ast) ->
 		"#{expr.name}:#{expr.keyn}(#{expr.args.map(intermediate_codegen).join ', '})"
 
 	codegen_for_loop = (expr) ->
-		"for #{expr.name} = #{intermediate_codegen expr.start}, #{intermediate_codegen expr.end} do #{expr.body.map(intermediate_codegen).join '\n\t'} end"
+		"for #{expr.name} = #{intermediate_codegen expr.start}, #{intermediate_codegen expr.end} do #{expr.body.map(intermediate_codegen).join ';'} end"
 
 
 	intermediate_codegen = (expr) ->
@@ -121,5 +121,4 @@ module.exports.codegen = (ast) ->
 	ast.map intermediate_codegen
 
 module.exports.emit = (code_parts) ->
-	for code in code_parts
-		console.log code
+	console.log code_parts.join ';'
