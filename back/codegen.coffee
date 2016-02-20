@@ -1,3 +1,4 @@
+fs = require 'fs'
 actual_opch = (opch) ->
 	opch_map =
 		"eq?": '=='
@@ -120,5 +121,6 @@ module.exports.codegen = (ast) ->
 
 	ast.map intermediate_codegen
 
-module.exports.emit = (code_parts) ->
-	console.log code_parts.join ';'
+module.exports.emit = (file, code_parts, cb) ->
+	fs.writeFile file, code_parts.join ';', (error) ->
+		cb error, code_parts.join ';'
