@@ -26,12 +26,12 @@ module.exports.preprocess = (contents) ->
 		else if line.startsWith '@markdown-doc'
 			mkdn = line.split(' ')[1]
 			exec "install `mktemp` -D #{mkdn} -m 0644"
-			console.error "exporting comment contents to #{mkdn}"
 		else if line.startsWith ';;'
 			if mkdn?
 				line = '\n' if line == ';; --'
-				fs.appendFileSync mkdn, line.replace(/^;; /g, '') + '  \n'
+				mkdn_lines.push line.replace(/^;; /g, '') + '  \n'
 		else
 			lines.push line
 
+	fs.writeFile mkdn_lines.join '\n', (error) -> console.error error
 	ret = lines.join '\n'
