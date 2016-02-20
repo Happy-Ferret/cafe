@@ -7,8 +7,8 @@ child_process         = require 'child_process'
 
 
 inp = process.argv[2] ? '/dev/stdin'
-out = process.argv[3] ? 'stdin.lua'
-ast = process.argv[4] ? 'stdin.ast.json'
+out = process.argv[3] ? "#{inp}.lua"
+ast = process.argv[4] ? "#{inp}.ast.json"
 
 fs.readFile inp, {encoding: 'utf-8'}, (err, data) ->
 	if err
