@@ -8,8 +8,6 @@ import this if you want anything to work
 global symbol bound to the stdout stream  
 
   
-
-  
 ## Functions  
 ##### `exists thing`  
 returns false if:  
