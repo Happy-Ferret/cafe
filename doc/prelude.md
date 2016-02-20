@@ -59,3 +59,7 @@ return the rest of the list, without head
 modify a list using a function, returning a new list  
 
   
+##### `require! module`  
+require a Lua module into the current environment  
+  
+support for hot-compilation of café modules will be added at a later date.  
