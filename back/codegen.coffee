@@ -1,8 +1,7 @@
 fs = require 'fs'
 actual_opch = (opch) ->
 	opch_map =
-		"eq?": '=='
-		"neq?": '~='
+		'=': '=='
 		'!=': '~='
 
 	if opch_map[opch] then opch_map[opch] else opch

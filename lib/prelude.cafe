@@ -22,8 +22,8 @@
 ;; --
 (defn (exists? n)
 	(if n
-		(if (or (== (type n) "string") (== (type n) "table"))
-			(if (== (# n) 0)
+		(if (or (= (type n) "string") (= (type n) "table"))
+			(if (= (# n) 0)
 				false
 				true)
 			true)
