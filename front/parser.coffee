@@ -10,7 +10,7 @@ operator = (s) ->
 	isop
 
 symbol = (str) ->
-	specialChars = ['-','*','?','!','&',':','=','!','$','^']
+	specialChars = ['-','*','?','!','&',':','=','!','$','^', '/', '\\']
 	escapeStr = (str) ->
 		for special in specialChars
 			str = str.replace new RegExp("\\#{special}", 'gmi'), special.codePointAt 0
@@ -53,7 +53,10 @@ module.exports.parse = (string, astf) ->
 			else if c == '"'
 				word += c
 				in_str = !in_str
-			else if c == ';'
+			else if c == ';' and !in_str
+				if word.length > 0 and !in_cm
+					sexpr[sexpr.length - 1].push word
+					word = ''
 				in_cm = true
 			else
 				word += c
@@ -138,11 +141,16 @@ module.exports.parse = (string, astf) ->
 						end: toks2ast tokens[3]
 						body: tokens.slice(4).map toks2ast
 					}
+				else if tokens[0] is 'lua-raw'
+					{
+						type: 'raw'
+						body: tokens.slice(1)
+					}
 				else
 					{
 						type: 'call_function'
 						name: symbol tokens[0]
-						args: tokens.slice(1).map toks2ast
+						args: tokens.slice(1).map(toks2ast)
 					}
 			when 'string'
 				if tokens[0] == '"' and tokens.slice(-1)[0] == '"'
