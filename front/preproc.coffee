@@ -33,5 +33,5 @@ module.exports.preprocess = (contents) ->
 		else
 			lines.push line
 
-	fs.writeFile mkdn_lines.join '\n', (error) -> console.error error
+	fs.writeFile mkdn, mkdn_lines.join '\n', (error) -> console.error error
 	ret = lines.join '\n'
