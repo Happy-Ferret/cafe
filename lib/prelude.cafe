@@ -5,6 +5,15 @@
 ;; import this if you want anything to work
 ;; --
 
+;; ## Symbols
+;; ##### `*standard-output*`
+;; global symbol bound to the stdout stream
+(set! *standard-output* (io.output))
+
+;; --
+;; --
+;; ## Functions
+
 ;; ##### `exists thing`
 ;; returns false if:
 ;; - thing is a table or a string and thing.length is 0
@@ -48,10 +57,47 @@
 (defn (print! stream something)
 	(let ((choose-stream (λ (s) (if s s (io.output)))))
 		(let ((stream (choose-stream stream)))
-			(.stream write something))))
+			(.stream write something "\n"))))
 
 ;; ##### `print! stream fmtstr va_args`
 ;; print a formatted string to a stream
 ;; --
 (defn (print-formatted! stream fmtstr ...)
 	(print! stream (.fmtstr format ...)))
+
+;; ##### `cons list elem`
+;; cons an element in front of a list
+;; --
+(defn (cons list elem)
+	(table.insert list 1 elem)
+	list)
+
+;; ##### `head list`
+;; return the first element of a list
+;; --
+(defn (head list)
+	list[1])
+
+;; ##### `list`
+;; create a list from given values
+;; --
+(defn (list ...) {...})
+
+
+;; ##### `tail list`
+;; return the rest of the list, without head
+;; --
+(defn (tail l)
+	(let ((ret (list)))
+		(for i 2 (# l)
+			(cons ret list[i]))
+		ret))
+
+;; ##### `map list fn`
+;; modify a list using a function, returning a new list
+;; --
+(defn (map li fn)
+	(let ((ret (list)))
+		(for i 1 (# li)
+			(cons ret (fn li[i])))
+		ret))
