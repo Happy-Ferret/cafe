@@ -7,18 +7,25 @@ actual_opch = (opch) ->
 	if opch_map[opch] then opch_map[opch] else opch
 
 module.exports.codegen = (ast) ->
-	codegen_function = (expr) ->
+	codegen_function_body = (expr) ->
 		body = expr.body.slice(0, -1).map intermediate_codegen
 		last_expr = expr.body.slice(-1)[0]
 
-
 		last_expr.is_tail = true
-		if last_expr[0]?.type is 'call_function'
-			last_expr = "return #{intermediate_codegen last_expr}"
+		if typeof last_expr is 'object'
+			if last_expr?.type is 'call_function'
+				last_expr = "return #{intermediate_codegen last_expr}"
+			else
+				last_expr = "#{intermediate_codegen last_expr}"
 		else
-			last_expr = "#{intermediate_codegen last_expr}"
+			last_expr = "return #{last_expr}"
 
-		"function #{expr.name}(#{expr.args.join ', '})\n\t#{body.join '\n\t'}\n\t#{last_expr}\nend"
+		"\t#{body.join '\n\t'}\n\t#{last_expr}"
+
+	codegen_function = (expr) ->
+		body = codegen_function_body expr
+
+		"function #{expr.name}(#{expr.args.join ', '})\n#{body}\nend"
 
 	codegen_call = (expr) ->
 		"#{expr.name}(#{expr.args.map(intermediate_codegen).join ', '})"
@@ -38,10 +45,13 @@ module.exports.codegen = (ast) ->
 
 		if expr.is_tail?
 			last_expr.is_tail = true
-			if last_expr[0]?.type is 'call_function'
-				last_expr = "return #{intermediate_codegen last_expr}"
+			if typeof last_expr is 'string'
+				last_expr = "return #{last_expr}"
 			else
-				last_expr = "#{intermediate_codegen last_expr}"
+				if last_expr[0]?.type is 'call_function'
+					last_expr = "return #{intermediate_codegen last_expr}"
+				else
+					last_expr = "#{intermediate_codegen last_expr}"
 		else
 			last_expr = "#{intermediate_codegen last_expr}"
 
@@ -61,8 +71,8 @@ module.exports.codegen = (ast) ->
 		base += " end)()"
 
 	codegen_lambda_expr = (expr) ->
-		body = expr.body.map intermediate_codegen
-		"function(#{expr.args.join ', '})\n\t#{body.slice(0, -1).join '\n\t'}\n\treturn #{body.slice(-1)}\nend"
+		body = codegen_function_body expr
+		"function(#{expr.args.join ', '})\n#{body}\nend"
 
 	codegen_assignment = (expr) ->
 		if expr.local?
@@ -75,6 +85,9 @@ module.exports.codegen = (ast) ->
 
 	codegen_self_call = (expr) ->
 		"#{expr.name}:#{expr.keyn}(#{expr.args.map(intermediate_codegen).join ', '})"
+
+	codegen_for_loop = (expr) ->
+		"for #{expr.name} = #{intermediate_codegen expr.start}, #{intermediate_codegen expr.end} do #{expr.body.map(intermediate_codegen).join '\n\t'} end"
 
 
 	intermediate_codegen = (expr) ->
@@ -98,6 +111,8 @@ module.exports.codegen = (ast) ->
 					codegen_lambda_expr expr
 				when 'self_call'
 					codegen_self_call expr
+				when 'for_loop'
+					codegen_for_loop expr
 				else
 					expr # either unimplemented construct or literal. either way, just emit.
 		else
