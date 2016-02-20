@@ -64,6 +64,12 @@
 (defn (print-formatted! stream fmtstr ...)
 	(print! stream (.fmtstr format ...)))
 
+;; #### `format! fmtstr va_args`
+;; print a formatted string to *standard-output* unconditionally
+;; --
+(defn (format! fmtstr ...)
+	(print-formatted! *standard-output* fmtstr ...))
+
 ;; ##### `cons list elem`
 ;; cons an element in front of a list
 ;; --

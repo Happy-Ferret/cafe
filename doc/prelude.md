@@ -35,6 +35,10 @@ print a string to a stream
 print a formatted string to a stream  
 
   
+#### `format! fmtstr va_args`  
+print a formatted string to *standard-output* unconditionally  
+
+  
 ##### `cons list elem`  
 cons an element in front of a list  
 
