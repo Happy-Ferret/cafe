@@ -9,8 +9,17 @@ operator = (s) ->
 	isop
 
 symbol = (str) ->
+	specialChars = ['-','*','?','!','&',':','=','!','$','^']
+	escapeStr = (str) ->
+		for special in specialChars
+			str = str.replace new RegExp("\\#{special}", 'gmi'), special.codePointAt 0
+		str
+
 	if str.replace?
-		str.replace(new RegExp('-', 'g'), '_').replace(/\?/g, 'qm').replace(new RegExp('!', 'g'), 'bang').replace(/\*/g, 'star')
+		if /[-*?!]/g.test str
+			"__" + escapeStr str + "__"
+		else
+			str
 	else
 		str
 
