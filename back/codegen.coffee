@@ -7,6 +7,21 @@ actual_opch = (opch) ->
 
 	if opch_map[opch] then opch_map[opch] else opch
 
+symbol = (str) ->
+	specialChars = ['-','*','?','!','&',':','=','!','$','^', '/', '\\']
+	escapeStr = (str) ->
+		for special in specialChars
+			str = str.replace new RegExp("\\#{special}", 'gmi'), special.codePointAt 0
+		str
+
+	if str.replace?
+		if new RegExp("[#{specialChars.concat ''}]", 'gmi').test str
+			"__" + escapeStr str + "__"
+		else
+			str
+	else
+		str
+
 module.exports.codegen = (ast) ->
 	codegen_function_body = (expr) ->
 		body = expr.body.slice(0, -1).map intermediate_codegen
@@ -35,7 +50,14 @@ module.exports.codegen = (ast) ->
 		"#{intermediate_codegen expr.lhs} #{actual_opch expr.opch} #{intermediate_codegen expr.rhs}"
 
 	codegen_unary = (expr) ->
-		"#{actual_opch expr.opch} #{intermediate_codegen expr.arg}"
+		base = "#{actual_opch expr.opch}"
+		if actual_opch expr.opch is 'not'
+			base += " "
+		base + "#{intermediate_codegen expr.arg}"
+
+	codegen_raw = (expr) ->
+		rem_quots = (str) -> str.slice(1, -1)
+		expr.body.map(rem_quots).join ""
 
 	codegen_scoped_block = (expr) ->
 		vars = expr.vars.map (v) ->
@@ -114,10 +136,15 @@ module.exports.codegen = (ast) ->
 					codegen_self_call expr
 				when 'for_loop'
 					codegen_for_loop expr
+				when 'raw'
+					codegen_raw expr
 				else
 					expr # either unimplemented construct or literal. either way, just emit.
 		else
-			expr
+			if (parseFloat expr isnt NaN) or (expr[0] is '"' and expr.slice(-1)[0] is '"')
+				expr
+			else
+				symbol expr
 
 	ast.map intermediate_codegen
 
