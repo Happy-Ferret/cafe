@@ -1,0 +1,57 @@
+@markdown-doc ./doc/prelude.md
+
+;; prelude
+;; =======
+;; import this if you want anything to work
+;; --
+
+;; ##### `exists thing`
+;; returns false if:
+;; - thing is a table or a string and thing.length is 0
+;; - thing is falsy (false, nil)
+;;
+;; if not, returns true.
+;; --
+(defn (exists? n)
+	(if n
+		(if (or (== (type n) "string") (== (type n) "table"))
+			(if (== (# n) 0)
+				false
+				true)
+			true)
+		false))
+
+;; ##### `exit-on-error! erfmt ...`
+;; exits with a formatted error message and status code 1.
+;; --
+(defn (exit-with-error! erfmt ...)
+	(print (string.format erfmt ...))
+	(os.exit 1))
+
+;; ##### `prompt pstr predicate?`
+;; prompt the user for input, writing `pstr` before reading,
+;; tests given input against `pred`, exiting with status
+;; code -1 on failure.
+;; --
+(defn (prompt pchr pred)
+	(io.write pchr)
+	(let ((ret (io.read)))
+		(if pred
+			(if (not (pred ret))
+				(exit-with-error! "Doesn't pass predicate!")
+				ret)
+			ret)))
+
+;; ##### `print! stream string`
+;; print a string to a stream
+;; --
+(defn (print! stream something)
+	(let ((choose-stream (λ (s) (if s s (io.output)))))
+		(let ((stream (choose-stream stream)))
+			(.stream write something))))
+
+;; ##### `print! stream fmtstr va_args`
+;; print a formatted string to a stream
+;; --
+(defn (print-formatted! stream fmtstr ...)
+	(print! stream (.fmtstr format ...)))

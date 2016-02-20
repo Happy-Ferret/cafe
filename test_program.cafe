@@ -1,30 +1,4 @@
-(defn (exists? n)
-	(if n
-		(if (== (# n) 0)
-			false
-			true)
-		false))
-
-(defn (exit-with-error! erfmt ...)
-	(print (string.format erfmt ...))
-	(os.exit 0))
-
-(defn (prompt pchr pred)
-	(io.write pchr)
-	(let ((ret (io.read)))
-		(if pred
-			(if (not (pred ret))
-				(exit-with-error! "Doesn't pass predicate!")
-				ret)
-			ret)))
-
-(defn (print! stream something)
-	(let ((choose-stream (λ (s) (if s s (io.output)))))
-		(let ((stream (choose-stream stream)))
-			(.stream write something))))
-
-(defn (print-formatted! stream fmtstr ...)
-	(print! stream (.fmtstr format ...)))
+@import prelude
 
 (let ((file (io.open "test" "w")) (name (prompt "enter your name: " exists?)))
 	(print-formatted! file "Hello, %s!" name))
