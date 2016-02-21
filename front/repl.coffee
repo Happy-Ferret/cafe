@@ -12,23 +12,25 @@ eval_string = (str, interp, cb) ->
 	tempFile = child_process.execSync 'mktemp', {encoding: 'utf8'}
 	ast = parse(preprocess(str))
 
-	ast[ast.length - 1].is_tail = true
-	code = codegen(ast).join ';'
+	if ast.length >= 1
+		ast[ast.length - 1].is_tail = true
+		code = codegen(ast).join ';'
 
-	if code.length >= 1
-		try
-			lua_process = child_process.spawn 'lua', {encoding: 'utf8', stdio: ['pipe', 1, 2]}
-			if lua_process?.stdin?
-				lua_process.stdin.write compile_cache.join ';\n;'
-				lua_process.stdin.end ";\n" + "io.write(\"#{arrow} \"); print((function() #{code} end)())"
+		if code.length >= 1
+			try
+				lua_process = child_process.spawn 'lua', {encoding: 'utf8', stdio: ['pipe', 1, 2]}
+				if lua_process?.stdin?
+					lua_process.stdin.write compile_cache.join ';\n;'
+					lua_process.stdin.end ";\n" + "io.write(\"#{arrow} \"); print((function() #{code} end)())"
 
-				lua_process.on 'close', cb
-			else
-				console.log 'Failed to execSync'
-		catch error
-			console.error error
-	else
-		do cb
+					lua_process.on 'close', cb
+				else
+					console.log 'Failed to execSync'
+			catch error
+				console.error error
+		else
+			do cb
+	else do cb
 
 ## Read history from disk
 read_history = (int) ->
