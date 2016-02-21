@@ -149,7 +149,10 @@ module.exports.codegen = (ast) ->
 				symbol expr
 
 	if ast?
-		ast.map intermediate_codegen
+		if ast?.map?
+			ast.map intermediate_codegen
+		else
+			intermediate_codegen ast	
 	else
 		''
 
