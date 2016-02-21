@@ -86,7 +86,7 @@ module.exports.codegen = (ast) ->
 			"do #{vars.join ';'}#{body};#{last_expr}; end"
 
 	codegen_conditional = (expr) ->
-		if expr.cond? and expr.trueb? and expr.falseb?
+		if expr.cond? and expr.trueb?
 			if expr.is_tail?
 				base = ' return '
 			else
