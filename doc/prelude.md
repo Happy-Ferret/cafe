@@ -8,6 +8,10 @@ import this if you want anything to work
 global symbol bound to the stdout stream  
 
   
+##### `*version*`  
+global symbol bound to the Lua version currently in use, and the semver version of the compiler itsel.f  
+
+  
 ## Functions  
 ##### `exists thing`  
 returns false if:  

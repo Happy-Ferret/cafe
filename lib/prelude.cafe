@@ -8,9 +8,14 @@
 ;; ## Symbols
 ;; ##### `*standard-output*`
 ;; global symbol bound to the stdout stream
+;; --
 (set! *standard-output* (io.output))
 
+;; ##### `*version*`
+;; global symbol bound to the Lua version currently in use, and the semver version of the compiler itsel.f
 ;; --
+(set! *version* (string.format "%s - %s" _VERSION "Café v0.1.0"))
+
 ;; ## Functions
 
 ;; ##### `exists thing`
