@@ -7,16 +7,20 @@ readline              = require 'readline'
 compile_cache = []
 
 ## Compile and evaluate a string using the passed interpreter
+arrow = "\x1b[1;31m→\x1b[0m"
 eval_string = (str, interp, cb) ->
 	tempFile = child_process.execSync 'mktemp', {encoding: 'utf8'}
-	code = codegen(parse(preprocess(str))).join ';'
+	ast = parse(preprocess(str))
+
+	ast[ast.length - 1].is_tail = true
+	code = codegen(ast).join ';'
 
 	if code.length >= 1
 		try
 			lua_process = child_process.spawn 'lua', {encoding: 'utf8', stdio: ['pipe', 1, 2]}
 			if lua_process?.stdin?
 				lua_process.stdin.write compile_cache.join ';\n;'
-				lua_process.stdin.end ";\n" + code
+				lua_process.stdin.end ";\n" + "io.write(\"#{arrow} \"); print((function() #{code} end)())"
 
 				lua_process.on 'close', cb
 			else
@@ -97,15 +101,15 @@ module.exports.repl = ->
 		try
 			line = do line.trim
 			if line.startsWith ',dump' # Print the result of code-generating an expression
-				console.log "\x1b[1;31m→\x1b[0m #{codegen(parse(preprocess(line.replace /^,dump /g, ''))).join ';'}"
+				console.log "#{arrow} #{codegen(parse(preprocess(line.replace /^,dump /g, ''))).join ';'}"
 				do ri.prompt
 			else if line.startsWith ',import' # Import a module into the compile cache
 				compile line.replace /^,import /gmi, ''
-				console.log "\x1b[1;31m→\x1b[0m Imported #{line.replace /^,import /gmi, ''}. #{compile_cache.length} module#{do plural} currently compiled."
+				console.log "#{arrow} Imported #{line.replace /^,import /gmi, ''}. #{compile_cache.length} module#{do plural} currently compiled."
 				do ri.prompt
 			else if line.startsWith ',cache ' # Cache an expression in the compile Cache
 				compile line.replace /^,cache /gmi, ''
-				console.log "\x1b[1;31m→\x1b[0m Cached #{line.replace /^,cache /gmi, ''}. #{compile_cache.length} module#{do plural} currently compiled."
+				console.log "#{arrow} Cached #{line.replace /^,cache /gmi, ''}. #{compile_cache.length} module#{do plural} currently compiled."
 				do ri.prompt
 			else
 				parsed = parse preprocess do line.trim
