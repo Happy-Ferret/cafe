@@ -70,7 +70,6 @@ if inp is '/dev/stdin' or inp is '-'
 
 	ri.history = read_history ri
 	ri.on 'line', (line) ->
-		console.log ri
 		line = do line.trim
 		if line.startsWith ',dump'
 			console.log codegen(parse(preprocess(line.replace /^,dump /g, ''))).join ';'
