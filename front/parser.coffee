@@ -10,19 +10,20 @@ operator = (s) ->
 	isop
 
 symbol = (str) ->
-	specialChars = ['-','*','?','!','&',':','=','!','$','^', '/', '\\']
-	escapeStr = (str) ->
-		for special in specialChars
-			str = str.replace new RegExp("\\#{special}", 'gmi'), special.codePointAt 0
-		str
+	if str?
+		specialChars = ['-','*','?','!','&',':','=','!','$','^', '/', '\\']
+		escapeStr = (str) ->
+			for special in specialChars
+				str = str.replace new RegExp("\\#{special}", 'gmi'), special.codePointAt 0
+			str
 
-	if str.replace?
-		if /[-*?!]/g.test str
-			"__" + escapeStr str + "__"
+		if str.replace?
+			if /[-*?!]/g.test str
+				"__" + escapeStr str + "__"
+			else
+				str
 		else
 			str
-	else
-		str
 
 module.exports.parse = (string, astf) ->
 	str2tok = (str) ->
@@ -124,7 +125,7 @@ module.exports.parse = (string, astf) ->
 						args: tokens[1]
 						body: tokens.slice(2).map toks2ast
 					}
-				else if tokens[0][0] is '.'
+				else if tokens[0]?[0]? and tokens[0][0] is '.'
 					{
 						type: 'self_call',
 						name: symbol tokens[0].slice 1
