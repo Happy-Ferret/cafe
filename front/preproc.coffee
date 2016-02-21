@@ -32,7 +32,7 @@ module.exports.preprocess = (contents) ->
 
 				lines.push module.exports.preprocess mod_contents
 			else
-				console.error "\x1b[1;31m~>\x1b[0m No such module #{file}. Compilation halted."
+				console.error "\x1b[1;31m→\x1b[0m No such module #{file}. Compilation halted."
 				process.exit 1
 		else if line.startsWith '@markdown-doc'
 			mkdn = line.split(' ')[1]
