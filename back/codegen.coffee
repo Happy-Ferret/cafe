@@ -22,16 +22,18 @@ symbol = (str) ->
 		str
 
 module.exports.codegen = (ast) ->
+	should_return = (expr) ->
+		if expr.is_tail?
+			"return "
+		else
+			""
 	codegen_function_body = (expr) ->
 		body = expr.body.slice(0, -1).map intermediate_codegen
 		last_expr = expr.body.slice(-1)[0]
 
 		last_expr.is_tail = true
 		if typeof last_expr is 'object'
-			if last_expr?.type is 'call_function'
-				last_expr = "return #{intermediate_codegen last_expr}"
-			else
-				last_expr = "#{intermediate_codegen last_expr}"
+			last_expr = "#{intermediate_codegen last_expr}"
 		else
 			last_expr = "return #{last_expr}"
 
@@ -43,13 +45,13 @@ module.exports.codegen = (ast) ->
 		"function #{expr.name}(#{expr.args.join ', '})#{body};end"
 
 	codegen_call = (expr) ->
-		"#{expr.name}(#{expr.args.map(intermediate_codegen).join ', '})"
+		"#{should_return expr}#{expr.name}(#{expr.args.map(intermediate_codegen).join ', '})"
 
 	codegen_binary = (expr) ->
-		"#{intermediate_codegen expr.lhs} #{actual_opch expr.opch} #{intermediate_codegen expr.rhs}"
+		"#{should_return expr}#{intermediate_codegen expr.lhs} #{actual_opch expr.opch} #{intermediate_codegen expr.rhs}"
 
 	codegen_unary = (expr) ->
-		base = "#{actual_opch expr.opch}"
+		base = "#{should_return expr}#{actual_opch expr.opch}"
 		if actual_opch expr.opch is 'not'
 			base += " "
 		base + "#{intermediate_codegen expr.arg}"
@@ -94,7 +96,7 @@ module.exports.codegen = (ast) ->
 
 	codegen_lambda_expr = (expr) ->
 		body = codegen_function_body expr
-		"function(#{expr.args.join ', '}) #{body} end"
+		"#{should_return expr}function(#{expr.args.join ', '}) #{body} end"
 
 	codegen_assignment = (expr) ->
 		if expr.local?
@@ -106,7 +108,7 @@ module.exports.codegen = (ast) ->
 		base
 
 	codegen_self_call = (expr) ->
-		"#{expr.name}:#{expr.keyn}(#{expr.args.map(intermediate_codegen).join ', '})"
+		"#{should_return expr}#{expr.name}:#{expr.keyn}(#{expr.args.map(intermediate_codegen).join ', '})"
 
 	codegen_for_loop = (expr) ->
 		"for #{expr.name} = #{intermediate_codegen expr.start}, #{intermediate_codegen expr.end} do #{expr.body.map(intermediate_codegen).join ';'} end"
