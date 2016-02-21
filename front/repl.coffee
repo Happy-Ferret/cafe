@@ -56,9 +56,6 @@ interpr_version = do ->
 
 	base.replace(/^Lua /gmi, '').replace(/\n$/gmi, '')
 
-## Warm compilation cache by compiling the prelude
-warm_cache = ->
-	compile_cache.push codegen(parse(preprocess(fs.readFileSync './lib/prelude.cafe', {encoding: 'utf8'}))).join ';' + '\n'
 
 ## Compile a new module
 compile = (module) ->
@@ -66,6 +63,10 @@ compile = (module) ->
 		potential_files = [
 			"./#{file}", "./#{file}.cafe",
 			"./lib/#{file}", "./lib/#{file}.cafe",
+			"#{__dirname}/#{file}", "#{__dirname}/#{file}.cafe",
+			"#{__dirname}/lib/#{file}", "#{__dirname}/lib/#{file}.cafe",
+			"#{__dirname}/../#{file}", "#{__dirname}/../#{file}.cafe",
+			"#{__dirname}/../lib/#{file}", "#{__dirname}/../lib/#{file}.cafe",
 			"/#{file}"
 		]
 
@@ -77,6 +78,10 @@ compile = (module) ->
 		compile_cache.push codegen(parse(preprocess fs.readFileSync resolve(module), {encoding: 'utf8'})).join ';' + '\n'
 	else
 		compile_cache.push codegen(parse(preprocess module)).join ';'
+
+## Warm compilation cache by compiling the prelude
+warm_cache = ->
+	compile 'prelude'
 
 plural = ->
 	if compile_cache.length is '1'
