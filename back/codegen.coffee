@@ -40,78 +40,87 @@ module.exports.codegen = (ast) ->
 		"#{body.join ';'}#{last_expr}"
 
 	codegen_function = (expr) ->
-		body = codegen_function_body expr
-
-		"function #{expr.name}(#{expr.args.join ', '})#{body};end"
+		if expr.name? and expr.args? and expr.body?
+			body = codegen_function_body expr
+			"function #{expr.name}(#{expr.args.join ', '})#{body};end"
 
 	codegen_call = (expr) ->
-		"#{should_return expr}#{expr.name}(#{expr.args.map(intermediate_codegen).join ', '})"
+		if expr.name?
+			"#{should_return expr}#{expr.name}(#{expr.args.map(intermediate_codegen).join ', '})"
 
 	codegen_binary = (expr) ->
-		"#{should_return expr}#{intermediate_codegen expr.lhs} #{actual_opch expr.opch} #{intermediate_codegen expr.rhs}"
+		if expr.lhs? and expr.opch? and expr.rhs?
+			"#{should_return expr}#{intermediate_codegen expr.lhs} #{actual_opch expr.opch} #{intermediate_codegen expr.rhs}"
 
 	codegen_unary = (expr) ->
-		base = "#{should_return expr}#{actual_opch expr.opch}"
-		if actual_opch expr.opch is 'not'
-			base += " "
-		base + "#{intermediate_codegen expr.arg}"
+		if expr.opch? and expr.arg?
+			base = "#{should_return expr}#{actual_opch expr.opch}"
+			if actual_opch expr.opch is 'not'
+				base += " "
+			base + "#{intermediate_codegen expr.arg}"
 
 	codegen_raw = (expr) ->
 		rem_quots = (str) -> str.slice(1, -1)
 		expr.body.map(rem_quots).join ""
 
 	codegen_scoped_block = (expr) ->
-		vars = expr.vars.map (v) ->
-			"local #{v[0]} = #{intermediate_codegen v[1]};"
+		if expr.vars? and expr.body?
+			vars = expr.vars.map (v) ->
+				"local #{v[0]} = #{intermediate_codegen v[1]};"
 
-		body = expr.body.slice(0, -1).map intermediate_codegen
-		last_expr = expr.body.slice(-1)[0]
+			body = expr.body.slice(0, -1).map intermediate_codegen
+			last_expr = expr.body.slice(-1)[0]
 
-		if expr.is_tail?
-			last_expr.is_tail = true
-			if typeof last_expr is 'string'
-				last_expr = "return #{last_expr}"
-			else
-				if last_expr[0]?.type is 'call_function'
-					last_expr = "return #{intermediate_codegen last_expr}"
+			if expr.is_tail?
+				last_expr.is_tail = true
+				if typeof last_expr is 'string'
+					last_expr = "return #{last_expr}"
 				else
-					last_expr = "#{intermediate_codegen last_expr}"
-		else
-			last_expr = "#{intermediate_codegen last_expr}"
+					if last_expr[0]?.type is 'call_function'
+						last_expr = "return #{intermediate_codegen last_expr}"
+					else
+						last_expr = "#{intermediate_codegen last_expr}"
+			else
+				last_expr = "#{intermediate_codegen last_expr}"
 
-		"do #{vars.join ';'}#{body};#{last_expr}; end"
+			"do #{vars.join ';'}#{body};#{last_expr}; end"
 
 	codegen_conditional = (expr) ->
-		if expr.is_tail?
-			base = ' return '
-		else
-			base = ' '
-		base += "(function() if #{intermediate_codegen expr.cond} then return #{intermediate_codegen expr.trueb}"
-		if expr.falsb?
-			base += " else return #{intermediate_codegen expr.falsb} end"
-		else
-			base += " end"
+		if expr.cond? and expr.trueb? and expr.falseb?
+			if expr.is_tail?
+				base = ' return '
+			else
+				base = ' '
+			base += "(function() if #{intermediate_codegen expr.cond} then return #{intermediate_codegen expr.trueb}"
+			if expr.falsb?
+				base += " else return #{intermediate_codegen expr.falsb} end"
+			else
+				base += " end"
 
-		base += " end)()"
+			base += " end)()"
 
 	codegen_lambda_expr = (expr) ->
-		body = codegen_function_body expr
-		"#{should_return expr}function(#{expr.args.join ', '}) #{body} end"
+		if expr.args? and expr.body?
+			body = codegen_function_body expr
+			"#{should_return expr}function(#{expr.args.join ', '}) #{body} end"
 
 	codegen_assignment = (expr) ->
-		if expr.local?
-			base = 'local '
-		else
-			base = ''
+		if expr.name? and expr.value?
+			if expr.local?
+				base = 'local '
+			else
+				base = ''
 
-		base += "#{expr.name} = #{intermediate_codegen expr.value};"
-		base
+			base += "#{expr.name} = #{intermediate_codegen expr.value};"
+			base
 
 	codegen_self_call = (expr) ->
-		"#{should_return expr}#{expr.name}:#{expr.keyn}(#{expr.args.map(intermediate_codegen).join ', '})"
+		if expr.name? and expr.keyn? and expr.args?
+			"#{should_return expr}#{expr.name}:#{expr.keyn}(#{expr.args.map(intermediate_codegen).join ', '})"
 
 	codegen_for_loop = (expr) ->
-		"for #{expr.name} = #{intermediate_codegen expr.start}, #{intermediate_codegen expr.end} do #{expr.body.map(intermediate_codegen).join ';'} end"
+		if expr.name? and expr.start? and expr.end and expr.body?
+			"for #{expr.name} = #{intermediate_codegen expr.start}, #{intermediate_codegen expr.end} do #{expr.body.map(intermediate_codegen).join ';'} end"
 
 
 	intermediate_codegen = (expr) ->
@@ -147,7 +156,10 @@ module.exports.codegen = (ast) ->
 			else
 				symbol expr
 
-	ast.map intermediate_codegen
+	if ast?
+		ast.map intermediate_codegen
+	else
+		''
 
 module.exports.emit = (file, code_parts, cb) ->
 	fs.writeFile file, code_parts.join ';', (error) ->
