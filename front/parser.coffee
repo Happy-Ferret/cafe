@@ -18,12 +18,13 @@ symbol = (str) ->
 			str
 
 		if str.replace?
-			if /[-*?!]/g.test str
+			if new RegExp("[#{specialChars.join '\\'}]", "gmi").test str
 				"__" + escapeStr str + "__"
 			else
 				str
 		else
 			str
+module.exports.symbol = symbol
 
 module.exports.parse = (string, astf) ->
 	str2tok = (str) ->
@@ -103,9 +104,14 @@ module.exports.parse = (string, astf) ->
 						type: 'scoped_block'
 						vars: tokens[1].map (tok) ->
 							arr = [symbol tok[0]]
-							arr.push toks2ast tok[1]
+							if arr[0]?
+								otherv = toks2ast tok[1]
+								if otherv
+									arr.push otherv
 
-							arr
+									arr
+								else []
+							else []
 						body: do ->
 							thing = tokens.slice(2).map toks2ast
 							# console.log thing

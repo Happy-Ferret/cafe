@@ -1,25 +1,11 @@
 fs = require 'fs'
+{ symbol } = require '../front'
 actual_opch = (opch) ->
 	opch_map =
 		'=': '=='
 		'!=': '~='
 
 	if opch_map[opch] then opch_map[opch] else opch
-
-symbol = (str) ->
-	specialChars = ['-','*','?','!','&',':','=','!','$','^', '/', '\\']
-	escapeStr = (str) ->
-		for special in specialChars
-			str = str.replace new RegExp("\\#{special}", 'gmi'), special.codePointAt 0
-		str
-
-	if str.replace?
-		if new RegExp("[#{specialChars.concat ''}]", 'gmi').test str
-			"__" + escapeStr str + "__"
-		else
-			str
-	else
-		str
 
 module.exports.codegen = (ast) ->
 	should_return = (expr) ->
@@ -151,7 +137,7 @@ module.exports.codegen = (ast) ->
 				else
 					expr # either unimplemented construct or literal. either way, just emit.
 		else
-			if (parseFloat expr isnt NaN) or (expr[0] is '"' and expr.slice(-1)[0] is '"')
+			if (parseFloat expr isnt NaN) or (expr?[0] is '"' and expr.slice(-1)?[0] is '"')
 				expr
 			else
 				symbol expr
