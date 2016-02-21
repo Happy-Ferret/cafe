@@ -9,32 +9,61 @@ readline              = require 'readline'
 child_process         = require 'child_process'
 
 
+helpstr = """
+usage: \x1b[1;34mcafe\x1b[0m <input> [-o/--output file] [-a,--ast file] | [--repl] [--interpreter lua/luajit]
+
+Available options are:
+  \x1b[1;32m--repl/-r\x1b[0m        Start a café REPL.
+  \x1b[1;32m-i/--interpreter\x1b[0m Set the interpreter for use with the REPL.
+  \x1b[1;32m-o/--output\x1b[0m      Set the output file.
+  \x1b[1;32m-a/--ast\x1b[0m         Set the AST output file.
+  \x1b[1;32m-?/-h/--help\x1b[0m     Print this help and exit.
+"""
+
+
+if argv['?']? || argv.h? || argv.help?
+	console.log helpstr
+	process.exit 0
+
 if argv?._[0]?
 	inp = argv._[0]
 else
 	inp = '-'
 
+interp = do ->
+	if argv.i? || argv.interpreter?
+		argv.interpreter ? argv.i
+	else
+		which = child_process.spawnSync 'which', ['luajit']
+		if !(which?) || which?.status isnt 0
+			'lua'
+		else
+			'luajit'
+
 
 if inp is '/dev/stdin' or inp is '-'
-	do repl
+	repl argv.interpreter ? 'lua'
 else
 	if argv.o? || argv.output?
 		out = argv.o || argv.output
 	else
 		out = 'out.lua'
 
-	if argv.ast?
-		ast = argv.ast
+	if argv.a? || argv.ast?
+		ast = argv.a || argv.ast
 	else
 		ast = '/dev/null'
 
-	fs.readFile inp, {encoding: 'utf-8'}, (err, data) ->
-		if err?
-			throw err
-
-		fs.writeFile out, '#!/usr/bin/env lua\n', (err) ->
+	if fs.existsSync inp
+		fs.readFile inp, {encoding: 'utf-8'}, (err, data) ->
 			if err?
 				throw err
 
-			emit out, codegen(parse preprocess(data), ast), ->
-				fs.chmodSync out, 0o755
+			fs.writeFile out, "#!/usr/bin/env #{argv.interpreter || argv.i ? "lua"}\n", (err) ->
+				if err?
+					throw err
+
+				emit out, codegen(parse preprocess(data), ast), ->
+					fs.chmodSync out, 0o755
+	else
+		console.log "\x1b[1;31m→\x1b[0m No such file #{inp}."
