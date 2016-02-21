@@ -1,6 +1,7 @@
 #!/usr/bin/coffee
 { parse, preprocess } = require './front'
 { codegen, emit }     = require './back'
+{ resolve }           = require 'path'
 fs                    = require 'fs'
 readline              = require 'readline'
 child_process         = require 'child_process'
@@ -32,13 +33,25 @@ eval_string = (str, interp, cb) ->
 	else
 		do cb
 
+read_history = (int) ->
+	if fs.existsSync int.historyFile
+		JSON.parse fs.readFileSync int.historyFile
+	else
+		fs.writeFileSync int.historyFile, '[]'
+		read_history int
+
+save_history = (int) -> fs.writeFileSync int.historyFile, JSON.stringify int.history
+
 if inp is '/dev/stdin' or inp is '-'
-	interpr = do ->
-		which = child_process.spawnSync 'which', ['luajit']
-		if which?.status isnt 0
-			'lua'
-		else
-			'luajit'
+	if (out isnt '/dev/stdin.lua') and (out isnt '-.lua')
+		interpr = out
+	else
+		interpr = do ->
+			which = child_process.spawnSync 'which', ['luajit']
+			if which?.status isnt 0
+				'lua'
+			else
+				'luajit'
 
 	interpr_version = do ->
 		base = child_process.execSync "#{interpr} -e \"print(_VERSION)\"",
@@ -47,19 +60,26 @@ if inp is '/dev/stdin' or inp is '-'
 		base.replace(/^Lua /gmi, '').replace(/\n$/gmi, '')
 
 	console.log "Café REPL - Node #{process.version} - #{if interpr is 'luajit' then 'LuaJIT' else 'Lua'} #{interpr_version}"
-	ri = readline.createInterface process.stdin, process.stdout
+	ri = readline.createInterface
+		input: process.stdin
+		output: process.stdout
+
+	ri.historyFile = resolve "/#{process.env.HOME}/.cafe_history"
 	ri.setPrompt "\x1b[1;32mλ\x1b[0m> "
 	ri.prompt()
 
+	ri.history = read_history ri
 	ri.on 'line', (line) ->
+		console.log ri
 		line = do line.trim
 		if line.startsWith ',dump'
-			console.log line.replace /^,dump /g, ''
 			console.log codegen(parse(preprocess(line.replace /^,dump /g, ''))).join ';'
 			ri.prompt()
 		else
 			eval_string do line.trim, interpr, -> ri.prompt()
-	.on 'close', -> console.log "Have a great day!"
+	.on 'close', ->
+		console.log "Have a great day!"
+		save_history ri
 
 else
 	fs.readFile inp, {encoding: 'utf-8'}, (err, data) ->
