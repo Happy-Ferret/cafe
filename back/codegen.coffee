@@ -1,5 +1,6 @@
-fs = require 'fs'
 { symbol } = require '../front'
+fs         = require 'fs'
+
 actual_opch = (opch) ->
 	opch_map =
 		'=': '=='
@@ -52,22 +53,27 @@ module.exports.codegen = (ast) ->
 	codegen_scoped_block = (expr) ->
 		if expr.vars? and expr.body?
 			vars = expr.vars.map (v) ->
-				"local #{v[0]} = #{intermediate_codegen v[1]};"
+				if v[0]? and v[1]? # Gracefully handle empty variables
+					"local #{v[0]} = #{intermediate_codegen v[1]};"
 
-			body = expr.body.slice(0, -1).map intermediate_codegen
-			last_expr = expr.body.slice(-1)[0]
+			if expr.body.length >= 1 # Gracefully handle empty blocks
+				body = expr.body.slice(0, -1).map intermediate_codegen
+				last_expr = expr.body.slice(-1)[0]
 
-			if expr.is_tail?
-				last_expr.is_tail = true
-				if typeof last_expr is 'string'
-					last_expr = "return #{last_expr}"
-				else
-					if last_expr[0]?.type is 'call_function'
-						last_expr = "return #{intermediate_codegen last_expr}"
+				if expr.is_tail?
+					last_expr.is_tail = true
+					if typeof last_expr is 'string'
+						last_expr = "return #{last_expr}"
 					else
-						last_expr = "#{intermediate_codegen last_expr}"
+						if last_expr[0]?.type is 'call_function'
+							last_expr = "return #{intermediate_codegen last_expr}"
+						else
+							last_expr = "#{intermediate_codegen last_expr}"
+				else
+					last_expr = "#{intermediate_codegen last_expr}"
 			else
-				last_expr = "#{intermediate_codegen last_expr}"
+				body = ''
+				last_expr = ''
 
 			"do #{vars.join ';'}#{body};#{last_expr}; end"
 
