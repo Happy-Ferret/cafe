@@ -51,14 +51,6 @@ interpr = do ->
 	else
 		'luajit'
 
-## Determine Lua interpreter version for the header
-interpr_version = do ->
-	base = child_process.execSync "#{interpr} -e \"print(_VERSION)\"",
-		encoding: 'utf8'
-
-	base.replace(/^Lua /gmi, '').replace(/\n$/gmi, '')
-
-
 ## Compile a new module
 compile = (module) ->
 	resolve = (file) ->
@@ -82,8 +74,7 @@ compile = (module) ->
 		compile_cache.push codegen(parse(preprocess module)).join ';'
 
 ## Warm compilation cache by compiling the prelude
-warm_cache = ->
-	compile 'prelude'
+warm_cache = -> compile 'prelude'
 
 plural = ->
 	if compile_cache.length is '1'
@@ -91,7 +82,15 @@ plural = ->
 	else
 		's'
 
-module.exports.repl = ->
+module.exports.repl = (intpt) ->
+	interpr = intpt ? interpr
+	## Determine Lua interpreter version for the header
+	interpr_version = do ->
+		base = child_process.execSync "#{interpr} -e \"print(_VERSION)\"",
+		encoding: 'utf8'
+
+		base.replace(/^Lua /gmi, '').replace(/\n$/gmi, '')
+
 	console.log "\x1b[1;37mCafé REPL - Node #{process.version} - #{if interpr is 'luajit' then 'LuaJIT' else 'Lua'} #{interpr_version}\x1b[0m"
 	do warm_cache
 
