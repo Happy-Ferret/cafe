@@ -63,3 +63,9 @@ modify a list using a function, returning a new list
 require a Lua module into the current environment  
   
 support for hot-compilation of café modules will be added at a later date.  
+
+  
+##### `curry fna fnb`  
+merge two functions together  
+
+  
