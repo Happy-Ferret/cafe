@@ -4,7 +4,8 @@ fs = require 'fs'
 resolve_module = (file) ->
 	potential_files = [
 		"./#{file}", "./#{file}.cafe",
-		"./lib/#{file}", "./lib/#{file}.cafe"
+		"./lib/#{file}", "./lib/#{file}.cafe",
+		"/#{file}"
 	]
 
 	for file in potential_files
