@@ -69,7 +69,10 @@ compile = (module) ->
 			if fs.existsSync file
 				return file
 
-	compile_cache.push codegen(parse(preprocess fs.readFileSync resolve(module), {encoding: 'utf8'})).join ';' + '\n'
+	if resolve(module)?
+		compile_cache.push codegen(parse(preprocess fs.readFileSync resolve(module), {encoding: 'utf8'})).join ';' + '\n'
+	else
+		compile_cache.push codegen(parse(preprocess module)).join ';'
 
 plural = ->
 	if compile_cache.length is '1'
@@ -78,7 +81,7 @@ plural = ->
 		's'
 
 module.exports.repl = ->
-	console.log "Café REPL - Node #{process.version} - #{if interpr is 'luajit' then 'LuaJIT' else 'Lua'} #{interpr_version}"
+	console.log "\x1b[1;37mCafé REPL - Node #{process.version} - #{if interpr is 'luajit' then 'LuaJIT' else 'Lua'} #{interpr_version}\x1b[0m"
 	do warm_cache
 
 	ri = readline.createInterface
@@ -87,20 +90,37 @@ module.exports.repl = ->
 
 	ri.historyFile = "/#{process.env.HOME}/.cafe_history"
 	ri.setPrompt "\x1b[1;32mλ\x1b[0m> "
-	ri.prompt()
+	do ri.prompt
 
 	ri.history = read_history ri
 	ri.on 'line', (line) ->
-		line = do line.trim
-		if line.startsWith ',dump' # Print the result of code-generating an expression
-			console.log "\x1b[1;31m→\x1b[0m #{codegen(parse(preprocess(line.replace /^,dump /g, ''))).join ';'}"
-			ri.prompt()
-		else if line.startsWith ',import' # Import a module into the compile cache
-			compile line.replace /^,import /gmi, ''
-			console.log "\x1b[1;31m→\x1b[0m Imported #{line.replace /^,import /gmi, ''}. #{compile_cache.length} module#{do plural} currently compiled."
-			ri.prompt()
-		else
-			eval_string do line.trim, interpr, -> ri.prompt()
+		try
+			line = do line.trim
+			if line.startsWith ',dump' # Print the result of code-generating an expression
+				console.log "\x1b[1;31m→\x1b[0m #{codegen(parse(preprocess(line.replace /^,dump /g, ''))).join ';'}"
+				do ri.prompt
+			else if line.startsWith ',import' # Import a module into the compile cache
+				compile line.replace /^,import /gmi, ''
+				console.log "\x1b[1;31m→\x1b[0m Imported #{line.replace /^,import /gmi, ''}. #{compile_cache.length} module#{do plural} currently compiled."
+				do ri.prompt
+			else if line.startsWith ',cache ' # Cache an expression in the compile Cache
+				compile line.replace /^,cache /gmi, ''
+				console.log "\x1b[1;31m→\x1b[0m Cached #{line.replace /^,cache /gmi, ''}. #{compile_cache.length} module#{do plural} currently compiled."
+				do ri.prompt
+			else
+				parsed = parse preprocess do line.trim
+				skip = false
+				for ast in parsed
+					if ast.type is 'assignment' or ast.type is 'define_function'
+						skip = true
+						compile_cache.push codegen(ast)
+						do ri.prompt
+				if !skip
+					eval_string do line.trim, interpr, -> do ri.prompt
+		catch error
+			console.error "\x1b[1;31m#{error}\x1b[0m"
+			save_history ri
+			process.exit 1
 
 	ri.on 'close', ->
 		console.log "Have a great day!"
