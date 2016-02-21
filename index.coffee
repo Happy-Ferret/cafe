@@ -3,19 +3,38 @@
 { codegen, emit }     = require './back'
 { resolve }           = require 'path'
 { repl }              = require './front/repl'
+{ argv }              = require 'optimist'
 fs                    = require 'fs'
 readline              = require 'readline'
 child_process         = require 'child_process'
 
-inp = process.argv[2] ? '/dev/stdin'
-out = process.argv[3] ? "#{inp}.lua"
-ast = process.argv[4] ? "#{inp}.ast.json"
+
+if argv?._[0]?
+	inp = argv._[0]
+else
+	inp = '-'
+
 
 if inp is '/dev/stdin' or inp is '-'
 	do repl
 else
-	fs.readFile inp, {encoding: 'utf-8'}, (err, data) ->
-	if err
-		throw err
+	if argv.o? || argv.output?
+		out = argv.o || argv.output
+	else
+		out = 'out.lua'
 
-	emit out, codegen parse preprocess(data), ast
+	if argv.ast?
+		ast = argv.ast
+	else
+		ast = '/dev/null'
+
+	fs.readFile inp, {encoding: 'utf-8'}, (err, data) ->
+		if err?
+			throw err
+
+		fs.writeFile out, '#!/usr/bin/env lua\n', (err) ->
+			if err?
+				throw err
+
+			emit out, codegen(parse preprocess(data), ast), ->
+				fs.chmodSync out, 0o755
