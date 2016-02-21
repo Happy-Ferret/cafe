@@ -12,7 +12,8 @@ ast = process.argv[4] ? "#{inp}.ast.json"
 
 prelude = codegen(parse(preprocess(fs.readFileSync './lib/prelude.cafe', {encoding: 'utf8'}))).join ';'
 
-eval_string = (str, cb) ->
+eval_string = (str, interp, cb) ->
+
 	tempFile = child_process.execSync 'mktemp', {encoding: 'utf8'}
 	code = codegen(parse(preprocess(str))).join ';'
 
@@ -32,6 +33,20 @@ eval_string = (str, cb) ->
 		do cb
 
 if inp is '/dev/stdin' or inp is '-'
+	interpr = do ->
+		which = child_process.spawnSync 'which', ['luajit']
+		if which?.status isnt 0
+			'lua'
+		else
+			'luajit'
+
+	interpr_version = do ->
+		base = child_process.execSync "#{interpr} -e \"print(_VERSION)\"",
+			encoding: 'utf8'
+
+		base.replace(/^Lua /gmi, '').replace(/\n$/gmi, '')
+
+	console.log "Café REPL - Node #{process.version} - #{if interpr is 'luajit' then 'LuaJIT' else 'Lua'} #{interpr_version}"
 	ri = readline.createInterface process.stdin, process.stdout
 	ri.setPrompt "\x1b[1;32mλ\x1b[0m> "
 	ri.prompt()
@@ -40,10 +55,10 @@ if inp is '/dev/stdin' or inp is '-'
 		line = do line.trim
 		if line.startsWith ',dump'
 			console.log line.replace /^,dump /g, ''
-			console.log codegen(parse(preprocess(line.replace /^,dump /g, '')), 'ast.json').join ';'
+			console.log codegen(parse(preprocess(line.replace /^,dump /g, ''))).join ';'
 			ri.prompt()
 		else
-			eval_string do line.trim, -> ri.prompt()
+			eval_string do line.trim, interpr, -> ri.prompt()
 	.on 'close', -> console.log "Have a great day!"
 
 else
