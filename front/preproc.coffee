@@ -34,7 +34,7 @@ module.exports.preprocess = (contents, docout = false, doc_dir = './doc') ->
 			else
 				console.error "\x1b[1;31m→\x1b[0m No such module #{file}. Compilation halted."
 				process.exit 1
-		else if line.startsWith '@markdown-doc'
+		else if line.startsWith '@doc'
 			mkdn = "#{doc_dir}/#{line.split(' ')[1]}"
 			exec "install `mktemp` -D #{mkdn} -m 0644" if docout
 		else if line.startsWith ';;'
