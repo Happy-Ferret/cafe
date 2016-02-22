@@ -20,6 +20,7 @@ Available options are:
   \x1b[1;32m-?/-h/--help\x1b[0m     Print this help and exit.
   \x1b[1;32m-d/--docs\x1b[0m        Emit documentation.
   \x1b[1;32m--doc-dir\x1b[0m        Specify where to emit documentation to.
+  \x1b[1;32m--hashbang\x1b[0m       Specify a custom #! line for executables.
 """
 
 
@@ -53,6 +54,11 @@ interp = do ->
 			'luajit'
 
 
+if argv.hashbang?
+	hashbang = argv.hashbang
+else
+	hashbang = "#!/usr/bin/env #{argv.interpreter || argv.i ? "lua"}\n"
+
 if inp is '/dev/stdin' or inp is '-'
 	repl argv.interpreter ? 'lua'
 else
@@ -71,7 +77,7 @@ else
 			if err?
 				throw err
 
-			fs.writeFile out, "#!/usr/bin/env #{argv.interpreter || argv.i ? "lua"}\n", (err) ->
+			fs.writeFile out, hashbang, (err) ->
 				if err?
 					throw err
 
