@@ -1,5 +1,12 @@
-{ symbol } = require '../front'
+{ symbol } = require '../../front'
 fs         = require 'fs'
+
+actual_opch = (opch) ->
+	opch_map =
+		'=': '=='
+		'!=': '~='
+
+	if opch_map[opch] then opch_map[opch] else opch
 
 actual_opch = (opch) ->
 	opch_map =
@@ -155,21 +162,3 @@ module.exports.codegen = (ast) ->
 			intermediate_codegen ast
 	else
 		''
-
-module.exports.emit = (file, code_parts, cb) ->
-	if fs.existsSync file
-		_error = null
-		try
-			fs.appendFileSync file, code_parts.join ';'
-		catch error
-			_error = error
-		finally
-			cb _error, code_parts.join ';'
-	else
-		_error = null
-		try
-			fs.writeFileSync file, code_parts.join ';'
-		catch error
-			_error = error
-		finally
-			cb _error, code_parts.join ';'
