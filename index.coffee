@@ -18,6 +18,7 @@ Available options are:
   \x1b[1;32m-o/--output\x1b[0m      Set the output file.
   \x1b[1;32m-a/--ast\x1b[0m         Set the AST output file.
   \x1b[1;32m-?/-h/--help\x1b[0m     Print this help and exit.
+  \x1b[1;32m-d/--docs\x1b[0m        Emit documentation.
 """
 
 
@@ -29,6 +30,11 @@ if argv?._[0]?
 	inp = argv._[0]
 else
 	inp = '-'
+
+if argv.d? || argv.docs?
+	do_docout = true
+else
+	do_docout = false
 
 interp = do ->
 	if argv.i? || argv.interpreter?
@@ -63,7 +69,7 @@ else
 				if err?
 					throw err
 
-				emit out, codegen(parse preprocess(data), ast), ->
+				emit out, codegen(parse preprocess(data, do_docout), ast), ->
 					fs.chmodSync out, 0o755
 	else
 		console.log "\x1b[1;31m→\x1b[0m No such file #{inp}."

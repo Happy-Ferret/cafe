@@ -18,7 +18,7 @@ resolve_module = (file) ->
 			return file
 
 
-module.exports.preprocess = (contents) ->
+module.exports.preprocess = (contents, docout = false) ->
 	lines = []
 	mkdn_lines = []
 	mkdn = null
@@ -36,7 +36,7 @@ module.exports.preprocess = (contents) ->
 				process.exit 1
 		else if line.startsWith '@markdown-doc'
 			mkdn = line.split(' ')[1]
-			exec "install `mktemp` -D #{mkdn} -m 0644"
+			exec "install `mktemp` -D #{mkdn} -m 0644" if docout
 		else if line.startsWith ';;'
 			if mkdn?
 				line = '\n' if line == ';; --'
@@ -44,7 +44,7 @@ module.exports.preprocess = (contents) ->
 		else
 			lines.push line
 
-	if mkdn?
+	if mkdn? && docout
 		if fs.existsSync(path.dirname mkdn) or fs.existsSync mkdn
 			fs.writeFile mkdn, mkdn_lines.join '', (error) -> console.error error
 	ret = lines.join '\n'
