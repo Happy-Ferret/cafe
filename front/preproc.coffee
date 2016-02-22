@@ -18,7 +18,7 @@ resolve_module = (file) ->
 			return file
 
 
-module.exports.preprocess = (contents, docout = false) ->
+module.exports.preprocess = (contents, docout = false, doc_dir = './doc') ->
 	lines = []
 	mkdn_lines = []
 	mkdn = null
@@ -30,12 +30,12 @@ module.exports.preprocess = (contents, docout = false) ->
 			if modfile?
 				mod_contents = fs.readFileSync(modfile, {encoding: 'utf8'})
 
-				lines.push module.exports.preprocess mod_contents
+				lines.push module.exports.preprocess mod_contents, docout, doc_dir
 			else
 				console.error "\x1b[1;31m→\x1b[0m No such module #{file}. Compilation halted."
 				process.exit 1
 		else if line.startsWith '@markdown-doc'
-			mkdn = line.split(' ')[1]
+			mkdn = "#{doc_dir}/#{line.split(' ')[1]}"
 			exec "install `mktemp` -D #{mkdn} -m 0644" if docout
 		else if line.startsWith ';;'
 			if mkdn?

@@ -1,4 +1,4 @@
-@markdown-doc ./doc/prelude.md
+@markdown-doc prelude.md
 
 ;; prelude
 ;; =======
