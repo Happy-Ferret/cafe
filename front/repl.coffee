@@ -6,16 +6,6 @@ fs                    = require 'fs'
 readline              = require 'readline'
 compile_cache = []
 
-compile_cache.push """
-function describe(x)
-	if type(x) == 'table' then
-		return table.concat(x, ', ')
-	else
-		return x
-	end
-end
-"""
-
 ## Compile and evaluate a string using the passed interpreter
 arrow = "\x1b[1;31m→\x1b[0m"
 eval_string = (str, interp, cb) ->
