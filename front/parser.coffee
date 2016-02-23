@@ -19,7 +19,7 @@ symbol = (str) ->
 
 		if str.replace?
 			if new RegExp("[#{specialChars.join '\\'}]", "gmi").test str
-				escapeStr str
+				"__#{escapeStr str}__"
 			else
 				str
 		else
@@ -152,6 +152,12 @@ module.exports.parse = (string, astf) ->
 					{
 						type: 'raw'
 						body: tokens.slice(1)
+					}
+				else if tokens[0] is 'loop'
+					{
+						type: 'while_loop'
+						cond: toks2ast tokens[1]
+						body: tokens.slice(2).map toks2ast
 					}
 				else
 					{
