@@ -172,3 +172,18 @@
 ;; --
 (defn (pair? a)
 	(= (# a) 2))
+
+;; ##### `eq? a b`
+;; returns true if both parameters are equal
+;; --
+(defn (eq? a b)
+	(let ((list-equals (λ (a b)
+		(let ((ret true))
+			(if (= (# a) (# b))
+				(for i 1 (# a)
+					(if (!= a[i] b[i])
+						(set! ret false !global))))
+				ret))))
+		(if (or (= (type a) "pair") (= (type a) "list"))
+			(list-equals a b)
+			(= a b))))

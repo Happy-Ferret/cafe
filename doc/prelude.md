@@ -93,3 +93,7 @@ reimplementation of Lua's `type`
 returns true if a is a pair  
 
   
+##### `eq? a b`  
+returns true if both parameters are equal  
+
+  
