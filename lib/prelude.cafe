@@ -187,3 +187,12 @@
 		(if (or (= (type a) "pair") (= (type a) "list"))
 			(list-equals a b)
 			(= a b))))
+
+
+;; ##### `nth num list`
+;; get num-th element of list
+;; --
+(defn (nth n l)
+	(if (= n 1)
+		(head l)
+		(nth (- n 1) (tail l))))

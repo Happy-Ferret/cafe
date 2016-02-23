@@ -97,3 +97,7 @@ returns true if a is a pair
 returns true if both parameters are equal  
 
   
+##### `nth num list`  
+get num-th element of list  
+
+  
