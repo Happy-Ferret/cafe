@@ -127,3 +127,10 @@
 				true)
 			true)
 		false))
+
+;; ##### `?: a b`
+;; null coalescing operator.
+;; returns a if it's truthy, or b otherwise.
+
+(defn (?: a b)
+	(lua-raw "if a then return b else if b then return b else return nil end end"))
