@@ -57,7 +57,7 @@ interp = do ->
 if argv.hashbang?
 	hashbang = argv.hashbang
 else
-	hashbang = "#!/usr/bin/env #{argv.interpreter || argv.i ? "lua"}\n"
+	hashbang = "#!/usr/bin/env #{argv.interpreter || argv.i ? "lua"}"
 
 if inp is '/dev/stdin' or inp is '-'
 	repl argv.interpreter ? 'lua'
@@ -77,11 +77,7 @@ else
 			if err?
 				throw err
 
-			fs.writeFile out, hashbang, (err) ->
-				if err?
-					throw err
-
-				emit out, codegen(parse preprocess(data, do_docout, docdir), ast), ->
-					fs.chmodSync out, 0o755
+			emit out, ([hashbang].concat codegen(parse preprocess(data, do_docout, docdir), ast)), ->
+				fs.chmodSync out, 0o755
 	else
 		console.log "\x1b[1;31m→\x1b[0m No such file #{inp}."
