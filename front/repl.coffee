@@ -21,7 +21,7 @@ eval_string = (str, interp, cb) ->
 				lua_process = child_process.spawn 'lua', {encoding: 'utf8', stdio: ['pipe', 1, 2]}
 				if lua_process?.stdin?
 					lua_process.stdin.write compile_cache.join ';\n;'
-					lua_process.stdin.end ";\n" + "io.write(\"#{arrow} \"); print(describe((function() #{code} end)()))"
+					lua_process.stdin.end ";\n" + "io.write(\"#{arrow} \"); print(describe((function() #{code} end)(), true))"
 
 					lua_process.on 'close', cb
 				else
