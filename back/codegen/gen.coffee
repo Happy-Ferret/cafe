@@ -85,11 +85,11 @@ module.exports.codegen = (ast) ->
 				body = ''
 				last_expr = ''
 
-			"do #{vars.join ';'}#{body};#{last_expr}; end"
+			"do #{vars.join ';'}#{body.join ';'};#{last_expr}; end"
 
 	codegen_conditional = (expr) ->
 		can_return = (exp) ->
-			if (exp.type isnt 'for_loop') && (exp.type isnt 'assignment')
+			if (exp.type isnt 'for_loop') && (exp.type isnt 'assignment') && (exp.type isnt 'scoped_block')
 				'return '
 			else
 				''
@@ -100,8 +100,12 @@ module.exports.codegen = (ast) ->
 			else
 				base = ' '
 
+			if expr.trueb.type is 'scoped_block'
+				expr.trueb.is_tail = true
 			base += "(function() if #{intermediate_codegen expr.cond} then #{can_return expr.trueb}#{intermediate_codegen expr.trueb}"
 			if expr.falsb?
+				if expr.falsb.type is 'scoped_block'
+					expr.falsb.is_tail = true
 				base += " else #{can_return expr.falsb}#{intermediate_codegen expr.falsb} end"
 			else
 				base += " end"
@@ -131,6 +135,10 @@ module.exports.codegen = (ast) ->
 		if expr.name? and expr.start? and expr.end and expr.body?
 			"for #{expr.name} = #{intermediate_codegen expr.start}, #{intermediate_codegen expr.end} do #{expr.body.map(intermediate_codegen).join ';'} end"
 
+	codegen_while_loop = (expr) ->
+		if expr.cond? and expr.body?
+			"while #{intermediate_codegen expr.cond} do #{expr.body.map(intermediate_codegen).join ';'} end"
+
 
 	intermediate_codegen = (expr) ->
 		if expr?.type?
@@ -157,6 +165,8 @@ module.exports.codegen = (ast) ->
 					codegen_for_loop expr
 				when 'raw'
 					codegen_raw expr
+				when 'while_loop'
+					codegen_while_loop expr
 				else
 					expr # either unimplemented construct or literal. either way, just emit.
 		else
