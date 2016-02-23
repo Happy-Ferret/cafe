@@ -142,20 +142,19 @@
 			true)
 		false))
 
-;; ##### `?: a b`
-;; null coalescing operator.
-;; returns a if it's truthy, or b otherwise.
-;; --
-(defn (?: a b)
-	(lua-raw "if a then return b else if b then return b else return nil end end"))
-
 ;; ##### `describe a`
 ;; format `a` for printing.
 ;; --
-(defn (describe a)
-	(if (= (type a) "table")
-		(table.concat (map a describe) ", ")
-		(tostring a)))
+(defn (describe x pt)
+	(let ((pt (or pt false)) (describe-internal (λ (a)
+		(if (= (type a) "list")
+			(table.concat (map a (λ (x) (describe x false))) ", ")
+			(if (= (type a) "pair")
+				(string.format "%s . %s" (describe a[1] false) (describe a[2] false))
+				(tostring a))))))
+		(if pt
+			(string.format "%s: %s" (type x) (describe-internal x))
+			(describe-internal x))))
 
 ;; ##### `type a`
 ;; reimplementation of Lua's `type`
