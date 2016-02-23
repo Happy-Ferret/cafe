@@ -6,6 +6,16 @@ fs                    = require 'fs'
 readline              = require 'readline'
 compile_cache = []
 
+compile_cache.push """
+function describe(x)
+	if type(x) == 'table' then
+		return table.concat(x, ', ')
+	else
+		return x
+	end
+end
+"""
+
 ## Compile and evaluate a string using the passed interpreter
 arrow = "\x1b[1;31m→\x1b[0m"
 eval_string = (str, interp, cb) ->
@@ -21,7 +31,7 @@ eval_string = (str, interp, cb) ->
 				lua_process = child_process.spawn 'lua', {encoding: 'utf8', stdio: ['pipe', 1, 2]}
 				if lua_process?.stdin?
 					lua_process.stdin.write compile_cache.join ';\n;'
-					lua_process.stdin.end ";\n" + "io.write(\"#{arrow} \"); print((function() #{code} end)())"
+					lua_process.stdin.end ";\n" + "io.write(\"#{arrow} \"); print(describe((function() #{code} end)()))"
 
 					lua_process.on 'close', cb
 				else
