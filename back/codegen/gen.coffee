@@ -18,7 +18,10 @@ actual_opch = (opch) ->
 module.exports.codegen = (ast) ->
 	should_return = (expr) ->
 		if expr.is_tail?
-			"return "
+			if (expr.type is 'for_loop') && (expr.type is 'assignment')
+				''
+			else
+				"return "
 		else
 			""
 	codegen_function_body = (expr) ->
@@ -85,14 +88,21 @@ module.exports.codegen = (ast) ->
 			"do #{vars.join ';'}#{body};#{last_expr}; end"
 
 	codegen_conditional = (expr) ->
+		can_return = (exp) ->
+			if (exp.type isnt 'for_loop') && (exp.type isnt 'assignment')
+				'return '
+			else
+				''
+
 		if expr.cond? and expr.trueb?
 			if expr.is_tail?
 				base = ' return '
 			else
 				base = ' '
-			base += "(function() if #{intermediate_codegen expr.cond} then return #{intermediate_codegen expr.trueb}"
+
+			base += "(function() if #{intermediate_codegen expr.cond} then #{can_return expr.trueb}#{intermediate_codegen expr.trueb}"
 			if expr.falsb?
-				base += " else return #{intermediate_codegen expr.falsb} end"
+				base += " else #{can_return expr.falsb}#{intermediate_codegen expr.falsb} end"
 			else
 				base += " end"
 
