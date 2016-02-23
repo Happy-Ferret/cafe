@@ -9,7 +9,7 @@ global symbol bound to the stdout stream
 
   
 ##### `*version*`  
-global symbol bound to the Lua version currently in use, and the semver version of the compiler itsel.f  
+global symbol bound to the Lua version currently in use, and the semver version of the compiler itself  
 
   
 ## Functions  

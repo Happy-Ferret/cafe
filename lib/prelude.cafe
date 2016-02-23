@@ -12,7 +12,7 @@
 (set! *standard-output* (io.output))
 
 ;; ##### `*version*`
-;; global symbol bound to the Lua version currently in use, and the semver version of the compiler itsel.f
+;; global symbol bound to the Lua version currently in use, and the semver version of the compiler itself
 ;; --
 (set! *version* (string.format "%s - %s" _VERSION "Café v0.2.0"))
 
@@ -146,7 +146,7 @@
 ;; format `a` for printing.
 ;; --
 (defn (describe x pt)
-	(let ((pt (or pt false)) (describe-internal (λ (a)
+	(let ((describe-internal (λ (a)
 		(if (= (type a) "list")
 			(table.concat (map a (λ (x) (describe x false))) ", ")
 			(if (= (type a) "pair")
