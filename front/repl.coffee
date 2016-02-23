@@ -1,6 +1,6 @@
+{ parse, symbol }     = require './parser'
 { preprocess }        = require './preproc'
 { codegen }           = require '../back'
-{ parse }             = require './parser'
 child_process         = require 'child_process'
 fs                    = require 'fs'
 readline              = require 'readline'
@@ -125,6 +125,11 @@ module.exports.repl = (intpt) ->
 						skip = true
 						compile_cache.push codegen(ast)
 						do ri.prompt
+					else if ast.type is 'call_function'
+						if ast.name is symbol 'require!'
+							skip = true
+							compile_cache.push codegen ast
+							do ri.prompt
 				if !skip
 					eval_string do line.trim, interpr, -> do ri.prompt
 		catch error
