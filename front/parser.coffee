@@ -9,9 +9,6 @@ operator = (s) ->
 	]
 	isop
 
-symbols = {}
-last_sym = 0
-
 symbol = (str) ->
 	if str?
 		specialChars = ['-','*','?','!','&',':','=','!','$','^', '/', '\\']
@@ -22,11 +19,7 @@ symbol = (str) ->
 
 		if str.replace?
 			if new RegExp("[#{specialChars.join '\\'}]", "gmi").test str
-				if symbols[str]?
-					symbols[str]
-				else
-					symbols[str] = "_#{last_sym++}"
-					symbol str
+				escapeStr str
 			else
 				str
 		else
