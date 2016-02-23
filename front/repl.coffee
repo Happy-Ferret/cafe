@@ -91,7 +91,7 @@ module.exports.repl = (intpt) ->
 
 		base.replace(/^Lua /gmi, '').replace(/\n$/gmi, '')
 
-	console.log "\x1b[1;37mCafé REPL - Node #{process.version} - #{if interpr is 'luajit' then 'LuaJIT' else 'Lua'} #{interpr_version}\x1b[0m"
+	console.log "Café REPL - Node #{process.version} - #{if interpr is 'luajit' then 'LuaJIT' else 'Lua'} #{interpr_version}"
 	do warm_cache
 
 	ri = readline.createInterface
