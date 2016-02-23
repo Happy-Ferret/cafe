@@ -115,7 +115,7 @@
 (defn (map li fn)
 	(let ((ret (list)))
 		(for i 1 (# li)
-			(push-tail! (fn li[i]) ret))
+			(push-tail! (fn (nth i li)) ret))
 		ret))
 
 ;; ##### `curry fna fnb`
@@ -150,7 +150,7 @@
 		(if (= (type a) "list")
 			(table.concat (map a (λ (x) (describe x false))) ", ")
 			(if (= (type a) "pair")
-				(string.format "%s . %s" (describe a[1] false) (describe a[2] false))
+				(string.format "%s . %s" (describe (head a) false) (describe (nth 2 a) false))
 				(tostring a))))))
 		(if pt
 			(string.format "%s: %s" (type x) (describe-internal x))
@@ -181,7 +181,7 @@
 		(let ((ret true))
 			(if (= (# a) (# b))
 				(for i 1 (# a)
-					(if (!= a[i] b[i])
+					(if (!= (nth i a) (nth i b))
 						(set! ret false !global))))
 				ret))))
 		(if (or (= (type a) "pair") (= (type a) "list"))
