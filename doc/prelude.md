@@ -53,6 +53,14 @@ return the first element of a list
 create a list from given values  
 
   
+##### `push! car rest`  
+insert a value at the head of a list, mutating it.  
+
+  
+##### `push-tail! end rest`  
+insert a value at the end of a list, mutating it.  
+
+  
 ##### `tail list`  
 return the rest of the list, without head  
 

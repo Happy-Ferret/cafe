@@ -70,9 +70,10 @@
 ;; ##### `cons list elem`
 ;; cons an element in front of a list
 ;; --
-(defn (cons list elem)
-	(table.insert list 1 elem)
-	list)
+(defn (cons car cdr)
+	(if (= (type li) "table")
+		(list car (table.unpack cdr))
+		(list car cdr)))
 
 ;; ##### `head list`
 ;; return the first element of a list
@@ -85,6 +86,19 @@
 ;; --
 (defn (list ...) {...})
 
+;; ##### `push! car rest`
+;; insert a value at the head of a list, mutating it.
+;; --
+(defn (push-head! car rest)
+	(table.insert rest 1 car)
+	rest)
+
+;; ##### `push-tail! end rest`
+;; insert a value at the end of a list, mutating it.
+;; --
+(defn (push-tail! fin rest)
+	(table.insert rest fin)
+	rest)
 
 ;; ##### `tail list`
 ;; return the rest of the list, without head
@@ -92,7 +106,7 @@
 (defn (tail l)
 	(let ((ret (list)))
 		(for i 2 (# l)
-			(cons ret list[i]))
+			(push-tail! l[i] ret))
 		ret))
 
 ;; ##### `map list fn`
@@ -101,7 +115,7 @@
 (defn (map li fn)
 	(let ((ret (list)))
 		(for i 1 (# li)
-			(cons ret (fn li[i])))
+			(push-tail! (fn li[i]) ret)
 		ret))
 
 ;; ##### `curry fna fnb`
