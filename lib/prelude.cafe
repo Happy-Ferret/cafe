@@ -79,7 +79,9 @@
 ;; return the first element of a list
 ;; --
 (defn (head list)
-	list[1])
+	(if list
+		list[1]
+		nil))
 
 ;; ##### `list`
 ;; create a list from given values
@@ -198,3 +200,21 @@
 	(if (= n 1)
 		(head l)
 		(nth (- n 1) (tail l))))
+
+;; ##### `null? list`
+;; returns true if list is empty.
+;; --
+(defn (null? lst)
+	(if lst
+		(= (# lst) 0)
+		false))
+
+;; ##### `foldl func accum lst`
+;; combine elements of a list into an accumulator using a function.
+;; --
+(defn (foldl func accum lst)
+	(if (null? lst)
+		accum
+		(foldl func (func accum (head lst)) (tail lst))))
+
+(set! reduce foldl)
