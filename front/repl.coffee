@@ -75,7 +75,7 @@ compile = (module) ->
 
 ## Warm compilation cache by compiling the built-in modules
 warm_cache = ->
-	['prelude', 'math'].map (x) -> compile x
+	['prelude', 'math', 'hashmap'].map (x) -> compile x
 
 plural = ->
 	if compile_cache.length is '1'

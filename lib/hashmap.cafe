@@ -1,0 +1,24 @@
+@import prelude
+
+(defn (hash-map/new ...)
+	(let ((l (list ...)) (ret (list)) (skip false))
+		(for i 1 (# l)
+			(if (not skip)
+				(if (and (nth i l) (nth (+ 1 i) l))
+					(lua-raw "ret[l[i]] = l[i + 1]; skip = true"))
+				(set! skip false !global)))
+	(lua-raw "ret._type = 'hashmap'")
+	ret))
+
+(defn (hash-map/empty)
+	(let ((ret (list)))
+		(lua-raw "ret._type = 'hashmap'")
+		ret))
+
+(defn (hash-map/map hm fun)
+	(let ((ret (hash-map/empty)))
+		(lua-raw "for k, v in pairs(hm) do")
+			(if (neq? (.k sub 1 1) "_")
+				(lua-raw "ret[k] = fun(v, k)"))
+		(lua-raw "end")
+		ret))

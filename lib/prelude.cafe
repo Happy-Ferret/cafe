@@ -137,7 +137,7 @@
 ;; --
 (defn (exists? n)
 	(if n
-		(if (or (= (type n) "string") (= (type n) "table"))
+		(if (or (= (type n) "string") (= (type n) "list"))
 			(if (= (# n) 0)
 				false
 				true)
@@ -153,7 +153,9 @@
 			(table.concat (map a (λ (x) (describe x false))) ", ")
 			(if (= (type a) "pair")
 				(string.format "%s . %s" (describe (head a) false) (describe (nth 2 a) false))
-				(tostring a))))))
+				(if (= (type a) "hashmap")
+					(string.match (tostring a) "table: 0x(%w+)")
+					(tostring a)))))))
 		(if pt
 			(string.format "%s: %s" (type x) (describe-internal x))
 			(describe-internal x))))
@@ -164,10 +166,12 @@
 (let ((old-type type))
 	(defn (type a)
 		(if (= (old-type a) "table")
-			(if (= (# a) 2)
-				"pair"
-				"list")
-			(old-type a))))
+			(if (= (lua-raw "a._type") "hashmap")
+				"hashmap"
+				(if (= (# a) 2)
+					"pair"
+					"list"))
+				(old-type a))))
 
 ;; ##### `pair? a`
 ;; returns true if a is a pair
@@ -177,6 +181,10 @@
 
 ;; ##### `eq? a b`
 ;; returns true if both parameters are equal
+;; --
+
+;; ##### `neq? a b`
+;; returns true if both parameters are not equal
 ;; --
 (defn (eq? a b)
 	(if (or (= (type a) "function") (= (type b) "function"))
@@ -191,6 +199,9 @@
 			(if (or (= (type a) "pair") (= (type a) "list"))
 				(list-equals a b)
 				(= a b)))))
+
+(defn (neq? a b)
+	(not (eq? a b)))
 
 
 ;; ##### `nth num list`
