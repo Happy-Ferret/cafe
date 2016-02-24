@@ -122,7 +122,7 @@ module.exports.codegen = (ast) ->
 
 	codegen_assignment = (expr) ->
 		if expr.name? and expr.value?
-			if expr.local?
+			if expr.local? and expr.local
 				base = 'local '
 			else
 				base = ''
