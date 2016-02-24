@@ -28,13 +28,16 @@ module.exports.codegen = (ast) ->
 		body = expr.body.slice(0, -1).map intermediate_codegen
 		last_expr = expr.body.slice(-1)[0]
 
-		last_expr.is_tail = true
-		if typeof last_expr is 'object'
-			last_expr = "#{intermediate_codegen last_expr}"
-		else
-			last_expr = "return #{last_expr}"
+		if body? and last_expr?
+			last_expr.is_tail = true
+			if typeof last_expr is 'object'
+				last_expr = "#{intermediate_codegen last_expr}"
+			else
+				last_expr = "return #{last_expr}"
 
-		"#{body.join ';'}#{last_expr}"
+			"#{body.join ';'}#{last_expr}"
+		else
+			""
 
 	codegen_function = (expr) ->
 		if expr.name? and expr.args? and expr.body?
