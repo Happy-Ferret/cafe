@@ -120,6 +120,16 @@
 			(push-tail! (fn (nth i li)) ret))
 		ret))
 
+;; ##### `filter list fn`
+;; filter a list using a predicate.
+;; --
+(defn (filter li fn)
+	(let ((ret (list)))
+		(for i 1 (# li)
+			(if (truth? (fn (nth i li)))
+				(push-tail! (nth i li) ret)))
+		ret))
+
 ;; ##### `curry fna fnb`
 ;; merge two functions together
 ;; --

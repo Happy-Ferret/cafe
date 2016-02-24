@@ -22,3 +22,17 @@
 				(lua-raw "ret[k] = fun(v, k)"))
 		(lua-raw "end")
 		ret))
+
+(defn (hash-map/filter hm fun)
+	(let ((ret (hash-map/empty)))
+		(lua-raw "for k, v in pairs(hm) do")
+			(if (neq? (.k sub 1 1) "_")
+				(lua-raw "ret[k] = fun(v, k)"))
+		(lua-raw "end")
+		ret))
+
+(defn (hash-map/size hm)
+	(let ((accum 0))
+		(hash-map/map hm (λ ()
+			(set! accum (+ 1 accum) !global)))
+		accum))
