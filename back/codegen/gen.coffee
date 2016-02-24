@@ -18,7 +18,7 @@ actual_opch = (opch) ->
 module.exports.codegen = (ast) ->
 	should_return = (expr) ->
 		if expr.is_tail?
-			if (expr.type is 'for_loop') && (expr.type is 'assignment')
+			if (expr.type is 'for_loop') && (expr.type is 'assignment') && (expr.type is 'raw')
 				''
 			else
 				"return "
@@ -92,7 +92,7 @@ module.exports.codegen = (ast) ->
 
 	codegen_conditional = (expr) ->
 		can_return = (exp) ->
-			if (exp.type isnt 'for_loop') && (exp.type isnt 'assignment') && (exp.type isnt 'scoped_block')
+			if (exp.type isnt 'for_loop') && (exp.type isnt 'assignment') && (exp.type isnt 'scoped_block') && (exp.type isnt 'raw')
 				'return '
 			else
 				''
