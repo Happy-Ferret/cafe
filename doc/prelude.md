@@ -101,3 +101,11 @@ returns true if both parameters are equal
 get num-th element of list  
 
   
+##### `null? list`  
+returns true if list is empty.  
+
+  
+##### `foldl func accum lst`  
+combine elements of a list into an accumulator using a function.  
+
+  
