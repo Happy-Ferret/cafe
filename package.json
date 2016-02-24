@@ -7,8 +7,7 @@
     "doc": "doc"
   },
   "scripts": {
-    "test": "coffee index.coffee",
-		"gen-docs": "coffee index.coffee --docs --doc-dir doc/ lib/prelude.cafe"
+    "test": "coffee index.coffee"
   },
   "repository": {
     "type": "git",

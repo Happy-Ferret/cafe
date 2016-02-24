@@ -1,0 +1,57 @@
+@doc math.md
+
+;; math
+;; ====
+;; idiomatic bindings to Lua's math library, with some additions.
+;; --
+
+;; Symbols
+;; --
+
+;; ##### `pi`
+;; 3.141592653..
+;; --
+(set! *pi* math.pi)
+(set! math/huge math.huge)
+
+;; Functions
+;; --
+
+;; ##### sine
+(defn (math/sin x) (math.sin x))
+;; ##### cosine
+(defn (math/cos x) (math.cos x))
+;; ##### tangent
+(defn (math/tan x) (math.tan x))
+;; ##### absolute
+(defn (math/abs x) (if (> 0 x) (- 0 x) x))
+;; ##### arc sine
+(defn (math/asin x) (math.asin x))
+;; ##### arc cosine
+(defn (math/acos x) (math.acos x))
+;; ##### arc tangent
+(defn (math/atan x) (math.atan x))
+;; ##### degrees to radians
+(defn (math/deg2rad x) (math.rad x))
+;; ##### radians to degrees
+(defn (math/rad2deg x) (math.deg x))
+;; ##### exponentiate by e
+(defn (math/exp x) (math.exp x))
+;; ##### natural logarithm
+(defn (math/logn x) (math.log x))
+;; ##### logarithm of base 10
+(defn (math/log10 x) (math.log x 10))
+;; ##### logarithm of base 2
+(defn (math/log2 x) (math.log x 2))
+;; ##### max
+(defn (math/max ...) (math.max ...))
+;; ##### min
+(defn (math/min ...) (math.min ...))
+;; ##### modf
+(defn (math/modf x) (cons (math.modf x)))
+;; ##### square root
+(defn (math/sqrt x) (math.sqrt x))
+;; ##### random
+(defn (math/rand u l) (math.random u l))
+;; ##### random seed
+(defn (math/rand-seed n) (math.randomseed n))

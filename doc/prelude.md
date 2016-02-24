@@ -109,3 +109,9 @@ returns true if list is empty.
 combine elements of a list into an accumulator using a function.  
 
   
+##### `truth?`  
+returns true if x is truthy, or:  
+- if x is a pair, return if the first element is truthy  
+- if x is a list, return if all elements are truthy.  
+
+  

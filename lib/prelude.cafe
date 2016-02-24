@@ -218,3 +218,22 @@
 		(foldl func (func accum (head lst)) (tail lst))))
 
 (set! reduce foldl)
+
+;; ##### `truth?`
+;; returns true if x is truthy, or:
+;; - if x is a pair, return if the first element is truthy
+;; - if x is a list, return if all elements are truthy.
+;; --
+
+(defn (truth? x)
+	(if (= (type x) "pair")
+		(truth? (head x))
+		(if (= (type x) "list")
+			(let ((ret true))
+				(map x (λ (n)
+					(if (not n)
+						(set! ret false !global))))
+				ret)
+			(if x
+				true
+				false))))
