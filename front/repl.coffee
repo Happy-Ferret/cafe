@@ -73,8 +73,9 @@ compile = (module) ->
 	else
 		compile_cache.push codegen(parse(preprocess module)).join ';'
 
-## Warm compilation cache by compiling the prelude
-warm_cache = -> compile 'prelude'
+## Warm compilation cache by compiling the built-in modules
+warm_cache = ->
+	['prelude', 'math'].map (x) -> compile x
 
 plural = ->
 	if compile_cache.length is '1'
