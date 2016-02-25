@@ -60,7 +60,7 @@ else
 	hashbang = "#!/usr/bin/env #{argv.interpreter || argv.i ? "lua"}"
 
 if inp is '/dev/stdin' or inp is '-'
-	repl argv.interpreter ? 'lua'
+	repl interp
 else
 	if argv.o? || argv.output?
 		out = argv.o || argv.output
