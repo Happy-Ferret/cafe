@@ -112,10 +112,7 @@ module.exports.parse = (string, astf) ->
 									arr
 								else []
 							else []
-						body: do ->
-							thing = tokens.slice(2).map toks2ast
-							# console.log thing
-							thing
+						body: tokens.slice(2).map toks2ast
 					}
 
 				else if tokens[0] is 'if'
@@ -158,6 +155,12 @@ module.exports.parse = (string, astf) ->
 						type: 'while_loop'
 						cond: toks2ast tokens[1]
 						body: tokens.slice(2).map toks2ast
+					}
+				else if tokens[0] is 'do'
+					{
+						type: 'scoped_block',
+						vars: [],
+						body: tokens.slice(1).map toks2ast
 					}
 				else
 					if tokens[0]?
