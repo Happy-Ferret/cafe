@@ -36,3 +36,6 @@
 		(hash-map/map hm (λ ()
 			(set! accum (+ 1 accum) !global)))
 		accum))
+
+(defn (hash-map/set hm k v)
+	(lua-raw "hm[k] = v"))
