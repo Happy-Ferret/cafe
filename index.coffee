@@ -21,6 +21,7 @@ Available options are:
   \x1b[1;32m-d/--docs\x1b[0m        Emit documentation.
   \x1b[1;32m--doc-dir\x1b[0m        Specify where to emit documentation to.
   \x1b[1;32m--hashbang\x1b[0m       Specify a custom #! line for executables.
+	\x1b[1;32m--run\x1b[0m            Evaluate the compiled output.
 """
 
 
@@ -30,6 +31,8 @@ if argv['?']? || argv.h? || argv.help?
 
 if argv?._[0]?
 	inp = argv._[0]
+else if argv?.run? && typeof argv.run is 'string'
+	inp = argv.run
 else
 	inp = '-'
 
@@ -47,11 +50,7 @@ interp = do ->
 	if argv.i? || argv.interpreter?
 		argv.interpreter ? argv.i
 	else
-		which = child_process.spawnSync 'which', ['luajit']
-		if !(which?) || which?.status isnt 0
-			'lua'
-		else
-			'luajit'
+		'lua'
 
 
 if argv.hashbang?
@@ -78,6 +77,11 @@ else
 				throw err
 
 			emit out, ([hashbang].concat codegen(parse preprocess(data, do_docout, docdir), ast)), ->
-				fs.chmodSync out, 0o755
+				if argv.run?
+					process.stdout.write "\x1b[0m"
+					proc = child_process.spawn "#{interp}", ["#{out}"], {encoding: 'utf-8', stdio: 'inherit'}
+					proc.on 'close', (status) ->
+						console.log "#{interp} process (#{proc.pid}) exited with status code #{status}."
+				else fs.chmodSync out, 0o755
 	else
 		console.log "\x1b[1;31m→\x1b[0m No such file #{inp}."
