@@ -22,3 +22,4 @@
 (defn (math/sqrt x) (math.sqrt x))
 (defn (math/rand u l) (math.random u l))
 (defn (math/rand-seed n) (math.randomseed n))
+(defn (math/percent val total) (* 100 (/ val total)))
