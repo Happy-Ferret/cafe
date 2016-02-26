@@ -120,6 +120,14 @@
 			(push-tail! (fn (nth i li)) ret))
 		ret))
 
+;; ##### `size li`
+;; determine the size of a list.
+;; --
+(defn (size li)
+	(let ((size 0))
+		(map li (λ ()
+			(set! size (+ 1 size) !global)))))
+
 ;; ##### `filter list fn`
 ;; filter a list using a predicate.
 ;; --
