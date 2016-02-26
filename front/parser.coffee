@@ -160,11 +160,14 @@ module.exports.parse = (string, astf) ->
 						body: tokens.slice(2).map toks2ast
 					}
 				else
-					{
-						type: 'call_function'
-						name: symbol tokens[0]
-						args: tokens.slice(1).map(toks2ast)
-					}
+					if tokens[0]?
+						{
+							type: 'call_function'
+							name: symbol tokens[0]
+							args: tokens.slice(1).map(toks2ast)
+						}
+					else
+						''
 			when 'string'
 				if tokens[0] == '"' and tokens.slice(-1)[0] == '"'
 					tokens
