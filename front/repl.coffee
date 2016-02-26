@@ -12,7 +12,7 @@ arrow = "\x1b[1;31m→\x1b[0m"
 
 ## Use the same FIFO for all operations.
 fifo = do ->
-	temp = child_process.execSync "mktemp -u 'cafe.repl.fifo_XXX'", {encoding: 'utf8'}
+	temp = child_process.execSync "mktemp -u '/tmp/cafe.repl.fifo_XXX'", {encoding: 'utf8'}
 	child_process.execSync "mkfifo #{temp}"
 	temp
 
@@ -53,13 +53,6 @@ read_history = (int) ->
 ## Save history to disk
 save_history = (int) -> fs.writeFileSync int.historyFile, JSON.stringify int.history
 
-## Determine Lua interpreter to use
-interpr = do ->
-	which = child_process.spawnSync 'which', ['luajit']
-	if which?.status isnt 0
-		'lua'
-	else
-		'luajit'
 
 ## Compile a new module
 compile = (module) ->
@@ -97,12 +90,12 @@ module.exports.repl = (intpt) ->
 	interpr = intpt ? interpr
 	## Determine Lua interpreter version for the header
 	interpr_version = do ->
-		base = child_process.execSync "#{interpr} -e \"print(_VERSION)\"",
+		base = child_process.execSync "lua -e \"print(_VERSION)\"",
 		encoding: 'utf8'
 
 		base.replace(/^Lua /gmi, '').replace(/\n$/gmi, '')
 
-	console.log "Café REPL - Node #{process.version} - #{if interpr is 'luajit' then 'LuaJIT' else 'Lua'} #{interpr_version}"
+	console.log "Café REPL - Node #{process.version} - Lua #{interpr_version}"
 	do warm_cache
 
 	ri = readline.createInterface
