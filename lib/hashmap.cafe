@@ -1,4 +1,3 @@
-@import prelude
 
 (defn (hash-map/new ...)
 	(let ((l (list ...)) (ret (list)) (skip false))
