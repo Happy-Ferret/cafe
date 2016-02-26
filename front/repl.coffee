@@ -4,13 +4,15 @@
 child_process         = require 'child_process'
 fs                    = require 'fs'
 readline              = require 'readline'
-compile_cache = []
+
+## Install special handler for io.read
+compile_cache = ["function io.read() return 'io.read is unimplemented in the REPL' end"]
 
 arrow = "\x1b[1;31m→\x1b[0m"
 
 ## Use the same FIFO for all operations.
 fifo = do ->
-	temp = child_process.execSync "mktemp -u 'cafe.repl.fifo_XXX.XXX'", {encoding: 'utf8'}
+	temp = child_process.execSync "mktemp -u 'cafe.repl.fifo_XXX'", {encoding: 'utf8'}
 	child_process.execSync "mkfifo #{temp}"
 	temp
 
@@ -22,7 +24,7 @@ eval_string = (str, interp, cb) ->
 	if ast.length >= 1
 		ast[ast.length - 1].is_tail = true
 		code = do ->
-			"#{compile_cache.join ';\n;'};\n;io.write(\"#{arrow }\"); print(describe((function() #{codegen(ast).join ';'} end)(), true))"
+			"#{compile_cache.join ';\n;'};\n;io.write(\"#{arrow} \"); print(describe((function() #{codegen(ast).join ';'} end)(), true))"
 
 
 		if code.length >= 1
@@ -30,7 +32,7 @@ eval_string = (str, interp, cb) ->
 			fs.writeFile fifo, code, ->
 				try
 					lua_process = child_process.spawn 'lua', [fifo], {encoding: 'utf8', stdio: ['ignore', 1, 2]}
-					if lua_process?.stdout?
+					if lua_process?
 						lua_process.on 'close', cb
 					else
 						console.log 'Failed to execSync'
