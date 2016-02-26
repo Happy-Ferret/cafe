@@ -1,4 +1,3 @@
-
 (defn (hash-map/new ...)
 	(let ((l (list ...)) (ret (list)) (skip false))
 		(for i 1 (# l)
