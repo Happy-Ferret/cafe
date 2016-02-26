@@ -1,5 +1,0 @@
-@import prelude
-
-(let ((name (prompt "enter your name: " exists?)))
-	(map (list *standard-output*) (λ (stream)
-		(print-formatted! stream "Hello, %s, from %s!" name *version*))))
