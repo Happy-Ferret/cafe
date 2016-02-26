@@ -6,30 +6,38 @@ fs                    = require 'fs'
 readline              = require 'readline'
 compile_cache = []
 
-## Compile and evaluate a string using the passed interpreter
 arrow = "\x1b[1;31m→\x1b[0m"
+
+## Use the same FIFO for all operations.
+fifo = do ->
+	temp = child_process.execSync "mktemp -u 'cafe.repl.fifo_XXX.XXX'", {encoding: 'utf8'}
+	child_process.execSync "mkfifo #{temp}"
+	temp
+
+## Compile and evaluate a string using the passed interpreter
 eval_string = (str, interp, cb) ->
 	tempFile = child_process.execSync 'mktemp', {encoding: 'utf8'}
 	ast = parse(preprocess(str))
 
 	if ast.length >= 1
 		ast[ast.length - 1].is_tail = true
-		code = codegen(ast).join ';'
+		code = do ->
+			"#{compile_cache.join ';\n;'};\n;io.write(\"#{arrow }\"); print(describe((function() #{codegen(ast).join ';'} end)(), true))"
+
 
 		if code.length >= 1
-			try
-				lua_process = child_process.spawn 'lua', {encoding: 'utf8', stdio: ['pipe', 1, 2]}
-				if lua_process?.stdin?
-					lua_process.stdin.write compile_cache.join ';\n;'
-					lua_process.stdin.end ";\n" + "io.write(\"#{arrow} \"); print(describe((function() #{code} end)(), true))"
 
-					lua_process.on 'close', cb
-				else
-					console.log 'Failed to execSync'
-			catch error
-				console.error error
-		else
-			do cb
+			fs.writeFile fifo, code, ->
+				try
+					lua_process = child_process.spawn 'lua', [fifo], {encoding: 'utf8', stdio: ['ignore', 1, 2]}
+					if lua_process?.stdout?
+						lua_process.on 'close', cb
+					else
+						console.log 'Failed to execSync'
+				catch error
+					console.error error
+					do cb
+		else do cb
 	else do cb
 
 ## Read history from disk
