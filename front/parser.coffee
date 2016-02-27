@@ -174,6 +174,8 @@ module.exports.parse = (string, astf) ->
 			when 'string'
 				if tokens[0] == '"' and tokens.slice(-1)[0] == '"'
 					tokens
+				else if parseFloat(tokens) isnt NaN
+					tokens
 				else
 					symbol tokens
 
