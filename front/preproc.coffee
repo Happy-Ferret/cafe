@@ -16,7 +16,7 @@ resolve_module = (file) ->
 	for file in potential_files
 		if fs.existsSync file
 			return file
-
+module.exports.resolve = resolve_module
 
 module.exports.preprocess = (contents, docout = false, doc_dir = './doc') ->
 	lines = []
