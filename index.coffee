@@ -63,6 +63,8 @@ if inp is '/dev/stdin' or inp is '-'
 else
 	if argv.o? || argv.output?
 		out = argv.o || argv.output
+	else if argv.run? && !(argv.o?)
+		out = "/tmp/cafe_run.lua"
 	else
 		out = 'out.lua'
 
