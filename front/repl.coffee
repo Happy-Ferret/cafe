@@ -10,11 +10,10 @@ compile_cache = ["function io.read() return 'io.read is unimplemented in the REP
 
 arrow = "\x1b[1;31m→\x1b[0m"
 
-## Use the same FIFO for all operations.
-fifo = do ->
-	temp = child_process.execSync "mktemp -u '/tmp/.cafe.repl.fifo_XXX'", {encoding: 'utf8'}
-	child_process.execSync "mkfifo #{temp}"
-	temp
+## Use the same file for all operations.
+file = do ->
+	temp = child_process.execSync "mktemp -u '/tmp/.cafe.repl.file_XXX'", {encoding: 'utf8'}
+	temp.replace /\n+$/gmi, ''
 
 ## Compile and evaluate a string using the passed interpreter
 eval_string = (str, interp, cb) ->
@@ -28,10 +27,9 @@ eval_string = (str, interp, cb) ->
 
 
 		if code.length >= 1
-
-			fs.writeFile fifo, code, ->
+			fs.writeFile file, code, ->
 				try
-					lua_process = child_process.spawn 'lua', [fifo], {encoding: 'utf8', stdio: ['ignore', 1, 'ignore']}
+					lua_process = child_process.spawn 'lua', [file], {encoding: 'utf8', stdio: ['ignore', 1, 'ignore']}
 					if lua_process?
 						lua_process.on 'close', (status) ->
 							if status isnt 0
@@ -128,10 +126,10 @@ module.exports.repl = (intpt, cb) ->
 		catch error
 			console.error "\x1b[1;31m#{error}\x1b[0m"
 			save_history ri
-			cb fifo
+			cb file
 			process.exit 1
 
 	ri.on 'close', ->
 		console.log "Have a great day!"
 		save_history ri
-		cb fifo
+		cb file
