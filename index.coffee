@@ -59,7 +59,10 @@ else
 	hashbang = "#!/usr/bin/env #{argv.interpreter || argv.i ? "lua"}"
 
 if inp is '/dev/stdin' or inp is '-'
-	repl interp
+	repl interp, (fifo) ->
+		fs.unlink fifo, (err) ->
+			if err?
+				console.log "Error unlinking REPL FIFO: #{err}"
 else
 	if argv.o? || argv.output?
 		out = argv.o || argv.output
