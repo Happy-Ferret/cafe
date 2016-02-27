@@ -76,9 +76,11 @@
 ;; ##### `head list`
 ;; return the first element of a list
 ;; --
-(defn (head list)
-	(if list
-		list[1]
+(defn (head li)
+	(if li
+		(if (or (= "list" (type li)) (= "pair" (type li)))
+			li[1]
+			li)
 		nil))
 
 ;; ##### `list`
@@ -107,7 +109,13 @@
 	(let ((ret (list)))
 		(for i 2 (# l)
 			(push-tail! l[i] ret))
-		ret))
+
+		(if (> (# ret) 1)
+			ret
+			(do
+				(if (= "list" (type ret))
+					(head ret)
+					ret)))))
 
 ;; ##### `map list fn`
 ;; modify a list using a function, returning a new list
