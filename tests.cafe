@@ -5,27 +5,27 @@
 
 ;; Test let
 (let ((x 1) (y (+ 1 1)))
-	(tests/expect! x 1 "x must be bound to 1")
-	(tests/expect! y 2 "y must be bound to 2"))
+	(tests/expect! x 1 "x should be bound to 1")
+	(tests/expect! y 2 "y should be bound to 2"))
 
 ;; Test set!
 (set! a 1)
 (set! b (λ () (print! *standard-output* "hello, world!")))
-(tests/expect! a 1 "a must be bound to 1")
-(tests/expect! (type b) "function" "b must be bound to a value with type of function")
-(tests/expect! (eq? (type a) (type b)) false "a and b mustn't be the same type")
+(tests/expect! a 1 "a should be bound to 1")
+(tests/expect! (type b) "function" "b should be bound to a value with type of function")
+(tests/expect! (eq? (type a) (type b)) false "a and b shouldn't be the same type")
 
 ;; Test defn
 
 (defn (add-and-sub a b c)
 	(- (+ a b) c))
 
-(tests/expect! (type add-and-sub) "function" "add-and-sub must be bound to a function")
-(tests/expect! (add-and-sub 1 2 3) 0 "add-and-sub called with parameters 1, 2 and 3 must return 0")
+(tests/expect! (type add-and-sub) "function" "add-and-sub should be bound to a function")
+(tests/expect! (add-and-sub 1 2 3) 0 "add-and-sub called with parameters 1, 2 and 3 should return 0")
 
 ;; Test basic list manipulation
 
-(tests/expect! (map (list 1 2 3) (λ ())) {} "mapping λ() over a list of numbers must return an empty list")
+(tests/expect! (map (list 1 2 3) (λ ())) {} "mapping λ() over a list of numbers should return an empty list")
 (tests/expect! (tail (cons 1 2)) 2 "the tail of 1 . 2 should be 2")
 (tests/expect! (head (cons 1 2)) 1 "the head of 1 . 2 should be 1")
 (tests/expect! (tail (list 1 2 3)) (cons 2 3) "the tail of {1, 2, 3} should be 2 . 3")
