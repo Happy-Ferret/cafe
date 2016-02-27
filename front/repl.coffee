@@ -14,7 +14,7 @@ arrow = "\x1b[1;31m→\x1b[0m"
 fifo = do ->
 	temp = child_process.execSync "mktemp -u '/tmp/.cafe.repl.fifo_XXX'", {encoding: 'utf8'}
 	child_process.execSync "mkfifo #{temp}"
-	temp.replace /\n$/gmi, ''
+	temp
 
 ## Compile and evaluate a string using the passed interpreter
 eval_string = (str, interp, cb) ->
@@ -90,11 +90,6 @@ module.exports.repl = (intpt) ->
 	ri.historyFile = "/#{process.env.HOME}/.cafe_history"
 	ri.setPrompt "\x1b[1;32mλ\x1b[0m> "
 	do ri.prompt
-	shutdown = ->
-		fs.unlink fifo, (err) ->
-			if err?
-				console.error err
-			save_history ri
 
 	ri.history = read_history ri
 	ri.on 'line', (line) ->
@@ -128,9 +123,9 @@ module.exports.repl = (intpt) ->
 					eval_string do line.trim, interpr, -> do ri.prompt
 		catch error
 			console.error "\x1b[1;31m#{error}\x1b[0m"
-			do shutdown
+			save_history ri
 			process.exit 1
 
 	ri.on 'close', ->
 		console.log "Have a great day!"
-		do shutdown
+		save_history ri
