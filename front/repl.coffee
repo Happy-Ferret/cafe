@@ -31,9 +31,13 @@ eval_string = (str, interp, cb) ->
 
 			fs.writeFile fifo, code, ->
 				try
-					lua_process = child_process.spawn 'lua', [fifo], {encoding: 'utf8', stdio: ['ignore', 1, 2]}
+					lua_process = child_process.spawn 'lua', [fifo], {encoding: 'utf8', stdio: ['ignore', 1, 'ignore']}
 					if lua_process?
-						lua_process.on 'close', cb
+						lua_process.on 'close', (status) ->
+							if status isnt 0
+								console.log "Lua process exited with #{status}"
+
+							do cb
 					else
 						console.log 'Failed to execSync'
 				catch error
