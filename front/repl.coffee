@@ -1,9 +1,9 @@
-{ parse, symbol }     = require './parser'
-{ preprocess }        = require './preproc'
-{ codegen }           = require '../back'
-child_process         = require 'child_process'
-fs                    = require 'fs'
-readline              = require 'readline'
+{ preprocess, resolve } = require './preproc'
+{ parse, symbol }       = require './parser'
+{ codegen }             = require '../back'
+child_process           = require 'child_process'
+fs                      = require 'fs'
+readline                = require 'readline'
 
 ## Install special handler for io.read
 compile_cache = ["function io.read() return 'io.read is unimplemented in the REPL' end"]
@@ -14,7 +14,7 @@ arrow = "\x1b[1;31m→\x1b[0m"
 fifo = do ->
 	temp = child_process.execSync "mktemp -u '/tmp/.cafe.repl.fifo_XXX'", {encoding: 'utf8'}
 	child_process.execSync "mkfifo #{temp}"
-	temp
+	temp.replace /\n$/gmi, ''
 
 ## Compile and evaluate a string using the passed interpreter
 eval_string = (str, interp, cb) ->
@@ -56,21 +56,6 @@ save_history = (int) -> fs.writeFileSync int.historyFile, JSON.stringify int.his
 
 ## Compile a new module
 compile = (module) ->
-	resolve = (file) ->
-		potential_files = [
-			"./#{file}", "./#{file}.cafe",
-			"./lib/#{file}", "./lib/#{file}.cafe",
-			"#{__dirname}/#{file}", "#{__dirname}/#{file}.cafe",
-			"#{__dirname}/lib/#{file}", "#{__dirname}/lib/#{file}.cafe",
-			"#{__dirname}/../#{file}", "#{__dirname}/../#{file}.cafe",
-			"#{__dirname}/../lib/#{file}", "#{__dirname}/../lib/#{file}.cafe",
-			"/#{file}"
-		]
-
-		for file in potential_files
-			if fs.existsSync file
-				return file
-
 	if resolve(module)?
 		compile_cache.push codegen(parse(preprocess fs.readFileSync resolve(module), {encoding: 'utf8'})).join ';' + '\n'
 	else
@@ -105,6 +90,11 @@ module.exports.repl = (intpt) ->
 	ri.historyFile = "/#{process.env.HOME}/.cafe_history"
 	ri.setPrompt "\x1b[1;32mλ\x1b[0m> "
 	do ri.prompt
+	shutdown = ->
+		fs.unlink fifo, (err) ->
+			if err?
+				console.error err
+			save_history ri
 
 	ri.history = read_history ri
 	ri.on 'line', (line) ->
@@ -138,9 +128,9 @@ module.exports.repl = (intpt) ->
 					eval_string do line.trim, interpr, -> do ri.prompt
 		catch error
 			console.error "\x1b[1;31m#{error}\x1b[0m"
-			save_history ri
+			do shutdown
 			process.exit 1
 
 	ri.on 'close', ->
 		console.log "Have a great day!"
-		save_history ri
+		do shutdown
