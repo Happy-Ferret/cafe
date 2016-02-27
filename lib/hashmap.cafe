@@ -37,3 +37,6 @@
 
 (defn (hash-map/set hm k v)
 	(lua-raw "hm[k] = v"))
+
+(defn (hash-map/get hm k v)
+	(lua-raw "return hm[k] or v"))
