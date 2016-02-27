@@ -13,7 +13,7 @@
 (set! b (λ () (print! *standard-output* "hello, world!")))
 (expect! a 1 "a must be bound to 1")
 (expect! (type b) "function" "b must be bound to a value with type of function")
-(dont-expect! (eq? (type a) (type b)) true "a and b mustn't be the same type")
+(expect! (eq? (type a) (type b)) false "a and b mustn't be the same type")
 
 ;; Test defn
 
