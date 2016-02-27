@@ -4,7 +4,7 @@
 	(defn (pass-test desc value expr)
 		(hash-map/set tests-passed (string.format "%s" (tostring desc) (tostring value) (tostring expr)) true))
 	(defn (print-tests)
-		(let ((num-tests (+ (hash-map/size tests-failed) (hash-map/size tests-passed))) (passed (hash-map/size tests-passed)) (failed (hash-map/size tests-failed)) (test-result-format "\t\x1b[1;3%dm→\x1b[0m %s"))
+		(let ((num-tests (+ (hash-map/size tests-failed) (hash-map/size tests-passed))) (passed (hash-map/size tests-passed)) (failed (hash-map/size tests-failed)) (test-result-format "  \x1b[1;3%dm→\x1b[0m %s"))
 			(format! "Test results: ")
 			(format! "%d (%2f%%) out of %d passed, %d (%2f%%) failed." passed (math/percent passed num-tests) num-tests failed (math/percent failed num-tests))
 			(format! "\027[1;32m- Passed tests:\027[0m (%d)" passed)
