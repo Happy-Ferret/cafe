@@ -5,41 +5,41 @@
 
 ;; Test let
 (let ((x 1) (y (+ 1 1)))
-	(expect! x 1 "x must be bound to 1")
-	(expect! y 2 "y must be bound to 2"))
+	(tests/expect! x 1 "x must be bound to 1")
+	(tests/expect! y 2 "y must be bound to 2"))
 
 ;; Test set!
 (set! a 1)
 (set! b (λ () (print! *standard-output* "hello, world!")))
-(expect! a 1 "a must be bound to 1")
-(expect! (type b) "function" "b must be bound to a value with type of function")
-(expect! (eq? (type a) (type b)) false "a and b mustn't be the same type")
+(tests/expect! a 1 "a must be bound to 1")
+(tests/expect! (type b) "function" "b must be bound to a value with type of function")
+(tests/expect! (eq? (type a) (type b)) false "a and b mustn't be the same type")
 
 ;; Test defn
 
 (defn (add-and-sub a b c)
 	(- (+ a b) c))
 
-(expect! (type add-and-sub) "function" "add-and-sub must be bound to a function")
-(expect! (add-and-sub 1 2 3) 0 "add-and-sub called with parameters 1, 2 and 3 must return 0")
+(tests/expect! (type add-and-sub) "function" "add-and-sub must be bound to a function")
+(tests/expect! (add-and-sub 1 2 3) 0 "add-and-sub called with parameters 1, 2 and 3 must return 0")
 
 ;; Test basic list manipulation
 
-(expect! (map (list 1 2 3) (λ ())) {} "mapping λ() over a list of numbers must return an empty list")
-(expect! (tail (cons 1 2)) 2 "the tail of 1 . 2 should be 2")
-(expect! (head (cons 1 2)) 1 "the head of 1 . 2 should be 1")
-(expect! (tail (list 1 2 3)) (cons 2 3) "the tail of {1, 2, 3} should be 2 . 3")
-(expect! (filter (list 1 2 3 4) (λ (n) (= (% n 2) 0))) (list 2 4) "filtering {1, 2, 3, 4} for even numbers should be 2 . 4")
-(expect! (size (list 1 2 3 4)) 4 "the size of {1, 2, 3, 4} should be 4")
+(tests/expect! (map (list 1 2 3) (λ ())) {} "mapping λ() over a list of numbers must return an empty list")
+(tests/expect! (tail (cons 1 2)) 2 "the tail of 1 . 2 should be 2")
+(tests/expect! (head (cons 1 2)) 1 "the head of 1 . 2 should be 1")
+(tests/expect! (tail (list 1 2 3)) (cons 2 3) "the tail of {1, 2, 3} should be 2 . 3")
+(tests/expect! (filter (list 1 2 3 4) (λ (n) (= (% n 2) 0))) (list 2 4) "filtering {1, 2, 3, 4} for even numbers should be 2 . 4")
+(tests/expect! (size (list 1 2 3 4)) 4 "the size of {1, 2, 3, 4} should be 4")
 
 ;; Test tests
 
-(expect! (eq? 1 1) true "1 and 1 should be equivalent")
-(expect! (eq? 1 2) false "1 and 2 should not be equivalent")
-(expect! (list? (list 1 2 3)) true "{1, 2, 3} should be list")
-(expect! (pair? (list 1 2 3)) false "{1, 2, 3} should not be a pair")
-(expect! (and (pair? (cons 1 2)) (not (list? (cons 1 2)))) true "1 . 2 should be a pair and not a list")
-(expect! (eq? (list 1 2) (cons 1 2)) true "1 . 2 and {1, 2} should be equivalent")
+(tests/expect! (eq? 1 1) true "1 and 1 should be equivalent")
+(tests/expect! (eq? 1 2) false "1 and 2 should not be equivalent")
+(tests/expect! (list? (list 1 2 3)) true "{1, 2, 3} should be list")
+(tests/expect! (pair? (list 1 2 3)) false "{1, 2, 3} should not be a pair")
+(tests/expect! (and (pair? (cons 1 2)) (not (list? (cons 1 2)))) true "1 . 2 should be a pair and not a list")
+(tests/expect! (eq? (list 1 2) (cons 1 2)) true "1 . 2 and {1, 2} should be equivalent")
 
 ;; Print results
-(print-tests)
+(tests/print-tests)
