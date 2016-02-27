@@ -64,7 +64,7 @@ else
 	if argv.o? || argv.output?
 		out = argv.o || argv.output
 	else if argv.run? && !(argv.o?)
-		out = child_process.execSync "mktemp -u '/tmp/cafe.run_XXX'", {encoding: 'utf8'}
+		out = child_process.execSync "mktemp -u '/tmp/.cafe.run_XXX'", {encoding: 'utf8'}
 	else
 		out = 'out.lua'
 

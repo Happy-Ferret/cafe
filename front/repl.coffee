@@ -12,7 +12,7 @@ arrow = "\x1b[1;31m→\x1b[0m"
 
 ## Use the same FIFO for all operations.
 fifo = do ->
-	temp = child_process.execSync "mktemp -u '/tmp/cafe.repl.fifo_XXX'", {encoding: 'utf8'}
+	temp = child_process.execSync "mktemp -u '/tmp/.cafe.repl.fifo_XXX'", {encoding: 'utf8'}
 	child_process.execSync "mkfifo #{temp}"
 	temp
 
