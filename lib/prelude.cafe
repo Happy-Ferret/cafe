@@ -203,6 +203,12 @@
 (defn (pair? a)
 	(= (# a) 2))
 
+;; ##### `pair? a`
+;; returns true if a is a list
+;; --
+(defn (list? a)
+	(= "list" (type a)))
+
 ;; ##### `eq? a b`
 ;; returns true if both parameters are equal
 ;; --
