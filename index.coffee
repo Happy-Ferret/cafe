@@ -60,7 +60,7 @@ else
 
 if inp is '/dev/stdin' or inp is '-'
 	repl interp, (fifo) ->
-		fs.unlink fifo, (err) ->
+		fs.unlink fifo.replace(/\n+$/gmi, ''), (err) ->
 			if err?
 				console.log "Error unlinking REPL FIFO: #{err}"
 else
