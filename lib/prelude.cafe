@@ -71,9 +71,7 @@
 ;; cons an element in front of a list
 ;; --
 (defn (cons car cdr)
-	(if (= (type li) "table")
-		(list car (table.unpack cdr))
-		(list car cdr)))
+	(list car cdr))
 
 ;; ##### `head list`
 ;; return the first element of a list
