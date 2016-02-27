@@ -71,7 +71,7 @@ plural = ->
 	else
 		's'
 
-module.exports.repl = (intpt) ->
+module.exports.repl = (intpt, cb) ->
 	interpr = intpt ? interpr
 	## Determine Lua interpreter version for the header
 	interpr_version = do ->
@@ -124,8 +124,10 @@ module.exports.repl = (intpt) ->
 		catch error
 			console.error "\x1b[1;31m#{error}\x1b[0m"
 			save_history ri
+			cb fifo
 			process.exit 1
 
 	ri.on 'close', ->
 		console.log "Have a great day!"
 		save_history ri
+		cb fifo
