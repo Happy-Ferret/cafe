@@ -132,7 +132,8 @@
 (defn (size li)
 	(let ((size 0))
 		(map li (λ ()
-			(set! size (+ 1 size) !global)))))
+			(set! size (+ 1 size) !global)))
+		size))
 
 ;; ##### `filter list fn`
 ;; filter a list using a predicate.
