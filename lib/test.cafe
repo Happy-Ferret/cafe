@@ -12,7 +12,7 @@
 				(format! test-result-format 2 desc)))
 
 			(if (< 0 failed)
-				(let (())
+				(do
 					(format! "\027[1;31m- Failed tests:\027[0m (%d)" failed)
 					(hash-map/map tests-failed (λ (_ desc)
 						(format! test-result-format 1 desc))))))))
