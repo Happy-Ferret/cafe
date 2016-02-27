@@ -21,8 +21,3 @@
 	(if (eq? value expr)
 		(pass-test desc value expr)
 		(fail-test desc value expr)))
-
-(defn (dont-expect! expr value desc)
-	(if (neq? value expr)
-		(pass-test desc value expr)
-		(fail-test desc value expr)))
