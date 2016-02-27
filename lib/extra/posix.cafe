@@ -1,0 +1,23 @@
+(defn (acquire-posix)
+	(let ((res (cons (pcall require "posix"))))
+		(if (truth? res)
+			(do
+				(print "module import succesful")
+				(tail res))
+			(fail "Failed to load posix module. Do you have LuaPosix installed?"))))
+
+(let ((posix (acquire-posix)))
+	(defn (fork fn)
+		(if fn
+			(let ((fork (hash-map/get posix "fork")) (pid (fork)))
+				(if (= 0 pid)
+					(fn pid)
+					(if (= -1 pid)
+						(error "Fork failed!")
+						pid)))
+			(let ((fork (hash-map/get posix "fork")))
+				(fork))))
+
+	(defn (getpid)
+		(let ((getpid (hash-map/get posix "getpid")))
+			(getpid))))
