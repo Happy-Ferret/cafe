@@ -85,6 +85,9 @@ else
 					proc.on 'close', (status) ->
 						console.log "#{interp} process (#{proc.pid}) exited with status code #{status}."
 						fs.chmodSync out, 0o755 if argv.o? || argv.out?
+						if !(argv.o? || argv.out?)
+							fs.unlink out
 				else fs.chmodSync out, 0o755
+
 	else
 		console.log "\x1b[1;31m→\x1b[0m No such file #{inp}."
