@@ -6,7 +6,7 @@
 	(defn (tests/print-tests)
 		(let ((num-tests (+ (hash-map/size tests-failed) (hash-map/size tests-passed))) (passed (hash-map/size tests-passed)) (failed (hash-map/size tests-failed)) (test-result-format "  \x1b[1;3%dm→\x1b[0m %s"))
 			(format! "Test results: ")
-			(format! "%d (%2f%%) out of %d passed, %d (%2f%%) failed." passed (math/percent passed num-tests) num-tests failed (math/percent failed num-tests))
+			(format! "%d (%.2f%%) out of %d passed, %d (%.2f%%) failed." passed (math/percent passed num-tests) num-tests failed (math/percent failed num-tests))
 			(format! "\027[1;32m- Passed tests:\027[0m (%d)" passed)
 			(hash-map/map tests-passed (λ (_ desc)
 				(format! test-result-format 2 desc)))

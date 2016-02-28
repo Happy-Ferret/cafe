@@ -167,7 +167,7 @@ module.exports.codegen = (ast) ->
 				else
 					expr # either unimplemented construct or literal. either way, just emit.
 		else
-			if (parseFloat expr isnt NaN) or (expr?[0] is '"' and expr.slice(-1)?[0] is '"')
+			if not isNaN parseFloat expr or (expr?[0] is '"' and expr.slice(-1)?[0] is '"')
 				expr
 			else
 				symbol expr
