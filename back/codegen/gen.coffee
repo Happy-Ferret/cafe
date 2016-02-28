@@ -8,12 +8,6 @@ actual_opch = (opch) ->
 
 	if opch_map[opch] then opch_map[opch] else opch
 
-actual_opch = (opch) ->
-	opch_map =
-		'=': '=='
-		'!=': '~='
-
-	if opch_map[opch] then opch_map[opch] else opch
 
 module.exports.codegen = (ast) ->
 	should_return = (expr) ->
