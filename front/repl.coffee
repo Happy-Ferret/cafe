@@ -121,7 +121,7 @@ module.exports.repl = (intpt, cb) ->
 							skip = true
 							compile_cache.push codegen ast
 							do ri.prompt
-				if !skip
+				if not skip
 					eval_string do line.trim, interpr, -> do ri.prompt
 		catch error
 			console.error "\x1b[1;31m#{error}\x1b[0m"

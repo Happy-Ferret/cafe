@@ -36,7 +36,7 @@ module.exports.preprocess = (contents, docout = false, doc_dir = './doc') ->
 				process.exit 1
 		else if line.startsWith '@doc'
 			mkdn = "#{doc_dir}/#{line.split(' ')[1]}"
-			if docout && !fs.existsSync mkdn
+			if docout and not fs.existsSync mkdn
 				exec "install `mktemp` -D #{mkdn} -m 0644"
 		else if line.startsWith ';;'
 			if mkdn?
@@ -45,7 +45,7 @@ module.exports.preprocess = (contents, docout = false, doc_dir = './doc') ->
 		else
 			lines.push line
 
-	if mkdn? && docout
+	if mkdn? and docout
 		if fs.existsSync(path.dirname mkdn) or fs.existsSync mkdn
 			fs.writeFile mkdn, mkdn_lines.join '', (error) -> console.error error
 	ret = lines.join '\n'

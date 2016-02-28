@@ -12,7 +12,7 @@ actual_opch = (opch) ->
 module.exports.codegen = (ast) ->
 	should_return = (expr) ->
 		if expr.is_tail?
-			if (expr.type is 'for_loop') && (expr.type is 'assignment') && (expr.type is 'raw')
+			if (expr.type is 'for_loop') and (expr.type is 'assignment') and (expr.type is 'raw')
 				''
 			else
 				'return '
@@ -86,7 +86,7 @@ module.exports.codegen = (ast) ->
 
 	codegen_conditional = (expr) ->
 		can_return = (exp) ->
-			if (exp.type isnt 'for_loop') && (exp.type isnt 'assignment') && (exp.type isnt 'scoped_block') && (exp.type isnt 'raw')
+			if (exp.type isnt 'for_loop') and (exp.type isnt 'assignment') and (exp.type isnt 'scoped_block') and (exp.type isnt 'raw')
 				'return '
 			else
 				''
@@ -167,7 +167,7 @@ module.exports.codegen = (ast) ->
 				else
 					expr # either unimplemented construct or literal. either way, just emit.
 		else
-			if not isNaN parseFloat expr or (expr?[0] is '"' and expr.slice(-1)?[0] is '"')
+			if not isNaN(parseFloat expr) or (expr?[0] is '"' and expr.slice(-1)?[0] is '"')
 				expr
 			else
 				symbol expr

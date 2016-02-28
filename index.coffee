@@ -25,18 +25,18 @@ Available options are:
 """
 
 
-if argv['?']? || argv.h? || argv.help?
+if argv['?']? or argv.h? or argv.help?
 	console.log helpstr
 	process.exit 0
 
 if argv?._[0]?
 	inp = argv._[0]
-else if argv?.run? && typeof argv.run is 'string'
+else if argv?.run? and typeof argv.run is 'string'
 	inp = argv.run
 else
 	inp = '-'
 
-if argv.d? || argv.docs?
+if argv.d? or argv.docs?
 	do_docout = true
 else
 	do_docout = false
@@ -47,7 +47,7 @@ if argv['doc-dir']?
 
 
 interp = do ->
-	if argv.i? || argv.interpreter?
+	if argv.i? or argv.interpreter?
 		argv.interpreter ? argv.i
 	else
 		'lua'
@@ -56,7 +56,7 @@ interp = do ->
 if argv.hashbang?
 	hashbang = argv.hashbang
 else
-	hashbang = "#!/usr/bin/env #{argv.interpreter || argv.i ? "lua"}"
+	hashbang = "#!/usr/bin/env #{argv.interpreter or argv.i ? "lua"}"
 
 if inp is '/dev/stdin' or inp is '-'
 	repl interp, (fifo) ->
@@ -64,15 +64,15 @@ if inp is '/dev/stdin' or inp is '-'
 			if err?
 				console.log "Error unlinking REPL FIFO: #{err}"
 else
-	if argv.o? || argv.output?
-		out = argv.o || argv.output
-	else if argv.run? && !(argv.o?)
+	if argv.o? or argv.output?
+		out = argv.o or argv.output
+	else if argv.run? and !(argv.o?)
 		out = child_process.execSync "mktemp -u '/tmp/.cafe.run_XXX'", {encoding: 'utf8'}
 	else
 		out = 'out.lua'
 
-	if argv.a? || argv.ast?
-		ast = argv.a || argv.ast
+	if argv.a? or argv.ast?
+		ast = argv.a or argv.ast
 	else
 		ast = '/dev/null'
 
@@ -87,8 +87,8 @@ else
 					proc = child_process.spawn "#{interp}", ["#{out}"], {encoding: 'utf-8', stdio: 'inherit'}
 					proc.on 'close', (status) ->
 						console.log "#{interp} process (#{proc.pid}) exited with status code #{status}."
-						fs.chmodSync out, 0o755 if argv.o? || argv.out?
-						if !(argv.o? || argv.out?)
+						fs.chmodSync out, 0o755 if argv.o? or argv.out?
+						if !(argv.o? or argv.out?)
 							fs.unlink out
 				else fs.chmodSync out, 0o755
 
