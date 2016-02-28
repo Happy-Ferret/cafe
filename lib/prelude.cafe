@@ -246,10 +246,11 @@
 ;; ##### `null? list`
 ;; returns true if list is empty.
 ;; --
-(defn (null? lst)
+(defn (empty? lst)
 	(if lst
 		(= (# lst) 0)
 		false))
+(set! null? empty?)
 
 ;; ##### `foldl func accum lst`
 ;; combine elements of a list into an accumulator using a function.
