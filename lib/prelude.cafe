@@ -132,7 +132,7 @@
 (defn (size li)
 	(let ((size 0))
 		(map li (λ ()
-			(set! size (+ 1 size) !global)))
+			(set! size (+ 1 size) :global)))
 		size))
 
 ;; ##### `filter list fn`
@@ -225,7 +225,7 @@
 				(if (= (# a) (# b))
 					(for i 1 (# a)
 						(if (!= (nth i a) (nth i b))
-							(set! ret false !global))))
+							(set! ret false :global))))
 					ret))))
 			(if (or (= (type a) "pair") (= (type a) "list"))
 				(list-equals a b)
@@ -275,7 +275,7 @@
 			(let ((ret true))
 				(map x (λ (n)
 					(if (not n)
-						(set! ret false !global))))
+						(set! ret false :global))))
 				ret)
 			(if x
 				true

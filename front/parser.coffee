@@ -35,16 +35,16 @@ module.exports.parse = (string, astf) ->
 
 
 		for c in str
-			if c == '(' and (!in_str && !in_cm)
+			if c == '(' and (not in_str and not in_cm)
 				sexpr.push []
-			else if c == ')' and (!in_str && !in_cm)
+			else if c == ')' and (not in_str and not in_cm)
 				if word.length > 0
 					sexpr[sexpr.length - 1].push word
 					word = ''
 
 				thing = do sexpr.pop
 				sexpr[sexpr.length - 1].push thing
-			else if c in " \r\n\t" and !in_str
+			else if c in " \r\n\t" and not in_str
 				if in_cm
 					if c is '\n'
 						word = ''
@@ -54,9 +54,9 @@ module.exports.parse = (string, astf) ->
 					word = ''
 			else if c == '"'
 				word += c
-				in_str = !in_str
-			else if c == ';' and !in_str
-				if word.length > 0 and !in_cm
+				in_str = not in_str
+			else if c == ';' and not in_str
+				if word.length > 0 and not in_cm
 					sexpr[sexpr.length - 1].push word
 					word = ''
 				in_cm = true
@@ -95,7 +95,7 @@ module.exports.parse = (string, astf) ->
 						value: toks2ast tokens[2]
 						local: true
 					}
-					if tokens[3] is '!global'
+					if tokens[3] is ':global'
 						base.local = false
 
 					base
