@@ -21,9 +21,9 @@ module.exports.codegen = (ast) ->
 			if (expr.type is 'for_loop') && (expr.type is 'assignment') && (expr.type is 'raw')
 				''
 			else
-				"return "
+				'return '
 		else
-			""
+			''
 	codegen_function_body = (expr) ->
 		body = expr.body.slice(0, -1).map intermediate_codegen
 		last_expr = expr.body.slice(-1)[0]
@@ -37,7 +37,7 @@ module.exports.codegen = (ast) ->
 
 			"#{body.join ';'}#{last_expr}"
 		else
-			""
+			''
 
 	codegen_function = (expr) ->
 		if expr.name? and expr.args? and expr.body?
@@ -56,12 +56,12 @@ module.exports.codegen = (ast) ->
 		if expr.opch? and expr.arg?
 			base = "#{should_return expr}#{actual_opch expr.opch}"
 			if actual_opch expr.opch is 'not'
-				base += " "
+				base += ' '
 			base + "#{intermediate_codegen expr.arg}"
 
 	codegen_raw = (expr) ->
 		rem_quots = (str) -> str.slice(1, -1)
-		expr.body.map(rem_quots).join ""
+		expr.body.map(rem_quots).join ''
 
 	codegen_scoped_block = (expr) ->
 		if expr.vars? and expr.body?
@@ -111,9 +111,9 @@ module.exports.codegen = (ast) ->
 					expr.falsb.is_tail = true
 				base += " else #{can_return expr.falsb}#{intermediate_codegen expr.falsb} end"
 			else
-				base += " end"
+				base += ' end'
 
-			base += " end)()"
+			base += ' end)()'
 
 	codegen_lambda_expr = (expr) ->
 		if expr.args? and expr.body?
