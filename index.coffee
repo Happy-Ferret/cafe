@@ -1,6 +1,7 @@
 #!/usr/bin/coffee
 { parse, preprocess } = require './front'
 { codegen, emit }     = require './back'
+{ optimize }          = require './middle'
 { resolve }           = require 'path'
 { repl }              = require './front/repl'
 { argv }              = require 'optimist'
@@ -81,7 +82,7 @@ else
 			if err?
 				throw err
 
-			emit out, ([hashbang].concat codegen(parse preprocess(data, do_docout, docdir), ast)), ->
+			emit out, ([hashbang].concat codegen(optimize parse preprocess(data, do_docout, docdir), ast)), ->
 				if argv.run?
 					process.stdout.write "\x1b[0m"
 					proc = child_process.spawn "#{interp}", ["#{out}"], {encoding: 'utf-8', stdio: 'inherit'}
