@@ -93,9 +93,9 @@ module.exports.codegen = (ast) ->
 
 		if expr.cond? and expr.trueb?
 			if expr.is_tail?
-				base = ' return '
+				base = 'return '
 			else
-				base = ' '
+				base = ''
 
 			if expr.trueb.type is 'scoped_block'
 				expr.trueb.is_tail = true
