@@ -11,10 +11,10 @@ module.exports.optimize = (ast) ->
 	ast.map (expr) ->
 		if expr?.type is 'define_function'
 			if not functions[expr.name].called?
-				console.log "removing #{expr.name}"
 				''
 			else
 				expr
 		else
 			expr
+
 	ast
