@@ -131,7 +131,7 @@ module.exports.parse = (string, astf) ->
 				else if tokens[0]?[0]? and tokens[0][0] is '.'
 					{
 						type: 'self_call',
-						name: symbol tokens[0].slice 1
+						name: toks2ast tokens[0].slice 1
 						keyn: symbol tokens[1]
 						args: tokens.slice(2).map toks2ast
 
@@ -166,7 +166,7 @@ module.exports.parse = (string, astf) ->
 					if tokens[0]?
 						{
 							type: 'call_function'
-							name: symbol tokens[0]
+							name: toks2ast tokens[0]
 							args: tokens.slice(1).map(toks2ast)
 						}
 					else

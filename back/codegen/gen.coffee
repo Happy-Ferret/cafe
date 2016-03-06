@@ -40,7 +40,7 @@ module.exports.codegen = (ast) ->
 
 	codegen_call = (expr) ->
 		if expr.name?
-			"#{should_return expr}#{expr.name}(#{expr.args.map(intermediate_codegen).join ', '})"
+			"#{should_return expr}(#{intermediate_codegen expr.name})(#{expr.args.map(intermediate_codegen).join ', '})"
 
 	codegen_binary = (expr) ->
 		if expr.lhs? and expr.opch? and expr.rhs?
@@ -126,7 +126,7 @@ module.exports.codegen = (ast) ->
 
 	codegen_self_call = (expr) ->
 		if expr.name? and expr.keyn? and expr.args?
-			"#{should_return expr}(#{expr.name}):#{expr.keyn}(#{expr.args.map(intermediate_codegen).join ', '})"
+			"#{should_return expr}(#{intermediate_codegen expr.name}):#{expr.keyn}(#{expr.args.map(intermediate_codegen).join ', '})"
 
 	codegen_for_loop = (expr) ->
 		if expr.name? and expr.start? and expr.end and expr.body?
