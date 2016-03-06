@@ -156,7 +156,7 @@ module.exports.codegen = (ast) ->
 				if /^\[(?:~?[\w]+,?)*\]$/gmi.test n
 					n.slice(1, -1).split(',').map (n) ->
 						n = do n.trim
-						if n[0] is '~'
+						if n[0] in "~!"
 							"type(value) ~= '#{n.slice(1)}'"
 						else
 							"type(value) == '#{n}'"
