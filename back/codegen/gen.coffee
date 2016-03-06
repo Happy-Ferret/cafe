@@ -136,6 +136,45 @@ module.exports.codegen = (ast) ->
 		if expr.cond? and expr.body?
 			"while #{intermediate_codegen expr.cond} do #{expr.body.map(intermediate_codegen).join ';'} end"
 
+	codegen_switch = (expr) ->
+		if expr.thing? and expr.clauses?
+			base = "#{if expr.is_tail? then 'return ' else ''}(function(value) "
+			compile_value = (thing) ->
+				if typeof thing is 'object'
+					thing.is_tail = true
+					intermediate_codegen thing
+				else
+					"return " + thing
+
+			clauses = do ->
+				ret = {}
+				expr.clauses.forEach (n) ->
+					ret[n.test] = compile_value n.valu
+				ret
+
+			compile_test = (n) ->
+				if /^\[\w+\]$/gmi.test n
+					"type(value) == '#{n.slice(1, -1)}'"
+				else if /^".+"$/gmi.test n
+					"type(value) == 'string' and value:match(#{n})"
+				else
+					n
+
+			gen_switch_body = ->
+				meat = []
+				for test, value of clauses
+					test = compile_test test
+					if test isnt '_'
+						meat.push "if #{test} then #{value} end;"
+				meat.join ""
+
+			gen_switch_catchall = ->
+				if clauses._
+					clauses._
+				else
+					"return nil"
+
+			base + "if value then #{do gen_switch_body} end #{do gen_switch_catchall} end)(#{intermediate_codegen expr.thing})"
 
 	intermediate_codegen = (expr) ->
 		if expr?.type?
@@ -164,6 +203,8 @@ module.exports.codegen = (ast) ->
 					codegen_raw expr
 				when 'while_loop'
 					codegen_while_loop expr
+				when 'switch'
+					codegen_switch expr
 				else
 					expr # either unimplemented construct or literal. either way, just emit.
 		else

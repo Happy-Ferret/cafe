@@ -162,6 +162,16 @@ module.exports.parse = (string, astf) ->
 						vars: [],
 						body: tokens.slice(1).map toks2ast
 					}
+				else if tokens[0] is 'cond'
+					{
+						type: 'switch'
+						thing: toks2ast tokens[1]
+						clauses: tokens.slice(2).map (n) ->
+							{
+								test: toks2ast n[0]
+								valu: toks2ast n[1]
+							}
+					}
 				else
 					if tokens[0]?
 						{
