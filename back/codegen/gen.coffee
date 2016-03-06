@@ -153,8 +153,14 @@ module.exports.codegen = (ast) ->
 				ret
 
 			compile_test = (n) ->
-				if /^\[\w+\]$/gmi.test n
-					"type(value) == '#{n.slice(1, -1)}'"
+				if /^\[(?:~?[\w]+,?)*\]$/gmi.test n
+					n.slice(1, -1).split(',').map (n) ->
+						n = do n.trim
+						if n[0] is '~'
+							"type(value) ~= '#{n.slice(1)}'"
+						else
+							"type(value) == '#{n}'"
+					.join ' or '
 				else if /^".+"$/gmi.test n
 					"type(value) == 'string' and value:match(#{n})"
 				else
