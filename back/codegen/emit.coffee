@@ -1,7 +1,7 @@
 fs = require 'fs'
 
 module.exports.emit = (file, code_parts, cb) ->
-	code_joined = (code_parts.map (part) -> part + '\n').join('\n').replace /;+/gi, '\n'
+	code_joined = code_parts.join '\n'
 	_error = null
 	try
 		fs.writeFileSync file, code_joined
