@@ -146,12 +146,6 @@ module.exports.codegen = (ast) ->
 				else
 					"return " + thing
 
-			clauses = do ->
-				ret = {}
-				expr.clauses.forEach (n) ->
-					ret[n.test] = compile_value n.valu
-				ret
-
 			compile_test = (n) ->
 				if /^\[(?:~?[\w]+,?)*\]$/gmi.test n
 					n.slice(1, -1).split(',').map (n) ->
@@ -163,13 +157,21 @@ module.exports.codegen = (ast) ->
 					.join ' or '
 				else if /^".+"$/gmi.test n
 					"type(value) == 'string' and value:match(#{n})"
+				else if n.type?
+					console.log n
+					intermediate_codegen n
 				else
 					n
+			clauses = do ->
+				ret = {}
+				expr.clauses.forEach (n) ->
+					ret[compile_test n.test] = compile_value n.valu
+				ret
+
 
 			gen_switch_body = ->
 				meat = []
 				for test, value of clauses
-					test = compile_test test
 					if test isnt '_'
 						meat.push "if #{test} then #{value} end;"
 				meat.join ""
