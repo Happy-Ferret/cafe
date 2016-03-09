@@ -88,7 +88,7 @@ module.exports.parse = (string, astf) ->
 								lhs: toks2ast tokens[1]
 								rhs: toks2ast tokens[2]
 							}
-				else if tokens[0] is 'set!'
+				else if tokens[0] is 'def'
 					base = {
 						type: 'assignment'
 						name: symbol tokens[1]

@@ -8,9 +8,9 @@
 	(tests/expect! x 1 "x should be bound to 1")
 	(tests/expect! y 2 "y should be bound to 2"))
 
-;; Test set!
-(set! a 1)
-(set! b (λ () (print! *standard-output* "hello, world!")))
+;; Test def
+(def a 1)
+(def b (λ () (print! *standard-output* "hello, world!")))
 (tests/expect! a 1 "a should be bound to 1")
 (tests/expect! (type b) "function" "b should be bound to a value with type of function")
 (tests/expect! (eq? (type a) (type b)) false "a and b shouldn't be the same type")

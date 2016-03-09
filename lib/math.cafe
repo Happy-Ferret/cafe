@@ -1,6 +1,6 @@
 
-(set! *pi* math.pi)
-(set! math/huge math.huge)
+(def *pi* math.pi)
+(def math/huge math.huge)
 
 
 (defn (math/sin x) (math.sin x))

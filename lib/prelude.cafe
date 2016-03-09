@@ -9,12 +9,12 @@
 ;; ##### `*standard-output*`
 ;; global symbol bound to the stdout stream
 ;; --
-(set! *standard-output* (io.output))
+(def *standard-output* (io.output))
 
 ;; ##### `*version*`
 ;; global symbol bound to the Lua version currently in use, and the semver version of the compiler itself
 ;; --
-(set! *version* (string.format "%s - %s" _VERSION "Café v0.2.0"))
+(def *version* (string.format "%s - %s" _VERSION "Café v0.2.0"))
 
 ;; ## Functions
 
@@ -132,7 +132,7 @@
 (defn (size li)
 	(with (size 0)
 		(map li (λ ()
-			(set! size (+ 1 size) :global)))
+			(def size (+ 1 size) :global)))
 		size))
 
 ;; ##### `filter list fn`
@@ -225,7 +225,7 @@
 				(if (= (# a) (# b))
 					(for i 1 (# a)
 						(if (!= (nth i a) (nth i b))
-							(set! ret false :global))))
+							(def ret false :global))))
 					ret)))
 			(if (or (= (type a) "pair") (= (type a) "list"))
 				(list-equals a b)
@@ -250,7 +250,7 @@
 	(if lst
 		(= (# lst) 0)
 		false))
-(set! null? empty?)
+(def null? empty?)
 
 ;; ##### `foldl func accum lst`
 ;; combine elements of a list into an accumulator using a function.
@@ -260,7 +260,7 @@
 		accum
 		(foldl func (func accum (head lst)) (tail lst))))
 
-(set! reduce foldl)
+(def reduce foldl)
 
 ;; ##### `truth?`
 ;; returns true if x is truthy, or:
@@ -275,6 +275,6 @@
 			(with (ret true)
 				(map x (λ (n)
 					(if (not n)
-						(set! ret false :global))))
+						(def ret false :global))))
 				ret)
 			(?? x false))))

@@ -4,7 +4,7 @@
 			(if (not skip)
 				(if (and (nth i l) (nth (+ 1 i) l))
 					(lua-raw "ret[l[i]] = l[i + 1]; skip = true"))
-				(set! skip false :global)))
+				(def skip false :global)))
 	(lua-raw "ret._type = 'hashmap'")
 	ret))
 
@@ -32,7 +32,7 @@
 (defn (hash-map/size hm)
 	(with (accum 0)
 		(hash-map/map hm (λ ()
-			(set! accum (+ 1 accum) :global)))
+			(def accum (+ 1 accum) :global)))
 		accum))
 
 (defn (hash-map/set hm k v)
