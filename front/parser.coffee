@@ -5,7 +5,7 @@ operator = (s) ->
 		'not', 'and', 'or',
 		'>', '<', '+', '-', '*', '/', '%',
 		'>=', '<=', '>>', '<<',
-		'#', '~', '&', '|', '..'
+		'#', '~', '&', '|', '..', '??'
 	]
 	isop
 
@@ -99,21 +99,28 @@ module.exports.parse = (string, astf) ->
 						base.local = false
 
 					base
-				else if tokens[0] is 'let'
-					{
-						type: 'scoped_block'
-						vars: tokens[1].map (tok) ->
-							arr = [symbol tok[0]]
-							if arr[0]?
-								otherv = toks2ast tok[1]
-								if otherv
-									arr.push otherv
+				else if tokens[0] in ['let', 'with']
+					if tokens[0] is 'let'
+						{
+							type: 'scoped_block'
+							vars: tokens[1].map (tok) ->
+								arr = [symbol tok[0]]
+								if arr[0]?
+									otherv = toks2ast tok[1]
+									if otherv
+										arr.push otherv
 
-									arr
+										arr
+									else []
 								else []
-							else []
-						body: tokens.slice(2).map toks2ast
-					}
+							body: tokens.slice(2).map toks2ast
+						}
+					else
+						{
+							type: 'scoped_block',
+							vars: [[symbol(tokens[1][0]), toks2ast(tokens[1][1])]],
+							body: tokens.slice(2).map toks2ast
+						}
 
 				else if tokens[0] is 'if'
 					{

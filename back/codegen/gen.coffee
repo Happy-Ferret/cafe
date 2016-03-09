@@ -5,6 +5,7 @@ actual_opch = (opch) ->
 	opch_map =
 		'=': '=='
 		'!=': '~='
+		'??': 'or'
 
 	if opch_map[opch] then opch_map[opch] else opch
 
