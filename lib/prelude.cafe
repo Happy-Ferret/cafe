@@ -32,7 +32,7 @@
 ;; --
 (defn (prompt pchr pred)
 	(io.write pchr)
-	(let ((ret (io.read)))
+	(with (ret (io.read))
 		(if pred
 			(if (not (pred ret))
 				(exit-with-error! "Doesn't pass predicate!")
@@ -43,8 +43,8 @@
 ;; print a string to a stream
 ;; --
 (defn (print! stream something)
-	(let ((choose-stream (λ (s) (if s s (io.output)))))
-		(let ((stream (choose-stream stream)))
+	(with (choose-stream (λ (s) (if s s (io.output))))
+		(with (stream (choose-stream stream))
 			(.stream write something "\n"))))
 
 ;; ##### `print! stream fmtstr va_args`
@@ -106,7 +106,7 @@
 ;; return the rest of the list, without head
 ;; --
 (defn (tail l)
-	(let ((ret (list)))
+	(with (ret (list))
 		(for i 2 (# l)
 			(push-tail! l[i] ret))
 
@@ -121,7 +121,7 @@
 ;; modify a list using a function, returning a new list
 ;; --
 (defn (map li fn)
-	(let ((ret (list)))
+	(with (ret (list))
 		(for i 1 (# li)
 			(push-tail! (fn (nth i li)) ret))
 		ret))
@@ -130,7 +130,7 @@
 ;; determine the size of a list.
 ;; --
 (defn (size li)
-	(let ((size 0))
+	(with (size 0)
 		(map li (λ ()
 			(set! size (+ 1 size) :global)))
 		size))
@@ -139,7 +139,7 @@
 ;; filter a list using a predicate.
 ;; --
 (defn (filter li fn)
-	(let ((ret (list)))
+	(with (ret (list))
 		(for i 1 (# li)
 			(if (truth? (fn (nth i li)))
 				(push-tail! (nth i li) ret)))
@@ -173,14 +173,14 @@
 ;; format `a` for printing.
 ;; --
 (defn (describe x pt)
-	(let ((describe-internal (λ (a)
+	(with (describe-internal (λ (a)
 		(if (= (type a) "list")
 			(table.concat (map a (λ (x) (describe x false))) ", ")
 			(if (= (type a) "pair")
 				(string.format "%s . %s" (describe (head a) false) (describe (nth 2 a) false))
 				(if (= (type a) "hashmap")
 					(string.match (tostring a) "table: 0x(%w+)")
-					(tostring a)))))))
+					(tostring a))))))
 		(if pt
 			(string.format "%s: %s" (type x) (describe-internal x))
 			(describe-internal x))))
@@ -188,7 +188,7 @@
 ;; ##### `type a`
 ;; reimplementation of Lua's `type`
 ;; --
-(let ((old-type type))
+(with (old-type type)
 	(defn (type a)
 		(if (= (old-type a) "table")
 			(if (= (lua-raw "a._type") "hashmap")
@@ -220,13 +220,13 @@
 (defn (eq? a b)
 	(if (or (= (type a) "function") (= (type b) "function"))
 		false
-		(let ((list-equals (λ (a b)
-			(let ((ret true))
+		(with (list-equals (λ (a b)
+			(with (ret true)
 				(if (= (# a) (# b))
 					(for i 1 (# a)
 						(if (!= (nth i a) (nth i b))
 							(set! ret false :global))))
-					ret))))
+					ret)))
 			(if (or (= (type a) "pair") (= (type a) "list"))
 				(list-equals a b)
 				(= a b)))))
@@ -272,11 +272,9 @@
 	(if (= (type x) "pair")
 		(truth? (head x))
 		(if (= (type x) "list")
-			(let ((ret true))
+			(with (ret true)
 				(map x (λ (n)
 					(if (not n)
 						(set! ret false :global))))
 				ret)
-			(if x
-				true
-				false))))
+			(?? x false))))
