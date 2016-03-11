@@ -9,75 +9,335 @@ actual_opch = (opch) ->
 
 	if opch_map[opch] then opch_map[opch] else opch
 
-module.exports.codegen = (ast) ->
-	define_function = (ast) ->
-	lambda_expr = (ast) ->
+indentinc = /\b(else|elseif|(local\s+)?function|then|do|repeat)\b((?!end).)*$|\{\s*$/
+indentdec = /^(end|}|until)/
+indentdic = /^else/
 
-	unary_operator = (ast) ->
-	binary_operator = (ast) ->
+lua_indent_func = (frag) ->
+	ci = 0
+	ni = 0
 
-	assignment = (ast) -> "#{if ast.local? then 'local ' else ''}#{ast.name} = #{_codegen ast.value}"
-	scoped_block = (ast) ->
-	self_call = (ast) ->
-	raw = (ast) ->
-	call_function = (ast) ->
+	frag.split(/\r?\n/).map (line) ->
+		if line?
+			line = do line.trim
+			ci = ni
 
-	for_loop = (ast) ->
-	while_loop = (ast) ->
-	scoped_block = (ast) ->
-	gen_switch = (ast) ->
-	conditional = (ast) ->
+			if indentinc.test line
+				ni = ci + 1
 
-	out = []
-	_codegen = (ast) ->
-		if ast?.type?
-			switch ast.type
-				when 'define_function'
-					define_function ast
-				when 'unary_operator'
-					unary_operator ast
-				when 'binary_operator'
-					binary_operator ast
-				when 'assignment'
-					assignment ast
-				when 'scoped_block'
-					scoped_block ast
-				when 'scoped_block'
-					scoped_block ast,
-				when 'conditional'
-					conditional ast
-				when 'lambda_expr'
-					lambda_expr ast
-				when 'self_call'
-					self_call ast,
-				when 'for_loop'
-					for_loop ast
-				when 'raw'
-					raw ast
-				when 'while_loop'
-					while_loop ast
-				when 'scoped_block'
-					scoped_block ast,
-				when 'switch'
-					gen_switch ast
-				when 'call_function'
-					call_function ast
-				else ast
+			if indentdec.test line
+				console.log "#{indentdec.test line}; #{line}"
+				ni = ci - 1
+
+			if indentdic.test line
+				ci = ci - 1
+				ni = ci + 1
+
+			if ci >= 1
+				'\t'.repeat(ci) + line
+			else
+				line
 		else
-			if not isNaN(parseFloat ast) or (ast?[0] is '"' and ast.slice(-1)?[0] is '"')
-				ast
-			else
-				symbol ast
+			''
+	.join '\n'
 
-	if ast?.map?
-		ast.map (n) ->
-			meat = _codegen n
-			if meat?.map?
-				out.concat meat
-			else
-				out.push meat
+class Generator
+	constructor: ->
+		@text = []
+
+	startBlock: (str) =>
+		@write str
+
+	endBlock: (str) =>
+		if str?
+			@write str
+		else
+			@write 'end'
+
+	write: (txt) =>
+		if typeof txt is 'string'
+			_ = @text.push txt
 			null
-	else
-		out.push _codegen n
+		else
+			if txt?.map?
+				txt.map @write
 
-	JSON.stringify out, null, '\t'
+	join: (joiner, indent_func = lua_indent_func) =>
+		t = @text.join joiner
+		if indent_func?
+			indent_func t
+		else
+			t
+
+
+module.exports.codegen = (ast) ->
+	should_return = (expr) ->
+		if expr.is_tail?
+			if (expr.type is 'for_loop') and (expr.type is 'assignment') and (expr.type is 'raw')
+				''
+			else
+				'return '
+		else
+			''
+	codegen_function_body = (expr, gen) ->
+		body = expr.body.slice(0, -1).map intermediate_codegen
+		last_expr = expr.body.slice(-1)[0]
+
+		if body? and last_expr?
+			last_expr.is_tail = true
+			if typeof last_expr is 'object'
+				last_expr = "#{intermediate_codegen last_expr}"
+			else
+				last_expr = "return #{last_expr}"
+
+			body.map gen.write
+			gen.write last_expr
+		else
+			''
+
+		gen.join ';\n'
+
+	codegen_function = (expr) ->
+		gen = new Generator()
+		if expr.name? and expr.args? and expr.body?
+			gen.startBlock "function #{expr.name}(#{expr.args.join ', '})"
+			codegen_function_body expr, gen
+			gen.endBlock "end"
+
+		gen.join ';\n'
+
+	codegen_call = (expr) ->
+		gen = new Generator()
+		if expr.name?
+			gen.write "#{should_return expr}(#{intermediate_codegen expr.name})(#{expr.args.map(intermediate_codegen).join ', '})"
+
+		gen.join ';\n'
+
+	codegen_binary = (expr) ->
+		gen = new Generator()
+		if expr.lhs? and expr.opch? and expr.rhs?
+			gen.write "#{should_return expr}#{intermediate_codegen expr.lhs} #{actual_opch expr.opch} #{intermediate_codegen expr.rhs}"
+		gen.join ';\n'
+
+	codegen_unary = (expr) ->
+		gen = new Generator()
+		if expr.opch? and expr.arg?
+			base = "#{should_return expr}#{actual_opch expr.opch}"
+			if actual_opch expr.opch is 'not'
+				base += ' '
+			gen.write base + "#{intermediate_codegen expr.arg}"
+		gen.join ';\n'
+
+
+	codegen_raw = (expr) ->
+		gen = new Generator()
+		rem_quots = (str) -> str.slice(1, -1)
+		gen.write expr.body.map(rem_quots)
+		gen.join ';\n'
+
+	codegen_scoped_block = (expr) ->
+		gen = new Generator()
+		if expr.vars? and expr.body?
+			vars = expr.vars.map (v) ->
+				if v[0]? and v[1]? # Gracefully handle empty variables
+					"local #{v[0]} = #{intermediate_codegen v[1]};"
+
+			if expr.body.length >= 1 # Gracefully handle empty blocks
+				body = expr.body.slice(0, -1).map intermediate_codegen
+				last_expr = expr.body.slice(-1)[0]
+
+				if expr.is_tail?
+					last_expr.is_tail = true
+					if typeof last_expr is 'string'
+						last_expr = "return #{last_expr}"
+					else
+						if last_expr[0]?.type is 'call_function'
+							last_expr = "return #{intermediate_codegen last_expr}"
+						else
+							last_expr = "#{intermediate_codegen last_expr}"
+				else
+					last_expr = "#{intermediate_codegen last_expr}"
+			else
+				body = ''
+				last_expr = ''
+
+			gen.startBlock "do"
+			gen.write vars
+			gen.write body
+			gen.write last_expr
+			do gen.endBlock
+		gen.join ';\n'
+
+	codegen_conditional = (expr) ->
+		gen = new Generator()
+		can_return = (exp) ->
+			if (exp.type isnt 'for_loop') and (exp.type isnt 'assignment') and (exp.type isnt 'scoped_block') and (exp.type isnt 'raw')
+				'return '
+			else
+				''
+
+		if expr.cond? and expr.trueb?
+			if expr.is_tail?
+				base = 'return '
+			else
+				base = ''
+
+			if expr.trueb.type is 'scoped_block'
+				expr.trueb.is_tail = true
+			gen.startBlock "#{base}(function()"
+			gen.startBlock "if #{intermediate_codegen expr.cond} then"
+			gen.write "#{can_return expr.trueb}#{intermediate_codegen expr.trueb}"
+			if expr.falsb?
+				if expr.falsb.type is 'scoped_block'
+					expr.falsb.is_tail = true
+				gen.endBlock "else"
+				gen.startBlock "#{can_return expr.falsb}#{intermediate_codegen expr.falsb}"
+				do gen.endBlock
+			else
+				do gen.endBlock
+
+			gen.endBlock 'end)()'
+		gen.join ';\n'
+
+	codegen_lambda_expr = (expr) ->
+		gen = new Generator()
+		if expr.args? and expr.body?
+			gen.startBlock "#{should_return expr}function(#{expr.args.join ', '})"
+			codegen_function_body expr, gen
+			do gen.endBlock
+		gen.join ';\n'
+
+	codegen_assignment = (expr) ->
+		gen = new Generator()
+		if expr.name? and expr.value?
+			if expr.local? and expr.local
+				base = 'local '
+			else
+				base = ''
+
+			gen.write base + "#{expr.name} = #{intermediate_codegen expr.value};"
+		gen.join ';\n'
+
+	codegen_self_call = (expr) ->
+		gen = new Generator()
+		if expr.name? and expr.keyn? and expr.args?
+			gen.write "#{should_return expr}(#{intermediate_codegen expr.name}):#{expr.keyn}(#{expr.args.map(intermediate_codegen).join ', '})"
+		gen.join ';\n'
+
+	codegen_for_loop = (expr) ->
+		gen = new Generator()
+		if expr.name? and expr.start? and expr.end and expr.body?
+			gen.startBlock "for #{expr.name} = #{intermediate_codegen expr.start}, #{intermediate_codegen expr.end} do"
+			gen.write expr.body.map(intermediate_codegen)
+			do gen.endBlock
+		gen.join ';\n'
+
+	codegen_while_loop = (expr) ->
+		gen = new Generator()
+		if expr.cond? and expr.body?
+			gen.startBlock "while #{intermediate_codegen expr.cond}"
+			gen.write expr.body.map(intermediate_codegen)
+			gen.endBlock
+		gen.join ';\n'
+
+	codegen_switch = (expr) ->
+		gen = new Generator()
+		if expr.thing? and expr.clauses?
+			gen.startBlock "#{if expr.is_tail? then 'return ' else ''}(function(value) "
+			compile_value = (thing) ->
+				if typeof thing is 'object'
+					thing.is_tail = true
+					intermediate_codegen thing
+				else
+					"return " + thing
+
+			compile_test = (n) ->
+				if /^\[(?:~?[\w]+,?)*\]$/gmi.test n
+					n.slice(1, -1).split(',').map (n) ->
+						n = do n.trim
+						if n[0] in "~!"
+							"type(value) ~= '#{n.slice(1)}'"
+						else
+							"type(value) == '#{n}'"
+					.join ' or '
+				else if /^".+"$/gmi.test n
+					"type(value) == 'string' and value:match(#{n})"
+				else if n.type?
+					console.log n
+					intermediate_codegen n
+				else
+					n
+			clauses = do ->
+				ret = {}
+				expr.clauses.forEach (n) ->
+					ret[compile_test n.test] = compile_value n.valu
+				ret
+
+
+			gen_switch_body = ->
+				meat = []
+				for test, value of clauses
+					if test isnt '_'
+						gen.startBlock "if #{test} then"
+						gen.write value
+						gen.endBlock 'end'
+
+			gen_switch_catchall = ->
+				if clauses._
+					gen.write clauses._
+				else
+					gen.write "return nil"
+
+			gen.startBlock "if value then"
+			do gen_switch_body
+			gen.endBlock 'end'
+			do gen_switch_catchall
+			gen.endBlock "end)(#{intermediate_codegen expr.thing})"
+
+		gen.join ';\n'
+
+	intermediate_codegen = (expr) ->
+		if expr?.type?
+			#console.log JSON.stringify expr, null, '\t'
+			switch expr.type
+				when 'define_function'
+					codegen_function expr
+				when 'call_function'
+					codegen_call expr
+				when 'binary_operator'
+					codegen_binary expr
+				when 'unary_operator'
+					codegen_unary expr
+				when 'assignment'
+					codegen_assignment expr
+				when 'scoped_block'
+					codegen_scoped_block expr
+				when 'conditional'
+					codegen_conditional expr
+				when 'lambda_expr'
+					codegen_lambda_expr expr
+				when 'self_call'
+					codegen_self_call expr
+				when 'for_loop'
+					codegen_for_loop expr
+				when 'raw'
+					codegen_raw expr
+				when 'while_loop'
+					codegen_while_loop expr
+				when 'switch'
+					codegen_switch expr
+				else
+					expr # either unimplemented construct or literal. either way, just emit.
+		else
+			if not isNaN(parseFloat expr) or (expr?[0] is '"' and expr.slice(-1)?[0] is '"')
+				expr
+			else
+				symbol expr
+
+	if ast?
+		if ast?.map?
+			ast.map intermediate_codegen
+		else
+			intermediate_codegen ast
+	else
+		''
