@@ -14,7 +14,7 @@
 ;; ##### `*version*`
 ;; global symbol bound to the Lua version currently in use, and the semver version of the compiler itself
 ;; --
-(def *version* (string.format "%s - %s" _VERSION "Café v0.2.0"))
+(def *version* (string.format "%s - %s" _VERSION "Café v1.0.0"))
 
 ;; ## Functions
 
