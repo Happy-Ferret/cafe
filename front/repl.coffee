@@ -6,10 +6,29 @@ child_process           = require 'child_process'
 fs                      = require 'fs'
 readline                = require 'readline'
 
-## Install special handler for io.read
-compile_cache = ["function io.read() return 'io.read is unimplemented in the REPL' end"]
-
 arrow = "\x1b[1;31m→\x1b[0m"
+
+## Install special REPL functions
+compile_cache = [
+	"""
+	function io.read()
+		return 'io.read is unimplemented in the REPL'
+	end
+	""", """
+	function repl_describe(expr)
+		if expr then
+			io.write(\"#{arrow}\ ")
+			print(describe(expr, true))
+		end
+	end
+	""",
+	"""
+	function print(...)
+		__print33__(__42standard45output42__, ...)
+	end
+	"""
+]
+
 
 interpr = do ->
 	which = child_process.spawnSync 'which', ['luajit']
@@ -23,6 +42,26 @@ file = do ->
 	temp = child_process.execSync "mktemp -u '/tmp/.cafe.repl.file_XXX'", {encoding: 'utf8'}
 	temp.replace /\n+$/gmi, ''
 
+error_report = (err, interpr) ->
+	is_call = (str) -> (str.indexOf 'attempt to call') isnt -1
+	call_sym = (str) ->
+		luajit_call = new RegExp "#{interpr}: #{file}:(\\d+): attempt to call global '(.+)' \\(a nil value\\)"
+		lua_call = new RegExp "#{interpr}: #{file}:(\\d+): attempt to call a nil value \\(global '(.+)'\\)"
+		if luajit_call.test str
+			match = str.match luajit_call
+		else
+			match = str.match lua_call
+
+		console.error "#{arrow} ERROR: Attempt to call undefined symbol #{match[2]}"
+		console.error "  #{arrow} in line #{match[1]}: #{do compile_cache.join(';\n').split(/\r?\n/)[(parseFloat match[1]) - 1].trim}"
+
+	err = err.join '\n'
+	err.split(/\r?\n/gmi).map (x) ->
+		x = do x.trim
+		if new RegExp("\\t*[\\w/.]+:\\d+: ").test x
+			if is_call x
+				call_sym x
+
 ## Compile and evaluate a string using the passed interpreter
 eval_string = (str, interp, cb) ->
 	tempFile = child_process.execSync 'mktemp', {encoding: 'utf8'}
@@ -32,18 +71,21 @@ eval_string = (str, interp, cb) ->
 	if ast.length >= 1
 		ast[ast.length - 1].is_tail = true
 		code = do ->
-			"#{compile_cache.join ';\n'};\nio.write(\"#{arrow} \"); print(describe((function() #{codegen(optimize ast).join ';'} end)(), true))"
+			"#{compile_cache.join ';\n'};\nrepl_describe((function() #{codegen(optimize ast).join ';'} end)(), true)"
 
 
 		if code.length >= 1
 			fs.writeFile file, code, ->
 				try
-					lua_process = child_process.spawn interp, [file], {encoding: 'utf8', stdio: ['ignore', 1, 'ignore']}
+					lua_process = child_process.spawn interp, [file], {encoding: 'utf8', stdio: ['ignore', 1, 'pipe']}
+					stderr = []
 					if lua_process?
+						lua_process.stderr.on 'data', (x) ->
+							stderr.push x.toString 'utf8'
+
 						lua_process.on 'close', (status) ->
 							if status isnt 0
-								console.log "Lua process exited with #{status}"
-
+								error_report stderr, interp
 							do cb
 					else
 						console.log 'Failed to execSync'
