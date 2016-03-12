@@ -11,12 +11,12 @@ child_process         = require 'child_process'
 
 
 helpstr = """
-usage: \x1b[1;34mcafe\x1b[0m <input> [-o/--output file] [-a,--ast file] | [--repl] [--interpreter lua/luajit]
+usage: \x1b[1;34mcafe\x1b[0m <input> [-o/--out file] [-a,--ast file] | [--repl] [--interpreter lua/luajit]
 
 Available options are:
   \x1b[1;32m--repl/-r\x1b[0m        Start a café REPL.
   \x1b[1;32m-i/--interpreter\x1b[0m Set the interpreter for use with the REPL.
-  \x1b[1;32m-o/--output\x1b[0m      Set the output file.
+  \x1b[1;32m-o/--out\x1b[0m         Set the output file.
   \x1b[1;32m-a/--ast\x1b[0m         Set the AST output file.
   \x1b[1;32m-?/-h/--help\x1b[0m     Print this help and exit.
   \x1b[1;32m-d/--docs\x1b[0m        Emit documentation.
@@ -65,8 +65,8 @@ if inp is '/dev/stdin' or inp is '-'
 			if err?
 				console.log "Error unlinking REPL FIFO: #{err}"
 else
-	if argv.o? or argv.output?
-		out = argv.o or argv.output
+	if argv.o? or argv.out?
+		out = argv.o or argv.out
 	else if argv.run? and !(argv.o?)
 		out = child_process.execSync("mktemp -u '/tmp/.cafe.run_XXX'", {encoding: 'utf8'}).replace /\n$/gmi, ''
 	else
@@ -82,7 +82,7 @@ else
 			if err?
 				throw err
 
-			emit out, ([hashbang].concat codegen(optimize parse preprocess(data, do_docout, docdir), ast)), ->
+			emit out, ([hashbang].concat codegen(optimize parse preprocess(data, do_docout, docdir, inp), ast)), ->
 				if argv.run?
 					process.stdout.write "\x1b[0m"
 					proc = child_process.spawn "#{interp}", ["#{out}"], {encoding: 'utf-8', stdio: 'inherit'}
