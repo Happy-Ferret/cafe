@@ -2,7 +2,7 @@
 fs = require 'fs'
 path = require 'path'
 
-resolve_module = (file) ->
+resolve_module = (file, fnam) ->
 	potential_files = [
 		"./#{file}", "./#{file}.cafe",
 		"./lib/#{file}", "./lib/#{file}.cafe",
@@ -10,17 +10,21 @@ resolve_module = (file) ->
 		"#{__dirname}/lib/#{file}", "#{__dirname}/lib/#{file}.cafe",
 		"#{__dirname}/../#{file}", "#{__dirname}/../#{file}.cafe",
 		"#{__dirname}/../lib/#{file}", "#{__dirname}/../lib/#{file}.cafe",
-		"#{path.dirname file}/#{file}", "#{path.dirname file}/#{file}.cafe",
-		"#{path.dirname file}/lib/#{file}", "#{path.dirname file}/lib/#{file}.cafe",
 		"/#{file}"
 	]
+
+	if fnam?
+		potential_files = potential_files.concat [
+			"#{path.dirname path.resolve fnam}/#{file}", "#{path.dirname path.resolve fnam}/#{file}.cafe",
+			"#{path.dirname path.resolve fnam}/lib/#{file}", "#{path.dirname path.resolve fnam}/lib/#{file}.cafe",
+		]
 
 	for file in potential_files
 		if fs.existsSync file
 			return file
 module.exports.resolve = resolve_module
 
-module.exports.preprocess = (contents, docout = false, doc_dir = './doc') ->
+module.exports.preprocess = (contents, docout = false, doc_dir = './doc', fnam) ->
 	lines = []
 	mkdn_lines = []
 	mkdn = null
@@ -28,7 +32,7 @@ module.exports.preprocess = (contents, docout = false, doc_dir = './doc') ->
 	contents.split('\n').map (line, ln) ->
 		if line.startsWith '@import'
 			file = line.split(' ')[1]
-			modfile = resolve_module(file)
+			modfile = resolve_module file, fnam
 			if modfile?
 				mod_contents = fs.readFileSync(modfile, {encoding: 'utf8'})
 
