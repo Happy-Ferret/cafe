@@ -10,8 +10,8 @@ resolve_module = (file) ->
 		"#{__dirname}/lib/#{file}", "#{__dirname}/lib/#{file}.cafe",
 		"#{__dirname}/../#{file}", "#{__dirname}/../#{file}.cafe",
 		"#{__dirname}/../lib/#{file}", "#{__dirname}/../lib/#{file}.cafe",
-		"#{path.dirname file}/#{file}", "#{path.dirname file}/#{file}#{path.dirname file}cafe",
-		"#{path.dirname file}/lib/#{file}", "#{path.dirname file}/lib/#{file}#{path.dirname file}cafe",
+		"#{path.dirname file}/#{file}", "#{path.dirname file}/#{file}.cafe",
+		"#{path.dirname file}/lib/#{file}", "#{path.dirname file}/lib/#{file}.cafe",
 		"/#{file}"
 	]
 
