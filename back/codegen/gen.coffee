@@ -10,14 +10,14 @@ actual_opch = (opch) ->
 	if opch_map[opch] then opch_map[opch] else opch
 
 indentinc = /\b(else|elseif|(local\s+)?function|then|do|repeat)\b((?!end).)*$|\{\s*$/
-indentdec = /^(end|}|until)/
+indentdec = /^(end|until)/
 indentdic = /^else/
 
 lua_indent_func = (frag) ->
 	ci = 0
 	ni = 0
 
-	frag.split(/\r?\n/).map (line) ->
+	meat = frag.split(/\r?\n/).map (line) ->
 		if line?
 			line = do line.trim
 			ci = ni
@@ -26,8 +26,7 @@ lua_indent_func = (frag) ->
 				ni = ci + 1
 
 			if indentdec.test line
-				console.log "#{indentdec.test line}; #{line}"
-				ni = ci - 1
+				ni = ci = ci - 1
 
 			if indentdic.test line
 				ci = ci - 1
@@ -39,7 +38,15 @@ lua_indent_func = (frag) ->
 				line
 		else
 			''
-	.join '\n'
+	.map (line) ->
+		if indentinc.test line or indentdic.test line or indentdec.test line
+			if /;$/gmi.test line
+				line = line.replace /;*$/gmi, ''
+			else line
+		else line
+	.join('\n')
+
+	meat.replace /;{2,}$/gm, ''
 
 class Generator
 	constructor: ->
@@ -215,8 +222,8 @@ module.exports.codegen = (ast) ->
 			else
 				base = ''
 
-			gen.write base + "#{expr.name} = #{intermediate_codegen expr.value};"
-		gen.join ';\n'
+			gen.write base + "#{expr.name} = #{intermediate_codegen expr.value}"
+		gen.join '\n'
 
 	codegen_self_call = (expr) ->
 		gen = new Generator()
@@ -263,7 +270,6 @@ module.exports.codegen = (ast) ->
 				else if /^".+"$/gmi.test n
 					"type(value) == 'string' and value:match(#{n})"
 				else if n.type?
-					console.log n
 					intermediate_codegen n
 				else
 					n
@@ -298,7 +304,6 @@ module.exports.codegen = (ast) ->
 
 	intermediate_codegen = (expr) ->
 		if expr?.type?
-			#console.log JSON.stringify expr, null, '\t'
 			switch expr.type
 				when 'define_function'
 					codegen_function expr
