@@ -11,6 +11,13 @@ compile_cache = ["function io.read() return 'io.read is unimplemented in the REP
 
 arrow = "\x1b[1;31m→\x1b[0m"
 
+interpr = do ->
+	which = child_process.spawnSync 'which', ['luajit']
+	if which?.status isnt 0
+		'lua'
+	else
+		'luajit'
+
 ## Use the same file for all operations.
 file = do ->
 	temp = child_process.execSync "mktemp -u '/tmp/.cafe.repl.file_XXX'", {encoding: 'utf8'}
@@ -20,17 +27,18 @@ file = do ->
 eval_string = (str, interp, cb) ->
 	tempFile = child_process.execSync 'mktemp', {encoding: 'utf8'}
 	ast = parse(preprocess(str))
+	interp ?= interpr
 
 	if ast.length >= 1
 		ast[ast.length - 1].is_tail = true
 		code = do ->
-			"#{compile_cache.join ';\n;'};\n;io.write(\"#{arrow} \"); print(describe((function() #{codegen(optimize ast).join ';'} end)(), true))"
+			"#{compile_cache.join ';\n'};\nio.write(\"#{arrow} \"); print(describe((function() #{codegen(optimize ast).join ';'} end)(), true))"
 
 
 		if code.length >= 1
 			fs.writeFile file, code, ->
 				try
-					lua_process = child_process.spawn 'lua', [file], {encoding: 'utf8', stdio: ['ignore', 1, 'ignore']}
+					lua_process = child_process.spawn interp, [file], {encoding: 'utf8', stdio: ['ignore', 1, 'ignore']}
 					if lua_process?
 						lua_process.on 'close', (status) ->
 							if status isnt 0
@@ -78,12 +86,12 @@ module.exports.repl = (intpt, cb) ->
 	interpr = intpt ? interpr
 	## Determine Lua interpreter version for the header
 	interpr_version = do ->
-		base = child_process.execSync "lua -e \"print(_VERSION)\"",
+		base = child_process.execSync "#{interpr} -e \"print(_VERSION)\"",
 		encoding: 'utf8'
 
 		base.replace(/^Lua /gmi, '').replace(/\n$/gmi, '')
 
-	console.log "Café REPL - Node #{process.version} - Lua #{interpr_version}"
+	console.log "Café REPL - Node #{process.version} - Lua (#{interpr}) #{interpr_version}"
 	do warm_cache
 
 	ri = readline.createInterface
@@ -108,6 +116,9 @@ module.exports.repl = (intpt, cb) ->
 			else if line.startsWith ',cache ' # Cache an expression in the compile Cache
 				compile line.replace /^,cache /gmi, ''
 				console.log "#{arrow} Cached #{line.replace /^,cache /gmi, ''}. #{compile_cache.length} module#{do plural} currently compiled."
+				do ri.prompt
+			else if line.startsWith ',view-cache'
+				console.log compile_cache.join ';\n'
 				do ri.prompt
 			else
 				parsed = parse preprocess do line.trim
