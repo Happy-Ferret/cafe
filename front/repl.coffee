@@ -42,7 +42,7 @@ file = do ->
 	temp = child_process.execSync "mktemp -u '/tmp/.cafe.repl.file_XXX'", {encoding: 'utf8'}
 	temp.replace /\n+$/gmi, ''
 
-error_report = (err, interpr) ->
+error_report = (err, interpr, code) ->
 	is_call = (str) -> (str.indexOf 'attempt to call') isnt -1
 	call_sym = (str) ->
 		luajit_call = new RegExp "#{interpr}: #{file}:(\\d+): attempt to call global '(.+)' \\(a nil value\\)"
@@ -53,7 +53,7 @@ error_report = (err, interpr) ->
 			match = str.match lua_call
 
 		console.error "#{arrow} ERROR: Attempt to call undefined symbol #{match[2]}"
-		console.error "  #{arrow} in line #{match[1]}: #{do compile_cache.join(';\n').split(/\r?\n/)[(parseFloat match[1]) - 1].trim}"
+		console.error "  #{arrow} in line #{match[1]}: #{code.split(/\r?\n/)[(parseFloat match[1]) - 1] ? "no such line"}"
 
 	err = err.join '\n'
 	err.split(/\r?\n/gmi).map (x) ->
@@ -85,7 +85,7 @@ eval_string = (str, interp, cb) ->
 
 						lua_process.on 'close', (status) ->
 							if status isnt 0
-								error_report stderr, interp
+								error_report stderr, interp, code
 							do cb
 					else
 						console.log 'Failed to execSync'
