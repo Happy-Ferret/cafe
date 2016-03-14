@@ -24,7 +24,7 @@ compile_cache = [
 	""",
 	"""
 	function print(...)
-		__print33__(__42standard45output42__, ...)
+		__print33__(__42standard45output42__, tostring(...))
 	end
 	"""
 ]
