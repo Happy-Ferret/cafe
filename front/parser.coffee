@@ -1,4 +1,6 @@
 { writeFile } = require 'fs'
+puny = require 'punycode'
+
 operator = (s) ->
 	isop = s in [
 		'=', '!=',
@@ -9,21 +11,28 @@ operator = (s) ->
 	]
 	isop
 
+specialChars = ['-','*','?','!','&',':','=','!','$','^', '/', '\\']
+escapeStr = (str) ->
+	for special in specialChars
+		str = str.replace new RegExp("\\#{special}", 'gmi'), special.codePointAt 0
+	str
+
+encode = (str) ->
+	ps = puny.encode(str).replace /-$/, ''
+	if /^\d/.test ps
+		"_#{ps}"
+	else ps
+
 symbol = (str) ->
 	if str?
-		specialChars = ['-','*','?','!','&',':','=','!','$','^', '/', '\\']
-		escapeStr = (str) ->
-			for special in specialChars
-				str = str.replace new RegExp("\\#{special}", 'gmi'), special.codePointAt 0
-			str
-
 		if str.replace?
 			if new RegExp("[#{specialChars.join '\\'}]", "gmi").test str
-				"__#{escapeStr str}__"
+				encode "__#{escapeStr str}__"
 			else
-				str
+				encode str
 		else
-			str
+			encode str
+
 module.exports.symbol = symbol
 
 module.exports.parse = (string, astf) ->
@@ -141,7 +150,6 @@ module.exports.parse = (string, astf) ->
 						name: toks2ast tokens[0].slice 1
 						keyn: symbol tokens[1]
 						args: tokens.slice(2).map toks2ast
-
 						cond: 2
 					}
 				else if tokens[0] is 'for'
@@ -183,7 +191,7 @@ module.exports.parse = (string, astf) ->
 					if tokens[0]?
 						{
 							type: 'call_function'
-							name: toks2ast tokens[0]
+							name: symbol tokens[0]
 							args: tokens.slice(1).map(toks2ast)
 						}
 					else
