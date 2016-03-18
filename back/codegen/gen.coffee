@@ -129,10 +129,7 @@ module.exports.codegen = (ast) ->
 	codegen_unary = (expr) ->
 		gen = new Generator()
 		if expr.opch? and expr.arg?
-			base = "#{should_return expr}#{actual_opch expr.opch}"
-			if actual_opch expr.opch is 'not'
-				base += ' '
-			gen.write base + "#{intermediate_codegen expr.arg}"
+			gen.write "#{should_return expr}#{actual_opch expr.opch} #{intermediate_codegen expr.arg}"
 		gen.join ';\n'
 
 

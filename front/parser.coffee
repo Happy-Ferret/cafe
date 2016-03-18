@@ -23,11 +23,15 @@ encode = (str) ->
 		"_#{ps}"
 	else ps
 
+_sc = {}
+
 symbol = (str) ->
-	if str?
+	if _sc[str]?
+		_sc[str]
+	else if str?
 		if str.replace?
 			if new RegExp("[#{specialChars.join '\\'}]", "gmi").test str
-				encode "__#{escapeStr str}__"
+				"__#{escapeStr encode str}__"
 			else
 				encode str
 		else
