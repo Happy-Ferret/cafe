@@ -332,7 +332,7 @@ module.exports.codegen = (ast) ->
 				when 'switch'
 					codegen_switch expr
 				else
-					expr # either unimplemented construct or literal. either way, just emit.
+					symbol expr # either unimplemented construct or literal. either way, just emit.
 		else
 			if not isNaN(parseFloat expr) or (expr?[0] is '"' and expr.slice(-1)?[0] is '"')
 				expr
