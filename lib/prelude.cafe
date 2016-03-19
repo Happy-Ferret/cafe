@@ -26,20 +26,6 @@
 	(os.exit 1))
 (def fail exit-with-error!)
 
-;; ##### `prompt pstr predicate?`
-;; prompt the user for input, writing `pstr` before reading,
-;; tests given input against `pred`, exiting with status
-;; code -1 on failure.
-;; --
-(defn (prompt pchr pred)
-	(io.write pchr)
-	(with (ret (io.read))
-		(if pred
-			(if (not (pred ret))
-				(exit-with-error! "Doesn't pass predicate!")
-				ret)
-			ret)))
-
 ;; ##### `print! stream string`
 ;; print a string to a stream
 ;; --
