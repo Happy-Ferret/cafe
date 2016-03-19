@@ -10,7 +10,7 @@
 
 ;; Test def
 (def a 1)
-(def b (λ () (print! *standard-output* "hello, world!")))
+(def b (λ () (print "hello, world!")))
 (tests/expect! a 1 "a should be bound to 1")
 (tests/expect! (type b) "function" "b should be bound to a value with type of function")
 (tests/expect! (eq? (type a) (type b)) false "a and b shouldn't be the same type")
