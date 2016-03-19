@@ -1,4 +1,4 @@
-#!/usr/bin/coffee
+#!/usr/bin/env coffee
 { parse, preprocess } = require './front'
 { codegen, emit }     = require './back'
 { optimize }          = require './middle'
