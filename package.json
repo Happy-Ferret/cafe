@@ -7,7 +7,7 @@
     "doc": "doc"
   },
   "scripts": {
-    "test": "coffee cafe.coffee --run tests.cafe",
+    "test": "coffee cafe.coffee --run tests.cafe -o tests.lua",
     "docs": "coffee docy.coffee -f lib/ -d doc/libs/"
   },
   "repository": {
