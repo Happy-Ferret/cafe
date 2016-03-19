@@ -20,8 +20,8 @@
 (defn (add-and-sub a b c)
 	(- (+ a b) c))
 
-(tests/expect! (type add-and-sub) "function" "add-and-sub should be bound to a function")
 (tests/expect! (add-and-sub 1 2 3) 0 "add-and-sub called with parameters 1, 2 and 3 should return 0")
+(tests/expect! (type add-and-sub) "function" "add-and-sub should be bound to a function")
 
 ;; Test basic list manipulation
 

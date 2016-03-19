@@ -1,10 +1,10 @@
 module.exports.optimize = (ast) ->
 	functions = {}
 	optimize_function = (e, destructive) ->
-		console.log "** DEFINING #{e.name.toUpperCase()}"
 		if !functions[e.name]?
 			functions[e.name] = {
 				called: 0
+				expression: e
 			}
 		e.body.map intermediate_optimize
 
@@ -12,13 +12,13 @@ module.exports.optimize = (ast) ->
 			if functions[e.name].called > 0
 				e
 			else
+				functions[e.name].expression.body.map (x) -> intermediate_optimize x, true
 				functions[e.name] = null
 				{}
 		else
 			e
 
 	optimize_call = (e, destructive) ->
-		console.log "** CALLING #{e.name.toUpperCase()}"
 		e.args.map intermediate_optimize
 		if functions[e.name]?
 			functions[e.name].called++
