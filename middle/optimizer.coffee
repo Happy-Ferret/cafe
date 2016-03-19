@@ -123,7 +123,4 @@ module.exports.optimize = (ast) ->
 			''
 
 	pass null
-	for f, v of functions
-		console.log "#{f}: #{v.called}"
-
 	pass true
