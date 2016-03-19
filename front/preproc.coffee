@@ -24,34 +24,19 @@ resolve_module = (file, fnam) ->
 			return file
 module.exports.resolve = resolve_module
 
-module.exports.preprocess = (contents, docout = false, doc_dir = './doc', fnam) ->
+module.exports.preprocess = (contents, fnam) ->
 	lines = []
-	mkdn_lines = []
-	mkdn = null
-
 	contents.split('\n').map (line, ln) ->
-		if line.startsWith '@import'
+		if line.startsWith ';;@import'
 			file = line.split(' ')[1]
 			modfile = resolve_module file, fnam
 			if modfile?
 				mod_contents = fs.readFileSync(modfile, {encoding: 'utf8'})
 
-				lines.push module.exports.preprocess mod_contents, docout, doc_dir
+				lines.push module.exports.preprocess mod_contents, fnam
 			else
 				console.error "\x1b[1;31m→\x1b[0m No such module #{file}. Compilation halted."
 				process.exit 1
-		else if line.startsWith '@doc'
-			mkdn = "#{doc_dir}/#{line.split(' ')[1]}"
-			if docout and not fs.existsSync mkdn
-				exec "install `mktemp` -D #{mkdn} -m 0644"
-		else if line.startsWith ';;'
-			if mkdn?
-				line = '\n' if line == ';; --'
-				mkdn_lines.push line.replace(/^;; ?/g, '') + '  \n'
 		else
 			lines.push line
-
-	if mkdn? and docout
-		if fs.existsSync(path.dirname mkdn) or fs.existsSync mkdn
-			fs.writeFile mkdn, mkdn_lines.join '', (error) -> console.error error
-	ret = lines.join '\n'
+	lines.join '\n'
