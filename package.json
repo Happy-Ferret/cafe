@@ -7,7 +7,8 @@
     "doc": "doc"
   },
   "scripts": {
-    "test": "coffee index.coffee"
+    "test": "coffee cafe.coffee --run tests.cafe",
+    "docs": "coffee docy.coffee -f lib/ -d doc/libs/"
   },
   "repository": {
     "type": "git",
