@@ -19,8 +19,6 @@ Available options are:
   \x1b[1;32m-o/--out\x1b[0m         Set the output file.
   \x1b[1;32m-a/--ast\x1b[0m         Set the AST output file.
   \x1b[1;32m-?/-h/--help\x1b[0m     Print this help and exit.
-  \x1b[1;32m-d/--docs\x1b[0m        Emit documentation.
-  \x1b[1;32m--doc-dir\x1b[0m        Specify where to emit documentation to.
   \x1b[1;32m--hashbang\x1b[0m       Specify a custom #! line for executables.
   \x1b[1;32m--run\x1b[0m            Evaluate the compiled output.
 """
@@ -36,15 +34,6 @@ else if argv?.run? and typeof argv.run is 'string'
 	inp = argv.run
 else
 	inp = '-'
-
-if argv.d? or argv.docs?
-	do_docout = true
-else
-	do_docout = false
-
-if argv['doc-dir']?
-	docdir = argv['doc-dir']
-	do_docout = true
 
 
 interp = do ->
@@ -82,7 +71,7 @@ else
 			if err?
 				throw err
 
-			emit out, ([hashbang].concat codegen(optimize parse preprocess(data, do_docout, docdir, inp), ast)), ->
+			emit out, ([hashbang].concat codegen(optimize parse preprocess(data, inp), ast)), ->
 				if argv.run?
 					process.stdout.write "\x1b[0m"
 					proc = child_process.spawn "#{interp}", ["#{out}"], {encoding: 'utf-8', stdio: 'inherit'}
