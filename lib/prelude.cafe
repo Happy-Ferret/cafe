@@ -1,4 +1,4 @@
-@doc prelude.md
+;;@doc prelude.md
 
 ;; prelude
 ;; =======
@@ -18,12 +18,13 @@
 
 ;; ## Functions
 
-;; ##### `exit-on-error! erfmt ...`
+;; ##### `exit-on-error! erfmt ...` or `fail ...`
 ;; exits with a formatted error message and status code 1.
 ;; --
 (defn (exit-with-error! erfmt ...)
 	(print (string.format erfmt ...))
 	(os.exit 1))
+(def fail exit-with-error!)
 
 ;; ##### `prompt pstr predicate?`
 ;; prompt the user for input, writing `pstr` before reading,

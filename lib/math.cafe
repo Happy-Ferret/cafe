@@ -1,28 +1,108 @@
+;;@doc math.md
 
-(def *pi* math.pi)
+;; math
+;; ====
+;; idiomatic bindings to the Lua math libraries
+;;
+
+;; ## Symbols
+;; #### `math/π`
+;; #### `math/pi`
+;; 3.1415926535...
+;; --
+
+(def math/π math.pi)
+(def math/pi math.pi)
+
+;; #### `math/huge`
+;; The value HUGE_VAL, a value larger than or equal to any other numerical value.
+;; --
 (def math/huge math.huge)
 
+;; ## Functions
 
+
+;; ### Trigonometrics
+;; All trigonometric functions assume the parameters to be in radians.
+;; #### `sin`, `hsin` and `asin`
+;; Calculate the sine, hyperbolic sine and arc sine of _x_
+;; --
 (defn (math/sin x) (math.sin x))
-(defn (math/cos x) (math.cos x))
-(defn (math/tan x) (math.tan x))
-(defn (math/abs x) (if (> 0 x) (- 0 x) x))
+(defn (math/hsin x) (math.sinh x))
 (defn (math/asin x) (math.asin x))
+;; #### `cos`, `hcos` and `acos`
+;; Calculate the cosine, hyperbolic cosine and arc cosine of _x_
+;; --
+(defn (math/cos x) (math.cos x))
+(defn (math/hcos x) (math.cosh x))
 (defn (math/acos x) (math.acos x))
+;; #### `tan`, `htan` and `atan`
+;; Calculate the tangent, hyperbolic tangent and arc tangent of _x_
+;; --
+(defn (math/tan x) (math.tan x))
 (defn (math/atan x) (math.atan x))
+(defn (math/htan x) (math.tanh x))
+
+;; #### `deg2rad` and `rad2deg`
+;; Convert degrees to radians and vice-versa
+;; --
 (defn (math/deg2rad x) (math.rad x))
 (defn (math/rad2deg x) (math.deg x))
+
+;; ### Algebra
+;; #### `abs`
+;; return the absolute value of _x_
+;; --
+(defn (math/abs x) (if (> 0 x) (- 0 x) x))
+;; #### `exp`
+;; return the value of e<sup>x</sup>
+;; --
 (defn (math/exp x) (math.exp x))
+;; #### `logn`, `log10` and `log2`
+;; Take the natural, base-10 and base-2 logarithm of _x_.
+;; --
 (defn (math/logn x) (math.log x))
 (defn (math/log10 x) (math.log x 10))
 (defn (math/log2 x) (math.log x 2))
-(defn (math/max ...) (math.max ...))
-(defn (math/min ...) (math.min ...))
+;; #### `max` and `min`
+;; Find the maximum or minimum value of a set (given as variadic arguments or a list)
+;; --
+(defn (math/max ...)
+	(with (t {...})
+		(if (= (type (head t)) "list")
+			(math.max (table.unpack (head t)))
+			(math.max (table.unpack t)))))
+
+(defn (math/min ...)
+	(with (t {...})
+		(if (= (type (head t)) "list")
+			(math.min (table.unpack (head t)))
+			(math.min (table.unpack t)))))
+
+;; #### `modf x`
+;; Returns two numbers, the integral part of _x_ and the fractional part of _x_ as a cons pair
+;; --
 (defn (math/modf x) (cons (math.modf x)))
+;; #### `sqrt x`
+;; Take the root of _x_ with index 2
+;; --
 (defn (math/sqrt x) (math.sqrt x))
-(defn (math/rand u l) (math.random u l))
+
+;; #### `rand l u`
+;; Generate a random number with a lower bound at _l_ and an upper bound at _u_
+;; --
+(defn (math/rand l u) (math.random l u))
+;; #### `rand-seed n`
+;; Seed the random number generator with _n_
+;; --
 (defn (math/rand-seed n) (math.randomseed n))
+;; #### `percent val tot`
+;; Take the percentage of _val_ against _tot_
+;; --
 (defn (math/percent val total) (* 100 (/ val total)))
+;; ### `mean ...`
+;; Take the arithmetic mean of a set, given as variadic arguments.
+;; --
 (defn (math/mean ...)
 	(let ((t {...}) (tot 0))
 		(for i 1 (# t)
