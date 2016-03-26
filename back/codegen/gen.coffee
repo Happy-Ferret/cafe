@@ -1,14 +1,7 @@
 { symbol } = require '../../front'
 fs         = require 'fs'
 
-actual_opch = (opch) ->
-	opch_map =
-		'=': '=='
-		'!=': '~='
-		'??': 'or'
-
-	if opch_map[opch] then opch_map[opch] else opch
-
+actual_opch = (opch) -> opch
 indentinc = /\b(else|elseif|(local\s+)?function|then|do|repeat)\b((?!end).)*$|\{\s*$/
 indentdec = /^(end|until)/
 indentdic = /^else/
@@ -90,6 +83,7 @@ module.exports.codegen = (ast) ->
 		body = expr.body.slice(0, -1).map intermediate_codegen
 		last_expr = expr.body.slice(-1)[0]
 
+		gen.write "local args = {#{expr.args.join ', '}}"
 		if body? and last_expr?
 			last_expr.is_tail = true
 			if typeof last_expr is 'object'
@@ -99,8 +93,7 @@ module.exports.codegen = (ast) ->
 
 			body.map gen.write
 			gen.write last_expr
-		else
-			''
+		else ''
 
 		gen.join ';\n'
 
@@ -120,19 +113,6 @@ module.exports.codegen = (ast) ->
 
 		gen.join ';\n'
 
-	codegen_binary = (expr) ->
-		gen = new Generator()
-		if expr.lhs? and expr.opch? and expr.rhs?
-			gen.write "#{should_return expr}#{intermediate_codegen expr.lhs} #{actual_opch expr.opch} #{intermediate_codegen expr.rhs}"
-		gen.join ';\n'
-
-	codegen_unary = (expr) ->
-		gen = new Generator()
-		if expr.opch? and expr.arg?
-			gen.write "#{should_return expr}#{actual_opch expr.opch} #{intermediate_codegen expr.arg}"
-		gen.join ';\n'
-
-
 	codegen_raw = (expr) ->
 		gen = new Generator()
 		rem_quots = (str) -> str.slice(1, -1)
@@ -144,7 +124,7 @@ module.exports.codegen = (ast) ->
 		if expr.vars? and expr.body?
 			vars = expr.vars.map (v) ->
 				if v[0]? and v[1]? # Gracefully handle empty variables
-					"local #{v[0]} = #{intermediate_codegen v[1]};"
+					"local #{v[0]} = #{intermediate_codegen v[1]}"
 
 			if expr.body.length >= 1 # Gracefully handle empty blocks
 				body = expr.body.slice(0, -1).map intermediate_codegen
@@ -188,7 +168,7 @@ module.exports.codegen = (ast) ->
 
 			if expr.trueb.type is 'scoped_block'
 				expr.trueb.is_tail = true
-			gen.startBlock "#{base}(function()"
+			gen.startBlock "#{base}(function(...)"
 			gen.startBlock "if #{intermediate_codegen expr.cond} then"
 			gen.write "#{can_return expr.trueb}#{intermediate_codegen expr.trueb}"
 			if expr.falsb?
@@ -200,7 +180,7 @@ module.exports.codegen = (ast) ->
 			else
 				do gen.endBlock
 
-			gen.endBlock 'end)()'
+			gen.endBlock 'end)(table.unpack(args))'
 		gen.join ';\n'
 
 	codegen_lambda_expr = (expr) ->
@@ -306,10 +286,6 @@ module.exports.codegen = (ast) ->
 					codegen_function expr
 				when 'call_function'
 					codegen_call expr
-				when 'binary_operator'
-					codegen_binary expr
-				when 'unary_operator'
-					codegen_unary expr
 				when 'assignment'
 					codegen_assignment expr
 				when 'scoped_block'

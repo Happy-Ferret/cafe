@@ -243,6 +243,7 @@
 ;; combine elements of a list into an accumulator using a function.
 ;; --
 (defn (foldl func accum lst)
+	(print (tostring func) (tostring accum) (describe list))
 	(if (null? lst)
 		accum
 		(foldl func (func accum (head lst)) (tail lst))))
@@ -265,3 +266,29 @@
 						(def ret false :global))))
 				ret)
 			(?? x false))))
+
+; Operators
+
+(defn (operator= x y) (lua-raw "return x == y"))
+(defn (operator!= x y) (lua-raw "return x ~= y"))
+(defn (operatornot x) (lua-raw "return not x"))
+(defn (operatorand x y) (lua-raw "return x and y"))
+(defn (operatoror x y) (lua-raw "return x or y"))
+(def operator?? operatoror :global)
+(defn (operator> x y) (lua-raw "return x > y"))
+(defn (operator< x y) (lua-raw "return x < y"))
+(defn (operator+ x y)
+	(cond x
+		([string] (lua-raw "return x .. y"))
+		(_        (lua-raw "return x + y"))))
+(defn (operator- x y) (lua-raw "return x - y"))
+(defn (operator* x y) (lua-raw "return x * y"))
+(defn (operator/ x y) (lua-raw "return x / y"))
+(defn (operator% x y) (lua-raw "return x % y"))
+(defn (operator>= x y) (lua-raw "return x >= y"))
+(defn (operator<= x y) (lua-raw "return x <= y"))
+(defn (operator>> x y) (lua-raw "return x >> y"))
+(defn (operator<< x y) (lua-raw "return x << y"))
+(defn (operator# y) (lua-raw "return #y"))
+(defn (operator~ y) (lua-raw "return ~y"))
+(defn (operator| x y) (lua-raw "return x | y"))

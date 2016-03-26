@@ -44,7 +44,6 @@ compile_file = (afile, file) ->
 			catch err
 				throw err
 
-
 compile_dir = (from) ->
 	fs.readdir from, (err, files) ->
 		if err?

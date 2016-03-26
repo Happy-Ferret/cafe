@@ -1,6 +1,5 @@
 { preprocess, resolve } = require './preproc'
 { parse, symbol }       = require './parser'
-{ optimize }            = require '../middle'
 { codegen }             = require '../back'
 child_process           = require 'child_process'
 fs                      = require 'fs'
@@ -16,7 +15,7 @@ compile_cache = [
 	end
 	""", """
 	function repl_describe(expr)
-		if expr then
+		if expr ~= nil then
 			io.write(\"#{arrow}\ ")
 			print(describe(expr, true))
 		end
@@ -71,8 +70,7 @@ eval_string = (str, interp, cb) ->
 	if ast.length >= 1
 		ast[ast.length - 1].is_tail = true
 		code = do ->
-			"#{compile_cache.join ';\n'};\nrepl_describe((function() #{codegen(optimize ast).join ';'} end)(), true)"
-
+			"#{compile_cache.join ';\n'};\nrepl_describe((function() #{codegen(ast).join ';'} end)(), true)"
 
 		if code.length >= 1
 			fs.writeFile file, code, ->
@@ -110,14 +108,13 @@ save_history = (int) -> fs.writeFileSync int.historyFile, JSON.stringify int.his
 ## Compile a new module
 compile = (module) ->
 	if resolve(module)?
-		compile_cache.push codegen(optimize(parse(preprocess fs.readFileSync resolve(module), {encoding: 'utf8'}))).join ';' + '\n'
+		compile_cache.push codegen(parse(preprocess fs.readFileSync resolve(module), {encoding: 'utf8'})).join ';' + '\n'
 	else
-		compile_cache.push codegen(optimize(parse(preprocess module))).join ';'
+		compile_cache.push codegen(parse(preprocess module)).join ';'
 
 ## Warm compilation cache by compiling the built-in modules
 warm_cache = ->
 	['prelude', 'math', 'hashmap'].map (x) -> compile x
-
 plural = ->
 	if compile_cache.length is '1'
 		''
@@ -149,7 +146,7 @@ module.exports.repl = (intpt, cb) ->
 		try
 			line = do line.trim
 			if line.startsWith ',dump' # Print the result of code-generating an expression
-				console.log "#{arrow} #{codegen(optimize(parse(preprocess(line.replace /^,dump /g, '')))).join ';'}"
+				console.log "#{arrow} #{codegen(parse(preprocess(line.replace /^,dump /g, ''))).join ';'}"
 				do ri.prompt
 			else if line.startsWith ',import' # Import a module into the compile cache
 				compile line.replace /^,import /gmi, ''
@@ -168,7 +165,7 @@ module.exports.repl = (intpt, cb) ->
 				for ast in parsed
 					if ast.type is 'assignment' or ast.type is 'define_function'
 						skip = true
-						compile_cache.push codegen(optimize(ast))
+						compile_cache.push codegen(ast)
 						do ri.prompt
 					else if ast.type is 'call_function'
 						if ast.name is symbol 'require!'

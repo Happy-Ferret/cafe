@@ -50,9 +50,10 @@ else
 
 if inp is '/dev/stdin' or inp is '-'
 	repl interp, (fifo) ->
-		fs.unlink fifo.replace(/\n+$/gmi, ''), (err) ->
-			if err?
-				console.log "Error unlinking REPL FIFO: #{err}"
+		if fs.existsSync(fifo)
+			fs.unlink fifo.replace(/\n+$/gmi, ''), (err) ->
+				if err?
+					console.log "Error unlinking REPL FIFO: #{err}"
 else
 	if argv.o? or argv.out?
 		out = argv.o or argv.out
@@ -71,7 +72,7 @@ else
 			if err?
 				throw err
 
-			emit out, ([hashbang].concat codegen(optimize parse preprocess(data, inp), ast)), ->
+			emit out, ([hashbang].concat codegen(optimize parse preprocess(";;@import prelude\n#{data}", inp), ast)), ->
 				if argv.run?
 					process.stdout.write "\x1b[0m"
 					proc = child_process.spawn "#{interp}", ["#{out}"], {encoding: 'utf-8', stdio: 'inherit'}

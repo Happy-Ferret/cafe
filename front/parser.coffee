@@ -7,11 +7,16 @@ operator = (s) ->
 		'not', 'and', 'or',
 		'>', '<', '+', '-', '*', '/', '%',
 		'>=', '<=', '>>', '<<',
-		'#', '~', '&', '|', '..', '??'
+		'#', '~', '&', '|', '??'
 	]
 	isop
 
-specialChars = ['-','*','?','!','&',':','=','!','$','^', '/', '\\']
+specialChars = ['+', '-', '*', '/',
+                '?', '!', '&', ':',
+                '=', '!', '$', '^',
+                '\\', '>', '<', '|',
+                '~', '#', '%']
+
 escapeStr = (str) ->
 	for special in specialChars
 		str = str.replace new RegExp("\\#{special}", 'gmi'), special.codePointAt 0
@@ -88,19 +93,11 @@ module.exports.parse = (string, astf) ->
 							body: tokens.slice(2).map toks2ast
 						}
 				else if operator tokens[0]
-						if tokens.length is 2
-							{
-								type: 'unary_operator'
-								opch: tokens[0]
-								arg:  toks2ast tokens[1]
-							}
-						else
-							{
-								type: 'binary_operator'
-								opch: tokens[0]
-								lhs: toks2ast tokens[1]
-								rhs: toks2ast tokens[2]
-							}
+						{
+							type: 'call_function'
+							name: symbol "operator#{tokens[0]}"
+							args: tokens.slice(1).map toks2ast
+						}
 				else if tokens[0] is 'def'
 					base = {
 						type: 'assignment'
