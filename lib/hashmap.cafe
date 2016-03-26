@@ -8,7 +8,7 @@
 ;; Create a new hash-map with keys and values given as variadic arguments.
 ;; Every two arguments constitutes a key:value pair.
 ;; --
-(def hash-map {} :global)
+(ns hash-map)
 
 (defn (hash-map/new ...)
 	(let ((l (list ...)) (ret (list)) (skip false))

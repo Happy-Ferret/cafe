@@ -9,12 +9,12 @@
 ;; ##### `*standard-output*`
 ;; global symbol bound to the stdout stream
 ;; --
-(def *standard-output* (io.output))
+(def *standard-output* (io/output))
 
 ;; ##### `*version*`
 ;; global symbol bound to the Lua version currently in use, and the semver version of the compiler itself
 ;; --
-(def *version* (string.format "%s - %s" _VERSION "Café v1.0.0"))
+(def *version* (string/format "%s - %s" _VERSION "Café v1.0.0"))
 
 ;; ## Functions
 
@@ -22,15 +22,15 @@
 ;; exits with a formatted error message and status code 1.
 ;; --
 (defn (exit-with-error! erfmt ...)
-	(print (string.format erfmt ...))
-	(os.exit 1))
+	(print (string/format erfmt ...))
+	(os/exit 1))
 (def fail exit-with-error!)
 
 ;; ##### `print! stream string`
 ;; print a string to a stream
 ;; --
 (defn (print! stream something)
-	(with (choose-stream (λ (s) (if s s (io.output))))
+	(with (choose-stream (λ (s) (if s s (io/output))))
 		(with (stream (choose-stream stream))
 			(.stream write something "\n"))))
 
@@ -52,7 +52,7 @@
 ;; support for hot-compilation of café modules will be added at a later date.
 ;; --
 (defn (require! module)
-	(lua-raw "local ok, mod = pcall(require, module); if not ok then return false, 'no such module' .. module else for k, v in pairs(mod) do _G[string.format('__%s47%s__', module, k)] = v end end return mod"))
+	(lua-raw "local ok, mod = pcall(require, module); if not ok then return false, 'no such module' .. module else for k, v in pairs(mod) do _G[string/format('__%s47%s__', module, k)] = v end end return mod"))
 
 ;; ##### `cons list elem`
 ;; cons an element in front of a list
@@ -79,14 +79,14 @@
 ;; insert a value at the head of a list, mutating it.
 ;; --
 (defn (push-head! car rest)
-	(table.insert rest 1 car)
+	(table/insert rest 1 car)
 	rest)
 
 ;; ##### `push-tail! end rest`
 ;; insert a value at the end of a list, mutating it.
 ;; --
 (defn (push-tail! fin rest)
-	(table.insert rest fin)
+	(table/insert rest fin)
 	rest)
 
 ;; ##### `tail list`
@@ -162,14 +162,14 @@
 (defn (describe x pt)
 	(with (describe-internal (λ (a)
 		(if (= (type a) "list")
-			(table.concat (map a (λ (x) (describe x false))) ", ")
+			(table/concat (map a (λ (x) (describe x false))) ", ")
 			(if (= (type a) "pair")
-				(string.format "%s . %s" (describe (head a) false) (describe (nth 2 a) false))
+				(string/format "%s . %s" (describe (head a) false) (describe (nth 2 a) false))
 				(if (= (type a) "hashmap")
-					(string.match (tostring a) "table: 0x(%w+)")
+					(string/match (tostring a) "table: 0x(%w+)")
 					(tostring a))))))
 		(if pt
-			(string.format "%s: %s" (type x) (describe-internal x))
+			(string/format "%s: %s" (type x) (describe-internal x))
 			(describe-internal x))))
 
 ;; ##### `type a`

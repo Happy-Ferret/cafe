@@ -118,6 +118,13 @@ module.exports.parse = (string, astf) ->
 						base.local = false
 
 					base
+				else if tokens[0] is 'ns'
+					{
+						type: 'assignment'
+						name: symbol tokens[1]
+						value: '{}'
+						local: false
+					}
 				else if tokens[0] in ['let', 'with']
 					if tokens[0] is 'let'
 						{
