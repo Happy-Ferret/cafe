@@ -95,7 +95,7 @@ module.exports.parse = (string, astf) ->
 				else if operator tokens[0]
 						{
 							type: 'call_function'
-							name: symbol "operator#{tokens[0]}"
+							name: symbol "operator^#{tokens[0]}"
 							args: tokens.slice(1).map toks2ast
 						}
 				else if tokens[0] is 'def'
