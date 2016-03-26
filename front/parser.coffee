@@ -31,16 +31,25 @@ encode = (str) ->
 _sc = {}
 
 symbol = (str) ->
-	if _sc[str]?
-		_sc[str]
-	else if str?
-		if str.replace?
-			if new RegExp("[#{specialChars.join '\\'}]", "gmi").test str
-				"__#{escapeStr encode str}__"
+	_symbol = (str) ->
+		if _sc[str]?
+			_sc[str]
+		else if str?
+			if str.replace?
+				if new RegExp("[#{specialChars.join '\\'}]", "gmi").test str
+					"__#{escapeStr encode str}__"
+				else
+					encode str
 			else
 				encode str
+
+	if str is '...'
+		'...'
+	else
+		if str?.split?
+			str.split(/\s*[./]\s*/).map(_symbol).filter((x) -> x.length >= 1).join '.'
 		else
-			encode str
+			str
 
 module.exports.symbol = symbol
 
