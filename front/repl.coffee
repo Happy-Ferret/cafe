@@ -41,27 +41,7 @@ file = do ->
 	temp = child_process.execSync "mktemp -u '/tmp/.cafe.repl.file_XXX'", {encoding: 'utf8'}
 	temp.replace /\n+$/gmi, ''
 
-error_report = (err, interpr, code) ->
-	is_call = (str) -> (str.indexOf 'attempt to call') isnt -1
-	call_sym = (str) ->
-		luajit_call = new RegExp "#{interpr}: #{file}:(\\d+): attempt to call global '(.+)' \\(a nil value\\)"
-		lua_call = new RegExp "#{interpr}: #{file}:(\\d+): attempt to call a nil value \\(global '(.+)'\\)"
-		if luajit_call.test str
-			match = str.match luajit_call
-		else
-			match = str.match lua_call
-
-		console.error "#{arrow} ERROR: Attempt to call undefined symbol #{match[2]}"
-		console.error "  #{arrow} in line #{match[1]}: #{code.split(/\r?\n/)[(parseFloat match[1]) - 1] ? "no such line"}"
-
-	err = err.join '\n'
-	err.split(/\r?\n/gmi).map (x) ->
-		x = do x.trim
-		if new RegExp("\\t*[\\w/.]+:\\d+: ").test x
-			if is_call x
-				call_sym x
-			else console.error x
-		else console.error x
+error_report = (err, interpr, code) -> console.log err.join '\n'
 
 ## Compile and evaluate a string using the passed interpreter
 eval_string = (str, interp, cb) ->
