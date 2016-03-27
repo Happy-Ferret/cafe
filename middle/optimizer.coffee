@@ -122,5 +122,7 @@ module.exports.optimize = (ast) ->
 		else
 			''
 
-	pass null
-	pass true
+	# pass null
+	# pass true
+
+	ast
