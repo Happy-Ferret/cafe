@@ -58,17 +58,18 @@ commands =
 			filter = true
 		else
 			filter = false
-	else: (params, context) ->
-		if filter
-			filter = false
-		else
-			filter = true
 	version: (params, context) ->
-		filt = (context.interpreter_version >= parseFloat(params[1]))
-		console.log "#{if not filt then "disabling output" else "keeping output"}"
+		expect = (parseFloat(params[1]) * 10)|0
+		got    = (context.interpreter_version * 10)|0
+		if params[2] is 'eq'
+			filt = (parseFloat(params[1]) * 10 == context.interpreter_version * 10)
+		else
+			filt = (parseFloat(params[1]) * 10 == context.interpreter_version * 10)
+
+		console.log "#{parseFloat(params[1]) * 10} #{if params[2] is 'eq' then '==' else '<='} #{context.interpreter_version * 10}? #{filt}"
 		filter = not filt
 	warn: (params) ->
-		console.log "\x1b[1;34mwarning:\x1b[0m #{params.slice(1).join ' '}"
+		console.log "\x1b[1;33mwarning:\x1b[0m #{params.slice(1).join ' '}"
 
 get_interp_version = (int) ->
 	base = execSync "#{int} -e \"print(_VERSION)\"",
@@ -79,7 +80,6 @@ get_interp_version = (int) ->
 
 module.exports.preprocess = (contents, fnam, context, interp = 'lua') ->
 	lines = []
-	console.log interp
 	command_context = context ?
 		file_name: fnam
 		file_contents: contents
@@ -98,4 +98,6 @@ module.exports.preprocess = (contents, fnam, context, interp = 'lua') ->
 			else lines.push line
 		else if command?[1] is 'end'
 			filter = false
+		else if command?[1] is 'else'
+			filter = !filter
 	lines.join '\n'
