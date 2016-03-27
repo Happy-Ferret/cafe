@@ -71,6 +71,9 @@ commands =
 	warn: (params) ->
 		console.log "\x1b[1;33mwarning:\x1b[0m #{params.slice(1).join ' '}"
 
+	else: (params) -> filter = !filter
+	end: (params) -> filter = false
+
 get_interp_version = (int) ->
 	base = execSync "#{int} -e \"print(_VERSION)\"",
 		encoding: 'utf8'
@@ -90,8 +93,6 @@ module.exports.preprocess = (contents, fnam, context, interp = 'lua') ->
 	contents.split('\n').map (line, ln) ->
 		line = do line.trim
 		command = line.match /;;@(\w+)/
-		if command?[1]?
-			console.log "#{command[1]} (#{line}) (#{filter})"
 		if !filter
 			if command?
 				if commands[command[1] ? 'nop']?
