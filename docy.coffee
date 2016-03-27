@@ -20,6 +20,7 @@ docgen = (file, cb) ->
 				docout_file = matches[1]
 			else if do line.trim is '--'
 				docs.push '\n\n'
+			else if line.startsWith '@'
 			else
 				docs.push line
 

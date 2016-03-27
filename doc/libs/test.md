@@ -1,7 +1,7 @@
 test  
 ====  
 simple, functional testing framework for café.  
-test operates on simple expected value / actual value comparisons, and classifies tests as 'failed' or 'passed'.  
+test operates on simple expected value . actual value comparisons, and classifies tests as 'failed' or 'passed'.  
 it also features a simple test results screen that displays  
 - passed test count (and percentage)  
 - failed test count (and percentage)  
