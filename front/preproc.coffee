@@ -65,7 +65,7 @@ commands =
 		if params[2] is 'eq'
 			filt = expect == got
 		else
-			filt = expect >= got
+			filt = expect <= got
 
 		filter = not filt
 	warn: (params) ->
