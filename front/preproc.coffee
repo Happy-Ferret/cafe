@@ -66,7 +66,6 @@ commands =
 		else
 			filt = (parseFloat(params[1]) * 10 == context.interpreter_version * 10)
 
-		console.log "#{parseFloat(params[1]) * 10} #{if params[2] is 'eq' then '==' else '<='} #{context.interpreter_version * 10}? #{filt}"
 		filter = not filt
 	warn: (params) ->
 		console.log "\x1b[1;33mwarning:\x1b[0m #{params.slice(1).join ' '}"

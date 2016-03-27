@@ -16,7 +16,7 @@
 ;; --
 (def *version* (string/format "%s - %s" _VERSION "Café v1.0.0"))
 
-;;@version 5.1
+;;@version 5.1 eq
 ;;@warn Compiling for Lua 5.1: Copying unpack to table/unpack
 (def table/unpack unpack :global)
 ;;@end
