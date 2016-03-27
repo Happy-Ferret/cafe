@@ -60,6 +60,8 @@ error_report = (err, interpr, code) ->
 		if new RegExp("\\t*[\\w/.]+:\\d+: ").test x
 			if is_call x
 				call_sym x
+			else console.error x
+		else console.error x
 
 ## Compile and evaluate a string using the passed interpreter
 eval_string = (str, interp, cb) ->
@@ -114,7 +116,7 @@ compile = (module) ->
 
 ## Warm compilation cache by compiling the built-in modules
 warm_cache = ->
-	['prelude', 'math', 'hashmap'].map (x) -> compile x
+	['prelude'].map (x) -> compile x
 plural = ->
 	if compile_cache.length is '1'
 		''

@@ -234,21 +234,27 @@
 ;; returns true if list is empty.
 ;; --
 (defn (empty? lst)
-	(if lst
-		(= (# lst) 0)
-		false))
+	(cond lst
+		([list,pair,hashmap] (= (# lst) 0))
+		(_ true)))
 (def null? empty?)
 
 ;; ##### `foldl func accum lst`
 ;; combine elements of a list into an accumulator using a function.
 ;; --
 (defn (foldl func accum lst)
-	(print (tostring func) (tostring accum) (describe list))
 	(if (null? lst)
-		accum
+		(cond lst
+			([~list] (func accum lst))
+			(_ accum))
 		(foldl func (func accum (head lst)) (tail lst))))
 
 (def reduce foldl)
+
+(defn (foldr func fin lst)
+	(if (null? lst)
+		fin
+		(func (head lst) (foldr func fin (tail lst)))))
 
 ;; ##### `truth?`
 ;; returns true if x is truthy, or:
@@ -267,29 +273,71 @@
 				ret)
 			(?? x false))))
 
+(defn (flip x)
+	(λ (a b)
+		(x b a)))
+
 ; Operators
 
-(defn (operator^= x y)   (lua-raw "return x == y"))
-(defn (operator^!= x y)  (lua-raw "return x ~= y"))
-(defn (operator^not x)   (lua-raw "return not x"))
-(defn (operator^and x y) (lua-raw "return x and y"))
-(defn (operator^or x y)  (lua-raw "return x or y"))
-(defn (operator^> x y)   (lua-raw "return x > y"))
-(defn (operator^< x y)   (lua-raw "return x < y"))
-(defn (operator^+ x y)
-	(cond x
-		([string] (lua-raw "return x .. y"))
-		(_        (lua-raw "return x + y"))))
-(defn (operator^- x y)   (lua-raw "return x - y"))
-(defn (operator^* x y)   (lua-raw "return x * y"))
-(defn (operator^/ x y)   (lua-raw "return x / y"))
-(defn (operator^% x y)   (lua-raw "return x % y"))
-(defn (operator^^ x y)   (lua-raw "return x % y"))
-(defn (operator^>= x y)  (lua-raw "return x >= y"))
-(defn (operator^<= x y)  (lua-raw "return x <= y"))
-(defn (operator^>> x y)  (lua-raw "return x >> y"))
-(defn (operator^<< x y)  (lua-raw "return x << y"))
-(defn (operator^# y)     (lua-raw "return #y"))
-(defn (operator^~ y)     (lua-raw "return ~y"))
-(defn (operator^| x y)   (lua-raw "return x | y"))
-(def operator^?? operator^or :global)
+(defn (^= x y)   (lua-raw "return x == y"))
+(defn (^!= x y)  (lua-raw "return x ~= y"))
+(defn (^> x y)   (lua-raw "return x > y"))
+(defn (^< x y)   (lua-raw "return x < y"))
+(defn (^not x)   (lua-raw "return not x"))
+
+(defn (^and x y ...)
+	(if (> (# args) 2)
+		(foldl ^and (head args) (tail args))
+		(lua-raw "return x and y")))
+(defn (^or x y ...)
+	(if (> (# args) 2)
+		(foldl ^or (head args) (tail args))
+		(lua-raw "return x or y")))
+(defn (^+ x y ...)
+	(if (> (# args) 2)
+		(foldl ^+ (head args) (tail args))
+		(cond x
+			([string] (lua-raw "return x .. y"))
+			(_        (lua-raw "return x + y")))))
+(defn (^- x y ...)
+	(if (> (# args) 2)
+		(foldl ^- (head args) (tail args))
+		(lua-raw "return x - y")))
+(defn (^* x y ...)
+	(if (> (# args) 2)
+		(foldl ^* (head args) (tail args))
+		(lua-raw "return x * y")))
+(defn (^/ x y ...)
+	(if (> (# args) 2)
+		(foldl ^/ (head args) (tail args))
+		(lua-raw "return x / y")))
+(defn (^% x y ...)
+	(if (> (# args) 2)
+		(foldl ^% (head args) (tail args))
+		(lua-raw "return x % y")))
+(defn (^^ x y ...)
+	(if (> (# args) 2)
+		(foldl ^^ (head args) (tail args))
+		(lua-raw "return x ^ y")))
+(defn (^>> x y ...)
+	(if (> (# args) 2)
+		(foldl ^>> (head args) (tail args))
+		(lua-raw "return x >> y")))
+(defn (^<< x y ...)
+	(if (> (# args) 2)
+		(foldl ^<< (head args) (tail args))
+		(lua-raw "return x << y")))
+(defn (^| x y ...)
+	(if (> (# args) 2)
+		(foldl ^| (head args) (tail args))
+		(lua-raw "return x | y")))
+(defn (^& x y ...)
+	(if (> (# args) 2)
+		(foldl ^& (head args) (tail args))
+		(lua-raw "return x & y")))
+
+(defn (^~ y)     (lua-raw "return ~y"))
+(defn (^>= x y)  (lua-raw "return x >= y"))
+(defn (^<= x y)  (lua-raw "return x <= y"))
+(defn (^# y)     (lua-raw "return #y"))
+(def ^?? ^or :global)
