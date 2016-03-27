@@ -16,7 +16,7 @@
 ;;@version 5.2
 (def test-result-format "  \x1b[1;3%dm→\x1b[0m %s")
 ;;@else
-;;@warn tests: Compiling for Lua 5.1! Using old-style escapes.
+;;@warn tests: Compiling for Lua 5.<=2! Using old-style escapes.
 (def test-result-format "  \27[1;3%dm→\27[0m %s")
 ;;@end
 
@@ -48,7 +48,8 @@
 				(do
 					(_format_ "\027[1;31m- Failed tests:\027[0m (%d)" failed)
 					(hash-map/map tests-failed (λ (_ desc)
-						(_format_ test-result-format 1 desc))))))))
+						(_format_ test-result-format 1 desc)))
+					(os/exit 1))))))
 
 ;; #### `tests/expect! expr value desc`
 ;; Compare expected values and given values, then appropriately class the test as passed or failed.
