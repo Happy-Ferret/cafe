@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test": "coffee cafe.coffee --run tests.cafe -o tests.lua",
+    "test5.1": "coffee cafe.coffee --run tests.cafe -o tests.lua -i lua5.1",
     "docs": "coffee docy.coffee -f lib/ -d doc/libs/"
   },
   "repository": {

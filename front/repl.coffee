@@ -66,8 +66,8 @@ error_report = (err, interpr, code) ->
 ## Compile and evaluate a string using the passed interpreter
 eval_string = (str, interp, cb) ->
 	tempFile = child_process.execSync 'mktemp', {encoding: 'utf8'}
-	ast = parse(preprocess(str))
 	interp ?= interpr
+	ast = parse(preprocess(str, null, null, interpr))
 
 	if ast.length >= 1
 		ast[ast.length - 1].is_tail = true
@@ -110,9 +110,9 @@ save_history = (int) -> fs.writeFileSync int.historyFile, JSON.stringify int.his
 ## Compile a new module
 compile = (module) ->
 	if resolve(module)?
-		compile_cache.push codegen(parse(preprocess fs.readFileSync resolve(module), {encoding: 'utf8'})).join ';' + '\n'
+		compile_cache.push codegen(parse(preprocess fs.readFileSync(resolve(module), {encoding: 'utf8'}), null, null, interpr)).join ';' + '\n'
 	else
-		compile_cache.push codegen(parse(preprocess module)).join ';'
+		compile_cache.push codegen(parse(preprocess(module, null, null, interpr))).join ';'
 
 ## Warm compilation cache by compiling the built-in modules
 warm_cache = ->
@@ -148,7 +148,7 @@ module.exports.repl = (intpt, cb) ->
 		try
 			line = do line.trim
 			if line.startsWith ',dump' # Print the result of code-generating an expression
-				console.log "#{arrow} #{codegen(parse(preprocess(line.replace /^,dump /g, ''))).join ';'}"
+				console.log "#{arrow} #{codegen(parse(preprocess(line.replace(/^,dump /g, ''), null, null, interpr))).join ';'}"
 				do ri.prompt
 			else if line.startsWith ',import' # Import a module into the compile cache
 				compile line.replace /^,import /gmi, ''
@@ -162,7 +162,7 @@ module.exports.repl = (intpt, cb) ->
 				console.log compile_cache.join ';\n'
 				do ri.prompt
 			else
-				parsed = parse preprocess do line.trim
+				parsed = parse preprocess(line.trim(), null, null, interpr)
 				skip = false
 				for ast in parsed
 					if ast.type is 'assignment' or ast.type is 'define_function'
