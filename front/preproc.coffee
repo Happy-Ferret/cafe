@@ -59,12 +59,13 @@ commands =
 		else
 			filter = false
 	version: (params, context) ->
-		expect = (parseFloat(params[1]) * 10)|0
-		got    = (context.interpreter_version * 10)|0
+		expect = Math.round (parseFloat(params[1]) * 10)|0
+		got    = Math.round (context.interpreter_version * 10)|0
+		Math.isInteger
 		if params[2] is 'eq'
-			filt = (parseFloat(params[1]) * 10 == context.interpreter_version * 10)
+			filt = expect == got
 		else
-			filt = (parseFloat(params[1]) * 10 == context.interpreter_version * 10)
+			filt = expect >= got
 
 		filter = not filt
 	warn: (params) ->
@@ -89,6 +90,8 @@ module.exports.preprocess = (contents, fnam, context, interp = 'lua') ->
 	contents.split('\n').map (line, ln) ->
 		line = do line.trim
 		command = line.match /;;@(\w+)/
+		if command?[1]?
+			console.log "#{command[1]} (#{line}) (#{filter})"
 		if !filter
 			if command?
 				if commands[command[1] ? 'nop']?
