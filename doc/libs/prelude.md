@@ -8,6 +8,14 @@ import this if you want anything to work
 global symbol bound to the stdout stream
 
 
+##### `*standard-error*`
+global symbol bound to the stderr stream
+
+
+##### `*standard-input*`
+global symbol bound to the stdin stream
+
+
 ##### `*version*`
 global symbol bound to the Lua version currently in use, and the semver version of the compiler itself
 
