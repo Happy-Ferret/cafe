@@ -83,7 +83,8 @@ module.exports.codegen = (ast) ->
 		body = expr.body.slice(0, -1).map intermediate_codegen
 		last_expr = expr.body.slice(-1)[0]
 
-		gen.write "local args = {#{expr.args.join ', '}}"
+		if not ('args' in expr.args)
+			gen.write "local args = {#{expr.args.join ', '}}"
 		if body? and last_expr?
 			last_expr.is_tail = true
 			if typeof last_expr is 'object'
@@ -180,7 +181,7 @@ module.exports.codegen = (ast) ->
 			else
 				do gen.endBlock
 
-			gen.endBlock 'end)(table.unpack(args))'
+			gen.endBlock 'end)(table.unpack(args or {}))'
 		gen.join ';\n'
 
 	codegen_lambda_expr = (expr) ->
