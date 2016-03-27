@@ -9,8 +9,15 @@
 ;; ##### `*standard-output*`
 ;; global symbol bound to the stdout stream
 ;; --
-(def *standard-output* (io/output))
-
+(def *standard-output* io/stdout)
+;; ##### `*standard-error*`
+;; global symbol bound to the stderr stream
+;; --
+(def *standard-error* io/stderr)
+;; ##### `*standard-input*`
+;; global symbol bound to the stdin stream
+;; --
+(def *standard-input* io/stdin)
 ;; ##### `*version*`
 ;; global symbol bound to the Lua version currently in use, and the semver version of the compiler itself
 ;; --
@@ -319,7 +326,7 @@
 (defn (^# y)     (lua-raw "return #y"))
 (def ^?? ^or :global)
 
-;;@version 5.3
+;;@version 5.3 eq
 (defn (^>> x y ...)
 	(if (> (# args) 2)
 		(foldl ^>> (head args) (tail args))
