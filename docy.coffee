@@ -26,7 +26,13 @@ docgen = (file, cb) ->
 
 		if docout_file?
 			cb null, {
-				contents: docs.join '  \n'
+				contents: docs.map (line) ->
+					if line isnt '\n\n'
+						if line.endsWith '@@'
+							line.replace(/@@/gmi, '') + '  \n'
+						else line + '\n'
+					else line
+				.join ''
 				file:     docout_file
 			}
 		else

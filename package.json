@@ -1,6 +1,6 @@
 {
   "name": "cafe",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "Simple Lisp that compiles to Lua.",
   "main": "index.coffee",
   "directories": {
@@ -9,7 +9,8 @@
   "scripts": {
     "test": "coffee cafe.coffee --run tests.cafe -o tests.lua",
     "test5.1": "coffee cafe.coffee --run tests.cafe -o tests.lua -i lua5.1",
-    "docs": "coffee docy.coffee -f lib/ -d doc/libs/"
+    "docs": "coffee docy.coffee -f lib/ -d doc/libs/",
+    "precommit": "npm test && npm run test5.1 && npm run docs"
   },
   "repository": {
     "type": "git",

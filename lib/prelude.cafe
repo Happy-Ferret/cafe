@@ -51,14 +51,6 @@
 (defn (format! fmtstr ...)
 	(print-formatted! *standard-output* fmtstr ...))
 
-;; ##### `require! module`
-;; require a Lua module into the current environment
-;;
-;; support for hot-compilation of café modules will be added at a later date.
-;; --
-(defn (require! module)
-	(lua-raw "local ok, mod = pcall(require, module); if not ok then return false, 'no such module' .. module else for k, v in pairs(mod) do _G[string/format('__%s47%s__', module, k)] = v end end return mod"))
-
 ;; ##### `cons list elem`
 ;; cons an element in front of a list
 ;; --

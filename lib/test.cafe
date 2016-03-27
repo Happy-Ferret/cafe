@@ -10,7 +10,7 @@
 ;; - description of all passed tests
 ;; - description, actual value and given value of all failed tests
 ;; --
-;; test puts all functions in the namespace `tests/`.
+;; test puts all functions in the namespace `tests/`. @@
 (ns tests)
 
 ;; ## Functions

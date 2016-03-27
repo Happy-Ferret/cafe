@@ -1,87 +1,74 @@
-math  
-====  
-idiomatic bindings to the Lua math libraries  
+math
+====
+idiomatic bindings to the Lua math libraries
 
-## Symbols  
-#### `math/π`  
-#### `math/pi`  
-3.1415926535...  
-
-
-
-#### `math/huge`  
-The value HUGE_VAL, a value larger than or equal to any other numerical value.  
+## Symbols
+#### `math/π`
+#### `math/pi`
+3.1415926535...
 
 
-
-## Functions  
-### Trigonometrics  
-All trigonometric functions assume the parameters to be in radians.  
-#### `math/sin`, `hsin` and `asin`  
-Calculate the sine, hyperbolic sine and arc sine of _x_  
+#### `math/huge`
+The value HUGE_VAL, a value larger than or equal to any other numerical value.
 
 
-
-#### `math/cos`, `hcos` and `acos`  
-Calculate the cosine, hyperbolic cosine and arc cosine of _x_  
-
-
-
-#### `math/tan`, `htan` and `atan`  
-Calculate the tangent, hyperbolic tangent and arc tangent of _x_  
+## Functions
+### Trigonometrics
+All trigonometric functions assume the parameters to be in radians.
+#### `math/sin`, `hsin` and `asin`
+Calculate the sine, hyperbolic sine and arc sine of _x_
 
 
-
-#### `math/deg2rad` and `rad2deg`  
-Convert degrees to radians and vice-versa  
-
+#### `math/cos`, `hcos` and `acos`
+Calculate the cosine, hyperbolic cosine and arc cosine of _x_
 
 
-### Algebra  
-#### `math/abs`  
-return the absolute value of _x_  
+#### `math/tan`, `htan` and `atan`
+Calculate the tangent, hyperbolic tangent and arc tangent of _x_
 
 
-
-#### `math/exp`  
-return the value of e<sup>x</sup>  
-
+#### `math/deg2rad` and `rad2deg`
+Convert degrees to radians and vice-versa
 
 
-#### `math/logn`, `log10` and `log2`  
-Take the natural, base-10 and base-2 logarithm of _x_.  
+### Algebra
+#### `math/abs`
+return the absolute value of _x_
 
 
-
-#### `math/max` and `min`  
-Find the maximum or minimum value of a set (given as variadic arguments or a list)  
-
+#### `math/exp`
+return the value of e<sup>x</sup>
 
 
-#### `math/modf x`  
-Returns two numbers, the integral part of _x_ and the fractional part of _x_ as a cons pair  
+#### `math/logn`, `log10` and `log2`
+Take the natural, base-10 and base-2 logarithm of _x_.
 
 
-
-#### `math/sqrt x`  
-Take the root of _x_ with index 2  
-
+#### `math/max` and `min`
+Find the maximum or minimum value of a set (given as variadic arguments or a list)
 
 
-#### `math/rand l u`  
-Generate a random number with a lower bound at _l_ and an upper bound at _u_  
+#### `math/modf x`
+Returns two numbers, the integral part of _x_ and the fractional part of _x_ as a cons pair
 
 
-
-#### `math/rand-seed n`  
-Seed the random number generator with _n_  
-
-
-  
-#### `math/percent val tot`  
-Take the percentage of _val_ against _tot_  
+#### `math/sqrt x`
+Take the root of _x_ with index 2
 
 
+#### `math/rand l u`
+Generate a random number with a lower bound at _l_ and an upper bound at _u_
 
-### `math/mean ...`  
-Take the arithmetic mean of a set, given as variadic arguments.  
+
+#### `math/rand-seed n`
+Seed the random number generator with _n_
+
+
+#### `math/percent val tot`
+Take the percentage of _val_ against _tot_
+
+
+### `math/mean ...`
+Take the arithmetic mean of a set, given as variadic arguments.
+
+
