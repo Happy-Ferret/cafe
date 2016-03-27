@@ -16,6 +16,11 @@
 ;; --
 (def *version* (string/format "%s - %s" _VERSION "Café v1.0.0"))
 
+;;@version 5.1
+;;@warn Compiling for Lua 5.1: Copying unpack to table/unpack
+(def table/unpack unpack :global)
+;;@end
+
 ;; ## Functions
 
 ;; ##### `exit-on-error! erfmt ...` or `fail ...`
@@ -319,6 +324,10 @@
 	(if (> (# args) 2)
 		(foldl ^^ (head args) (tail args))
 		(lua-raw "return x ^ y")))
+(defn (^# y)     (lua-raw "return #y"))
+(def ^?? ^or :global)
+
+;;@version 5.3
 (defn (^>> x y ...)
 	(if (> (# args) 2)
 		(foldl ^>> (head args) (tail args))
@@ -337,7 +346,15 @@
 		(lua-raw "return x & y")))
 
 (defn (^~ y)     (lua-raw "return ~y"))
+
 (defn (^>= x y)  (lua-raw "return x >= y"))
 (defn (^<= x y)  (lua-raw "return x <= y"))
-(defn (^# y)     (lua-raw "return #y"))
-(def ^?? ^or :global)
+
+;;@else
+;;@warn Compiling without support for bitwise operators!
+;;@end
+
+(defn (range fin)
+	(if (= fin 0)
+		(list)
+		(cons fin (range (- fin 1)))))
