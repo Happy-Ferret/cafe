@@ -77,7 +77,7 @@
 ;; ##### `list`
 ;; create a list from given values
 ;; --
-(defn (list ...) {...})
+(defn (list ...) args)
 
 ;; ##### `push! car rest`
 ;; insert a value at the head of a list, mutating it.

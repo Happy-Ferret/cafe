@@ -93,7 +93,6 @@ module.exports.parse = (string, astf) ->
 			else
 				word += c
 
-		console.log sexpr[0]
 		if sexpr.length > 1
 			if sexpr?[1]?[0]?
 				sexpr[1][0]
@@ -216,11 +215,14 @@ module.exports.parse = (string, astf) ->
 							}
 					}
 				else if tokens[0][0] is '\''
-					console.log tokens.slice(1)
 					{
 						type: 'call_function'
 						name: symbol 'list'
-						args: [tokens[0].slice(1)].concat tokens.slice(1)?.map toks2ast
+						args: ([toks2ast tokens[0].slice(1)].concat tokens.slice(1)?.map toks2ast).map (x) ->
+							if typeof x is 'string'
+								"'#{x}'"
+							else
+								x
 					}
 				else
 					if tokens[0]?
@@ -234,13 +236,20 @@ module.exports.parse = (string, astf) ->
 			when 'string'
 				if tokens[0] == '"' and tokens.slice(-1)[0] == '"'
 					tokens
-				else if parseFloat(tokens) isnt NaN
+				else if !isNaN(parseFloat(tokens))
+					tokens
+				else if tokens[0] is '\''
+					{
+						type: 'call_function'
+						name: symbol 'list'
+						args: ["'#{tokens.slice 1}'"]
+					}
+				else if tokens[0] is '[' and tokens.slice(-1)[0] is ']'
 					tokens
 				else
 					symbol tokens
 
 	tokens = str2tok string
-	console.log tokens.map toks2ast
 	if tokens?
 		ast = tokens.map toks2ast
 

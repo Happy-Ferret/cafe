@@ -86,11 +86,11 @@ module.exports.codegen = (ast) ->
 		if not ('args' in expr.args)
 			gen.write "local args = {#{expr.args.join ', '}}"
 		if body? and last_expr?
-			last_expr.is_tail = true
 			if typeof last_expr is 'object'
+				last_expr.is_tail = true
 				last_expr = "#{intermediate_codegen last_expr}"
 			else
-				last_expr = "return #{last_expr}"
+				last_expr = "return #{intermediate_codegen last_expr}"
 
 			body.map gen.write
 			gen.write last_expr
@@ -100,7 +100,7 @@ module.exports.codegen = (ast) ->
 
 	codegen_function = (expr) ->
 		gen = new Generator()
-		if expr.name? and expr.args? and expr.body?
+		if expr.name? and expr.args?.join? and expr.body?
 			gen.startBlock "function #{expr.name}(#{expr.args.join ', '})"
 			codegen_function_body expr, gen
 			gen.endBlock "end"
@@ -110,7 +110,7 @@ module.exports.codegen = (ast) ->
 	codegen_call = (expr) ->
 		gen = new Generator()
 		if expr.name?
-			gen.write "#{should_return expr}(#{intermediate_codegen expr.name})(#{expr.args.map(intermediate_codegen).join ', '})"
+			gen.write "#{should_return expr}(#{intermediate_codegen expr.name})(#{expr.args?.map?(intermediate_codegen).join ', '})"
 
 		gen.join ';\n'
 
@@ -317,6 +317,6 @@ module.exports.codegen = (ast) ->
 		if ast?.map?
 			ast.map intermediate_codegen
 		else
-			intermediate_codegen ast
+			[intermediate_codegen ast]
 	else
-		''
+		['']

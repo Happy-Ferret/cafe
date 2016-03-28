@@ -141,6 +141,13 @@ module.exports.repl = (intpt, cb) ->
 			else if line.startsWith ',view-cache'
 				console.log compile_cache.join ';\n'
 				do ri.prompt
+			else if line.startsWith ',save-cache'
+				fs.writeFile line.replace(/^,save-cache /gmi, ''), compile_cache.join ';\n', (err) ->
+					if err?
+						console.log err
+					else
+						do ri.prompt
+				do ri.prompt
 			else
 				parsed = parse preprocess(line.trim(), null, null, interpr)
 				skip = false
