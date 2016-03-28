@@ -159,7 +159,7 @@
 ;; merge two functions together, applying the first over the result of the second
 ;; --
 
-(defn (curry a b)
+(defn (compose a b)
 	(λ (...) (a (b ...))))
 
 ;; ##### `exists thing`
