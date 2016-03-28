@@ -218,11 +218,7 @@ module.exports.parse = (string, astf) ->
 					{
 						type: 'call_function'
 						name: symbol 'list'
-						args: ([toks2ast tokens[0].slice(1)].concat tokens.slice(1)?.map toks2ast).map (x) ->
-							if typeof x is 'string'
-								"'#{x}'"
-							else
-								x
+						args: ([toks2ast tokens[0].slice(1)].concat tokens.slice(1)?.map toks2ast)
 					}
 				else
 					if tokens[0]?
