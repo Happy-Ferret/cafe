@@ -136,7 +136,7 @@
 ;; --
 (defn (filter li f)
 	(cond li
-		([list|0|,pair|0|] (do (print "edge case") '()))
+		([list|0|] (do (print "edge case") '()))
 		(_ li)
 		([list|x:xs|]
 			(do
