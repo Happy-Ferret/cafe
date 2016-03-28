@@ -17,20 +17,21 @@ specialChars = ['+', '-', '*', '/',
                 '\\', '>', '<', '|',
                 '~', '#', '%']
 
-escapeStr = (str) ->
-	for special in specialChars
-		str = str.replace new RegExp("\\#{special}", 'gmi'), special.codePointAt 0
-	str
-
-encode = (str) ->
-	ps = puny.encode(str).replace /-$/, ''
-	if /^\d/.test ps
-		"_#{ps}"
-	else ps
-
 _sc = {}
+kwda = "and break do else elseif end for function  if in local nil not or repeat return then until while".split ' '
 
 symbol = (str) ->
+	encode = (str) ->
+		ps = puny.encode(str).replace /-$/, ''
+		if /^\d/.test ps
+			"_#{ps}"
+		else ps
+
+	escapeStr = (str) ->
+		for special in specialChars
+			str = str.replace new RegExp("\\#{special}", 'gmi'), special.codePointAt 0
+		str
+
 	_symbol = (str) ->
 		if _sc[str]?
 			_sc[str]
