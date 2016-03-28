@@ -70,7 +70,10 @@ module.exports.parse = (string, astf) ->
 					word = ''
 
 				thing = do sexpr.pop
-				sexpr[sexpr.length - 1].push thing
+				if sexpr[sexpr.length - 1]?
+					sexpr[sexpr.length - 1].push thing
+				else
+					return null
 			else if c in " \r\n\t" and not in_str
 				if in_cm
 					if c is '\n'
@@ -89,7 +92,15 @@ module.exports.parse = (string, astf) ->
 				in_cm = true
 			else
 				word += c
-		sexpr[0]
+
+		console.log sexpr[0]
+		if sexpr.length > 1
+			if sexpr?[1]?[0]?
+				sexpr[1][0]
+			else
+				null
+		else
+			sexpr[0]
 
 	toks2ast = (tokens) ->
 		switch typeof tokens
@@ -204,12 +215,19 @@ module.exports.parse = (string, astf) ->
 								valu: toks2ast n[1]
 							}
 					}
+				else if tokens[0][0] is '\''
+					console.log tokens.slice(1)
+					{
+						type: 'call_function'
+						name: symbol 'list'
+						args: [tokens[0].slice(1)].concat tokens.slice(1)?.map toks2ast
+					}
 				else
 					if tokens[0]?
 						{
 							type: 'call_function'
 							name: symbol tokens[0]
-							args: tokens.slice(1).map(toks2ast)
+							args: tokens.slice(1)?.map(toks2ast)
 						}
 					else
 						''
@@ -222,10 +240,14 @@ module.exports.parse = (string, astf) ->
 					symbol tokens
 
 	tokens = str2tok string
-	ast = tokens.map toks2ast
+	console.log tokens.map toks2ast
+	if tokens?
+		ast = tokens.map toks2ast
 
-	if astf?
-		writeFile astf, JSON.stringify(ast, null, '  '), (error) ->
-			if error?
-				console.error "Failed to write #{astf}: #{error}"
-	ast
+		if astf?
+			writeFile astf, JSON.stringify(ast, null, '  '), (error) ->
+				if error?
+					console.error "Failed to write #{astf}: #{error}"
+		ast
+	else
+		{}
