@@ -109,7 +109,7 @@ module.exports.codegen = (ast) ->
 
 	codegen_call = (expr) ->
 		gen = new Generator()
-		if expr.name?
+		if expr.name? and expr.args?
 			gen.write "#{should_return expr}(#{intermediate_codegen expr.name})(#{expr.args?.map?(intermediate_codegen).join ', '})"
 
 		gen.join ';\n'
@@ -229,6 +229,7 @@ module.exports.codegen = (ast) ->
 		gen = new Generator()
 		if expr.thing? and expr.clauses?
 			gen.startBlock "#{if expr.is_tail? then 'return ' else ''}(function(value) "
+			extra = {}
 			compile_value = (thing) ->
 				if typeof thing is 'object'
 					thing.is_tail = true
@@ -237,13 +238,23 @@ module.exports.codegen = (ast) ->
 					"return " + thing
 
 			compile_test = (n) ->
-				if /^\[(?:~?[\w]+,?)*\]$/gmi.test n
+				if /^\[(?:~?[\w|:]+,?)*\]$/gmi.test n
 					n.slice(1, -1).split(',').map (n) ->
-						n = do n.trim
-						if n[0] in "~!"
-							"type(value) ~= '#{n.slice(1)}'"
+						if /(\w+)\|(\w+):(\w+)\|/gmi.test n
+							matches = n.match(/(\w+)|(\w+):(\w+)|/gmi).filter (x) -> x.length >= 1
+							x = "(type(value) == '#{matches[0]}' and head(value) and tail(value))"
+							if !extra[x]?
+								extra[x] = ["#{matches[1]} = head(value)", "#{matches[2]} = tail(value)"]
+							x
+						else if /(\w+)\|(\d+)\|/gmi.test n
+							matches = n.match(/(\w+)|(\d+)|/gmi).filter (x) -> x.length >= 1
+							x = "(type(value) == '#{matches[0]}' and #value == #{matches[1]})"
 						else
-							"type(value) == '#{n}'"
+							n = do n.trim
+							if n[0] in "~!"
+								"(type(value) ~= '#{n.slice(1)}')"
+							else
+								"(type(value) == '#{n}')"
 					.join ' or '
 				else if /^".+"$/gmi.test n
 					"type(value) == 'string' and value:match(#{n})"
@@ -251,6 +262,7 @@ module.exports.codegen = (ast) ->
 					intermediate_codegen n
 				else
 					n
+
 			clauses = do ->
 				ret = {}
 				expr.clauses.forEach (n) ->
@@ -263,6 +275,8 @@ module.exports.codegen = (ast) ->
 				for test, value of clauses
 					if test isnt '_'
 						gen.startBlock "if #{test} then"
+						if extra[test]?
+							extra[test].map gen.write
 						gen.write value
 						gen.endBlock 'end'
 
