@@ -62,7 +62,9 @@
 ;; cons an element in front of a list
 ;; --
 (defn (cons car cdr)
-	(list car cdr))
+	(cond cdr
+		([list,pair] '(car (table/unpack cdr)))
+		(_ (list car cdr))))
 
 ;; ##### `head list`
 ;; return the first element of a list
@@ -97,10 +99,9 @@
 ;; return the rest of the list, without head
 ;; --
 (defn (tail l)
-	(with (ret (list))
+	(with (ret '())
 		(for i 2 (# l)
 			(push-tail! l[i] ret))
-
 		(if (> (# ret) 1)
 			ret
 			(do
@@ -112,11 +113,15 @@
 ;; modify a list using a function, returning a new list
 ;; --
 (defn (map li fn)
-	(with (ret (list))
-		(for i 1 (# li)
-			(push-tail! (fn (nth i li)) ret))
-		ret))
-
+	(cond li
+		([list] (with (ret '())
+			(for i 1 (# li)
+				(push-tail! (fn (nth i li)) ret))
+			ret))
+		([function] (with (ret '())
+			(for i 1 (# fn)
+				(push-tail! (li (nth i fn)) ret))
+			ret))))
 ;; ##### `size li`
 ;; determine the size of a list.
 ;; --
@@ -129,20 +134,33 @@
 ;; ##### `filter list fn`
 ;; filter a list using a predicate.
 ;; --
-(defn (filter li fn)
-	(with (ret (list))
-		(for i 1 (# li)
-			(if (truth? (fn (nth i li)))
-				(push-tail! (nth i li) ret)))
-		ret))
-
+(defn (filter li f)
+	(cond li
+		([list|0|,pair|0|] (do (print "edge case") '()))
+		(_ li)
+		([list|x:xs|]
+			(do
+				(cond x
+					((f x) (x . (filter xs f)))
+					(_ (filter xs f)))))
+		([pair|x:xs|]
+			(do
+				(cond x
+					((f x) (x . (filter xs f)))
+					(_ (filter xs f)))))))
 ;; ##### `curry fna fnb`
-;; merge two functions together
+;; merge two functions together, applying the second over the result of the first
 ;; --
 
 (defn (curry a b)
-	(λ (...)
-		(b (a ...))))
+	(λ (...) (b (a ...))))
+
+;; ##### `compose fna fnb`
+;; merge two functions together, applying the first over the result of the second
+;; --
+
+(defn (curry a b)
+	(λ (...) (a (b ...))))
 
 ;; ##### `exists thing`
 ;; returns false if:
@@ -358,5 +376,9 @@
 
 (defn (range fin)
 	(if (= fin 0)
-		(list)
+		'()
 		(cons fin (range (- fin 1)))))
+
+(defn (partial fn x)
+	(λ (y)
+		(fn x y)))
