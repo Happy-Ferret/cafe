@@ -35,7 +35,7 @@
 (tests/expect! (eq? 1 2) false "1 and 2 should not be equivalent")
 (tests/expect! (list? (list 1 2 3)) true "{1, 2, 3} should be list")
 (tests/expect! (pair? (list 1 2 3)) false "{1, 2, 3} should not be a pair")
-(tests/expect! (and (pair? (cons 1 2)) (not (list? (cons 1 2)))) true "1 . 2 should be a pair and not a list")
+(tests/expect! (pair? (cons 1 2)) true "1 . 2 should be a pair")
 (tests/expect! (eq? (list 1 2) (cons 1 2)) true "1 . 2 and {1, 2} should be equivalent")
 
 ;; Print results

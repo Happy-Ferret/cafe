@@ -141,3 +141,7 @@ return a function that when invoked applies the given function (`fn`) with param
 
 ### `flip x`
 return a function that when invoked applies the given function (`x`) with it's parameters in reverse order.
+### `elem? a li`
+return true if `a` is an element of `li`, false otherwise.
+
+

@@ -142,12 +142,8 @@
 			(do
 				(cond x
 					((f x) (x . (filter xs f)))
-					(_ (filter xs f)))))
-		([pair|x:xs|]
-			(do
-				(cond x
-					((f x) (x . (filter xs f)))
 					(_ (filter xs f)))))))
+
 ;; ##### `curry fna fnb`
 ;; merge two functions together, applying the second over the result of the first
 ;; --
@@ -205,9 +201,7 @@
 		(if (= (old-type a) "table")
 			(if (= (lua-raw "a._type") "hashmap")
 				"hashmap"
-				(if (= (# a) 2)
-					"pair"
-					"list"))
+					"list")
 				(old-type a))))
 
 ;; ##### `pair? a`
@@ -388,3 +382,15 @@
 ;; return a function that when invoked applies the given function (`x`) with it's parameters in reverse order.
 (defn (flip x)
 	(λ (a b) (x b a)))
+
+;; ### `elem? a li`
+;; return true if `a` is an element of `li`, false otherwise.
+;; --
+(defn (elem? a li)
+	(cond li
+		([list|0|] false)
+		([list|x:xs|]
+			(if (= x a) true
+				(elem? a xs)))
+		((eq? a li) true)
+		(_ false)))

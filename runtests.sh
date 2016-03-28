@@ -5,6 +5,7 @@ for testsuite in $(grep test package.json | sed -re 's|\s*"(\S+)":.*$|\1|g' | gr
 	if which lua$(echo $testsuite | sed -re 's/test(.*)$/\1/') >/dev/null; then
 		if npm run "$testsuite" | grep "status code 0" &>/dev/null; then
 			echo -e "  \x1b[1;32m→\x1b[0m Test $testsuite passed!"
+			rm -rf "$(echo "$testsuite" | sed -re 's/test/&s/;s/\.//g').lua"
 		else
 			echo -e "  \x1b[1;31m→\x1b[0m Test $testsuite failed!"
 			exit
