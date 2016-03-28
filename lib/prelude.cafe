@@ -164,17 +164,20 @@
 ;; format `a` for printing.
 ;; --
 (defn (describe x pt)
-	(with (describe-internal (λ (a)
-		(if (= (type a) "list")
-			(table/concat (map a (λ (x) (describe x false))) ", ")
-			(if (= (type a) "pair")
-				(string/format "%s . %s" (describe (head a) false) (describe (nth 2 a) false))
-				(if (= (type a) "hashmap")
-					(string/match (tostring a) "table: 0x(%w+)")
-					(tostring a))))))
+	(defn (describe-list list)
+		(defn (dli accum elem)
+			(+ (describe-internal accum) ", " (describe-internal elem)))
+		(foldl dli (describe-internal (head list)) (tail list)))
+	(defn (describe-internal a)
+		(cond a
+			([list] (string/format "(%s)" (describe-list a)))
+			([pair] (string/format "%s . %s" (describe (head a) false) (describe (nth 2 a) false)))
+			([hashmap] (string/format "hm(%s)" (string/match (tostring a) "table: 0x(%w+)")))
+			([function] (string/format "fn(%s)" (string/match (tostring a) "function: 0x(%w+)")))
+			(_ (tostring a))))
 		(if pt
 			(string/format "%s: %s" (type x) (describe-internal x))
-			(describe-internal x))))
+			(describe-internal x)))
 
 ;; ##### `type a`
 ;; reimplementation of Lua's `type`
