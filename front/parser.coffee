@@ -222,11 +222,18 @@ module.exports.parse = (string, astf) ->
 					}
 				else
 					if tokens[0]?
-						{
-							type: 'call_function'
-							name: toks2ast tokens[0]
-							args: tokens.slice(1)?.map(toks2ast)
-						}
+						if tokens[1]? and tokens[2]? and tokens[1] is '.'
+							{
+								type: 'call_function'
+								name: symbol 'cons'
+								args: [toks2ast(tokens[0])].concat [toks2ast(tokens[2])]
+							}
+						else
+							{
+								type: 'call_function'
+								name: toks2ast tokens[0]
+								args: tokens.slice(1)?.map(toks2ast)
+							}
 					else
 						''
 			when 'string'
