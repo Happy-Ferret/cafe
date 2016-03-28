@@ -298,10 +298,6 @@
 				ret)
 			(?? x false))))
 
-(defn (flip x)
-	(λ (a b)
-		(x b a)))
-
 ; Operators
 
 (defn (^= x y)   (lua-raw "return x == y"))
@@ -374,11 +370,21 @@
 ;;@warn Compiling without support for bitwise operators!
 ;;@end
 
+;; ### `range end`
+;; create a list of integers from 0 to `end`
+;; --
 (defn (range fin)
 	(if (= fin 0)
 		'()
-		(cons fin (range (- fin 1)))))
+		(fin . (range (- fin 1)))))
 
+;; ### `partial fn x`
+;; return a function that when invoked applies the given function (`fn`) with parameters `x` and parameters given to the return function.
+;; --
 (defn (partial fn x)
-	(λ (y)
-		(fn x y)))
+	(λ (y) (fn x y)))
+
+;; ### `flip x`
+;; return a function that when invoked applies the given function (`x`) with it's parameters in reverse order.
+(defn (flip x)
+	(λ (a b) (x b a)))

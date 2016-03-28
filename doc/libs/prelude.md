@@ -74,7 +74,11 @@ filter a list using a predicate.
 
 
 ##### `curry fna fnb`
-merge two functions together
+merge two functions together, applying the second over the result of the first
+
+
+##### `compose fna fnb`
+merge two functions together, applying the first over the result of the second
 
 
 ##### `exists thing`
@@ -127,3 +131,13 @@ returns true if x is truthy, or:
 - if x is a list, return if all elements are truthy.
 
 
+### `range end`
+create a list of integers from 0 to `end`
+
+
+### `partial fn x`
+return a function that when invoked applies the given function (`fn`) with parameters `x` and parameters given to the return function.
+
+
+### `flip x`
+return a function that when invoked applies the given function (`x`) with it's parameters in reverse order.
