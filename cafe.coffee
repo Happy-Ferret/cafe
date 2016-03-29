@@ -14,13 +14,13 @@ helpstr = """
 usage: \x1b[1;34mcafe\x1b[0m <input> [-o/--out file] [-a,--ast file] | [--repl] [--interpreter lua/luajit]
 
 Available options are:
-  \x1b[1;32m--repl/-r\x1b[0m        Start a café REPL.
-  \x1b[1;32m-i/--interpreter\x1b[0m Set the interpreter for use with the REPL.
-  \x1b[1;32m-o/--out\x1b[0m         Set the output file.
-  \x1b[1;32m-a/--ast\x1b[0m         Set the AST output file.
-  \x1b[1;32m-?/-h/--help\x1b[0m     Print this help and exit.
-  \x1b[1;32m--hashbang\x1b[0m       Specify a custom #! line for executables.
-  \x1b[1;32m--run\x1b[0m            Evaluate the compiled output.
+	\x1b[1;32m--repl/-r\x1b[0m        Start a café REPL.
+	\x1b[1;32m-i/--interpreter\x1b[0m Set the interpreter for use with the REPL.
+	\x1b[1;32m-o/--out\x1b[0m         Set the output file.
+	\x1b[1;32m-a/--ast\x1b[0m         Set the AST output file.
+	\x1b[1;32m-?/-h/--help\x1b[0m     Print this help and exit.
+	\x1b[1;32m--hashbang\x1b[0m       Specify a custom #! line for executables.
+	\x1b[1;32m--run\x1b[0m            Evaluate the compiled output.
 """
 
 
@@ -72,16 +72,17 @@ else
 			if err?
 				throw err
 
-			emit out, ([hashbang].concat codegen(optimize parse preprocess(";;@import prelude\n#{data}", inp, null, interp), ast)), ->
-				if argv.run?
-					process.stdout.write "\x1b[0m"
-					proc = child_process.spawn "#{interp}", ["#{out}"], {encoding: 'utf-8', stdio: 'inherit'}
-					proc.on 'close', (status) ->
-						console.log "#{interp} process (#{proc.pid}) exited with status code #{status}."
-						fs.chmodSync out, 0o755 if argv.o? or argv.out?
-						if !(argv.o? or argv.out?)
-							fs.unlink out
-				else fs.chmodSync out, 0o755
+			fs.writeFile out, hashbang + "\n", ->
+				emit out, (codegen(optimize parse preprocess(";;@import prelude\n#{data}", inp, null, interp), ast)), ->
+					if argv.run?
+						process.stdout.write "\x1b[0m"
+						proc = child_process.spawn "#{interp}", ["#{out}"], {encoding: 'utf-8', stdio: 'inherit'}
+						proc.on 'close', (status) ->
+							console.log "#{interp} process (#{proc.pid}) exited with status code #{status}."
+							fs.chmodSync out, 0o755 if argv.o? or argv.out?
+							if !(argv.o? or argv.out?)
+								fs.unlink out
+					else fs.chmodSync out, 0o755
 
 	else
 		console.log "\x1b[1;31m→\x1b[0m No such file #{inp}."
