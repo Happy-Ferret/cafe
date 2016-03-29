@@ -53,7 +53,7 @@ create a list from given values
 insert a value at the head of a list, mutating it.
 
 
-##### `push-tail! end rest`
+##### `! end rest`
 insert a value at the end of a list, mutating it.
 
 
@@ -143,5 +143,13 @@ return a function that when invoked applies the given function (`fn`) with param
 return a function that when invoked applies the given function (`x`) with it's parameters in reverse order.
 ### `elem? a li`
 return true if `a` is an element of `li`, false otherwise.
+
+
+### `join li1 li2`
+join the two given lists
+
+
+### `copy li1`
+copy a list
 
 

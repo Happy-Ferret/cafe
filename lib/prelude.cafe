@@ -88,7 +88,7 @@
 	(table/insert rest 1 car)
 	rest)
 
-;; ##### `push-tail! end rest`
+;; ##### `! end rest`
 ;; insert a value at the end of a list, mutating it.
 ;; --
 (defn (push-tail! fin rest)
@@ -308,12 +308,18 @@
 	(if (> (# args) 2)
 		(foldl ^or (head args) (tail args))
 		(lua-raw "return x or y")))
+
 (defn (^+ x y ...)
 	(if (> (# args) 2)
 		(foldl ^+ (head args) (tail args))
 		(cond x
 			([string] (lua-raw "return x .. y"))
-			(_        (lua-raw "return x + y")))))
+			([list]
+				(cond y
+					([list] (join x y))
+					(_ (push-tail! y x))))
+			(_ (lua-raw "return x + y")))))
+
 (defn (^- x y ...)
 	(if (> (# args) 2)
 		(foldl ^- (head args) (tail args))
@@ -394,3 +400,20 @@
 				(elem? a xs)))
 		((eq? a li) true)
 		(_ false)))
+
+;; ### `join li1 li2`
+;; join the two given lists
+;; --
+(defn (join li1 li2)
+	(with (ret (copy li1))
+		(map li2 (λ (x) (push-tail! x ret)))
+		ret))
+
+;; ### `copy li1`
+;; copy a list
+;; --
+(defn (copy li1)
+	(with (ret '())
+		(map li1 (λ (x)
+			(push-tail! x ret)))
+		ret))
