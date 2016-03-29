@@ -1,4 +1,4 @@
-gprelude
+prelude
 =======
 import this if you want anything to work
 
@@ -153,3 +153,22 @@ join the two given lists
 
 ###### `copy li1`
 copy a list
+
+
+###### `take n li`
+take the first `n`th elements of `li`
+
+
+###### `int? x`
+returns true if `x` is an integer (below 2³²)
+
+
+###### `int x`
+return the integer form of `x` if `x` passes `int?`.
+if `x` is not an integer, then `int x` returns x.
+
+
+###### `id x`
+The [identity](https://en.wikipedia.org/wiki/Identity_function) function.
+
+

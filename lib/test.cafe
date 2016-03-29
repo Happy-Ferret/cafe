@@ -27,12 +27,12 @@
 ;; internal use function for adding a test to the failed-tests list.
 ;; --
 	(defn (tests/fail-test desc value expr)
-		(hash-map/set tests-failed (string/format "%s: expected %s, got %s" (tostring desc) (tostring value) (tostring expr)) true))
+		(hash-map/set tests-failed (string/format "%s: expected %s, got %s" (describe desc) (describe value) (describe expr)) true))
 ;; ###### `tests/fail-test desc value expr`
 ;; internal use function for adding a test to the passed-tests list.
 ;; --
 	(defn (tests/pass-test desc value expr)
-		(hash-map/set tests-passed (string/format "%s" (tostring desc) (tostring value) (tostring expr)) true))
+		(hash-map/set tests-passed (string/format "%s" (describe desc) (describe value) (describe expr)) true))
 ;; ###### `tests/print-tests`
 ;; print tests results as described in the opening paragraph
 ;; --

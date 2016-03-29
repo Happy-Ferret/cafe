@@ -293,7 +293,10 @@
 	(if (and (cmp (type a) (type b)) (negcmp (type a) "function"))
 		(cond a
 			([list] (list-equals a b))
-			(_ (cmp a b)))))
+			(_ (cmp a b)))
+		(if (and (= (type a) "function") (= (type a) "function"))
+			(cmp a b)
+			false)))
 
 (defn (^!= x y)  (not (= x y)))
 (defn (^> x y)   (lua-raw "return x > y"))
@@ -342,6 +345,8 @@
 		(lua-raw "return x ^ y")))
 (defn (^# y)     (lua-raw "return #y"))
 (def ^?? ^or :global)
+(defn (^>= x y)  (lua-raw "return x >= y"))
+(defn (^<= x y)  (lua-raw "return x <= y"))
 
 ;;@version 5.3 eq
 (defn (^>> x y ...)
@@ -362,10 +367,6 @@
 		(lua-raw "return x & y")))
 
 (defn (^~ y)     (lua-raw "return ~y"))
-
-(defn (^>= x y)  (lua-raw "return x >= y"))
-(defn (^<= x y)  (lua-raw "return x <= y"))
-
 ;;@else
 ;;@warn Compiling without support for bitwise operators!
 ;;@end
@@ -376,7 +377,7 @@
 (defn (range fin)
 	(if (= fin 0)
 		'()
-		(fin . (range (- fin 1)))))
+		(join (range (- fin 1)) fin)))
 
 ;; ###### `partial fn x`
 ;; return a function that when invoked applies the given function (`fn`) with parameters `x` and parameters given to the return function.
@@ -405,9 +406,15 @@
 ;; join the two given lists
 ;; --
 (defn (join li1 li2)
-	(with (ret (copy li1))
-		(map li2 (λ (x) (push-tail! x ret)))
-		ret))
+	(cond li2
+		([list]
+			(with (ret (copy li1))
+				(map li2 (λ (x) (push-tail! x ret)))
+				ret))
+		(_
+			(cond li1
+				([list] (push-tail! li2 li1))
+				(_ (li1 . li2))))))
 
 ;; ###### `copy li1`
 ;; copy a list
@@ -417,3 +424,39 @@
 		(map li1 (λ (x)
 			(push-tail! x ret)))
 		ret))
+
+;; ###### `take n li`
+;; take the first `n`th elements of `li`
+;; --
+(defn (take n li)
+	(cond li
+		([list]
+			(cond n
+				((<= n 0) '())
+				((> n (# li)) (false . (string/format "you can't take %d from a list of length %d" n (# li))))
+				(_ (cond li
+					([list|0|] '())
+					([list|x:xs|] (x . (take (- n 1) xs)))
+					(_ (do (print li) li))))))
+		(_ li)))
+
+;; ###### `int? x`
+;; returns true if `x` is an integer (below 2³²)
+;; --
+(defn (int? x)
+	(if (< (^ 2 32) x)
+		(head (pcall ^| x 0))
+		false))
+
+;; ###### `int x`
+;; return the integer form of `x` if `x` passes `int?`.
+;; if `x` is not an integer, then `int x` returns x.
+;; --
+(defn (int x)
+	(if (int? x)
+		(| x 0) x))
+
+;; ###### `id x`
+;; The [identity](https://en.wikipedia.org/wiki/Identity_function) function.
+;; --
+(defn (id x) x)
