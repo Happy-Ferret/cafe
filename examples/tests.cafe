@@ -22,13 +22,13 @@
 
 ;; Test basic list manipulation
 
-(tests/expect! (map '(1 2 3) (λ ())) {} "mapping λ() over a list of numbers should return an empty list")
+(tests/expect! (map '(1 2 3) (λ ())) '() "mapping λ() over a list of numbers should return an empty list")
 (tests/expect! (tail (1 . 2)) 2 "the tail of 1 . 2 should be 2")
 (tests/expect! (head (1 . 2)) 1 "the head of 1 . 2 should be 1")
-(tests/expect! (tail '(1 2 3)) (2 . 3) "the tail of {1, 2, 3} should be 2 . 3")
-(tests/expect! (filter '(1 2 3 4) (λ (n) (= (% n 2) 0))) '(2 4) "filtering {1, 2, 3, 4} for even numbers should be 2 . 4")
-(tests/expect! (size '(1 2 3 4)) 4 "the size of {1, 2, 3, 4} should be 4")
-(tests/expect! (take 2 '(1 2 3 4)) '(1 2) "taking the first 2 elements of {1, 2, 3, 4} should be 1 . 2")
+(tests/expect! (tail '(1 2 3)) (2 . 3) "the tail of 3 should be 2 . 3")
+(tests/expect! (filter '(1 2 3 4) (λ (n) (= (% n 2) 0))) '(2 4) "filtering 4 for even numbers should be 2 . 4")
+(tests/expect! (size '(1 2 3 4)) 4 "the size of '(1 2 3 4) should be 4")
+(tests/expect! (take 2 '(1 2 3 4)) '(1 2) "taking the first 2 elements of '(1 2 3 4) should be 1 . 2")
 (tests/expect! (head (take 1 '(1 2 3 4))) (head '(1 2 3 4)) "taking the first element of a list should be equivalent to taking the head of said list")
 (tests/expect! (take 10 (map (curry (partial ^^ 2) int) (range 20))) '(2 4 8 16 32 64 128 256 512 1024) "taking the first 10 powers of two should be the 10 first powers of two")
 
@@ -36,10 +36,15 @@
 
 (tests/expect! (= 1 1) true "1 and 1 should be equivalent")
 (tests/expect! (= 1 2) false "1 and 2 should not be equivalent")
-(tests/expect! (list? '(1 2 3)) true "{1, 2, 3} should be list")
-(tests/expect! (pair? '(1 2 3)) false "{1, 2, 3} should not be a pair")
+(tests/expect! (list? '(1 2 3)) true "'(1 2 3) should be list")
+(tests/expect! (pair? '(1 2 3)) false "'(1  2 3) should not be a pair")
 (tests/expect! (pair? (1 . 2)) true "1 . 2 should be a pair")
-(tests/expect! (= '(1 2) (1 . 2)) true "1 . 2 and {1, 2} should be equivalent")
+(tests/expect! (= '(1 2) (1 . 2)) true "1 . 2 and '(1 2) should be equivalent")
+
+;; Test some other standard library functions
+(tests/expect! (id 1) 1 "the identity of 1 should be 1")
+(tests/expect! (id id) id "the identity of the identity function should be the identity function")
+(tests/expect! (id '(1 2 3)) '(1 2 3) "the identity of '(1 2 3) should be '(1 2 3)")
 
 ;; Print results
 (tests/print-tests)
