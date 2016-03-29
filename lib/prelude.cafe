@@ -6,19 +6,19 @@
 ;; --
 
 ;; ## Symbols
-;; ##### `*standard-output*`
+;; ###### `*standard-output*`
 ;; global symbol bound to the stdout stream
 ;; --
 (def *standard-output* io/stdout)
-;; ##### `*standard-error*`
+;; ###### `*standard-error*`
 ;; global symbol bound to the stderr stream
 ;; --
 (def *standard-error* io/stderr)
-;; ##### `*standard-input*`
+;; ###### `*standard-input*`
 ;; global symbol bound to the stdin stream
 ;; --
 (def *standard-input* io/stdin)
-;; ##### `*version*`
+;; ###### `*version*`
 ;; global symbol bound to the Lua version currently in use, and the semver version of the compiler itself
 ;; --
 (def *version* (string/format "%s - %s" _VERSION "Café v1.0.0"))
@@ -30,7 +30,7 @@
 
 ;; ## Functions
 
-;; ##### `exit-on-error! erfmt ...` or `fail ...`
+;; ###### `exit-on-error! erfmt ...` or `fail ...`
 ;; exits with a formatted error message and status code 1.
 ;; --
 (defn (exit-with-error! erfmt ...)
@@ -38,7 +38,7 @@
 	(os/exit 1))
 (def fail exit-with-error!)
 
-;; ##### `print! stream string`
+;; ###### `print! stream string`
 ;; print a string to a stream
 ;; --
 (defn (print! stream something)
@@ -46,19 +46,19 @@
 		(with (stream (choose-stream stream))
 			(.stream write something "\n"))))
 
-;; ##### `print! stream fmtstr va_args`
+;; ###### `print! stream fmtstr va_args`
 ;; print a formatted string to a stream
 ;; --
 (defn (print-formatted! stream fmtstr ...)
 	(print! stream (.fmtstr format ...)))
 
-;; #### `format! fmtstr va_args`
+;; ###### `format! fmtstr va_args`
 ;; print a formatted string to *standard-output* unconditionally
 ;; --
 (defn (format! fmtstr ...)
 	(print-formatted! *standard-output* fmtstr ...))
 
-;; ##### `cons list elem`
+;; ###### `cons list elem`
 ;; cons an element in front of a list
 ;; --
 (defn (cons car cdr)
@@ -66,7 +66,7 @@
 		([list,pair] '(car (table/unpack cdr)))
 		(_ (list car cdr))))
 
-;; ##### `head list`
+;; ###### `head list`
 ;; return the first element of a list
 ;; --
 (defn (head li)
@@ -76,26 +76,26 @@
 			li)
 		nil))
 
-;; ##### `list`
+;; ###### `list`
 ;; create a list from given values
 ;; --
 (defn (list ...) args)
 
-;; ##### `push! car rest`
+;; ###### `push! car rest`
 ;; insert a value at the head of a list, mutating it.
 ;; --
 (defn (push-head! car rest)
 	(table/insert rest 1 car)
 	rest)
 
-;; ##### `! end rest`
+;; ###### `! end rest`
 ;; insert a value at the end of a list, mutating it.
 ;; --
 (defn (push-tail! fin rest)
 	(table/insert rest fin)
 	rest)
 
-;; ##### `tail list`
+;; ###### `tail list`
 ;; return the rest of the list, without head
 ;; --
 (defn (tail l)
@@ -109,7 +109,7 @@
 					(head ret)
 					ret)))))
 
-;; ##### `map list fn`
+;; ###### `map list fn`
 ;; modify a list using a function, returning a new list
 ;; --
 (defn (map li fn)
@@ -122,7 +122,7 @@
 			(for i 1 (# fn)
 				(push-tail! (li (nth i fn)) ret))
 			ret))))
-;; ##### `size li`
+;; ###### `size li`
 ;; determine the size of a list.
 ;; --
 (defn (size li)
@@ -131,7 +131,7 @@
 			(def size (+ 1 size) :global)))
 		size))
 
-;; ##### `filter list fn`
+;; ###### `filter list fn`
 ;; filter a list using a predicate.
 ;; --
 (defn (filter li f)
@@ -144,21 +144,21 @@
 					((f x) (x . (filter xs f)))
 					(_ (filter xs f)))))))
 
-;; ##### `curry fna fnb`
+;; ###### `curry fna fnb`
 ;; merge two functions together, applying the second over the result of the first
 ;; --
 
 (defn (curry a b)
 	(λ (...) (b (a ...))))
 
-;; ##### `compose fna fnb`
+;; ###### `compose fna fnb`
 ;; merge two functions together, applying the first over the result of the second
 ;; --
 
 (defn (compose a b)
 	(λ (...) (a (b ...))))
 
-;; ##### `exists thing`
+;; ###### `exists thing`
 ;; returns false if:
 ;; - thing is a table or a string and thing.length is 0
 ;; - thing is falsy (false, nil)
@@ -174,7 +174,7 @@
 			true)
 		false))
 
-;; ##### `describe a`
+;; ###### `describe a`
 ;; format `a` for printing.
 ;; --
 (defn (describe x pt)
@@ -193,55 +193,41 @@
 			(string/format "%s: %s" (type x) (describe-internal x))
 			(describe-internal x)))
 
-;; ##### `type a`
+;; ###### `type a`
 ;; reimplementation of Lua's `type`
 ;; --
 (with (old-type type)
 	(defn (type a)
-		(if (= (old-type a) "table")
+		(if (lua-raw "__old45type__(a) == 'table'")
 			(if (= (lua-raw "a._type") "hashmap")
 				"hashmap"
 					"list")
 				(old-type a))))
 
-;; ##### `pair? a`
+;; ###### `pair? a`
 ;; returns true if a is a pair
 ;; --
 (defn (pair? a)
 	(= (# a) 2))
 
-;; ##### `pair? a`
+;; ###### `pair? a`
 ;; returns true if a is a list
 ;; --
 (defn (list? a)
 	(= "list" (type a)))
 
-;; ##### `eq? a b`
+;; ###### `eq? a b`
+;; ** deprecated **: use `=` instead.
 ;; returns true if both parameters are equal
 ;; --
 
-;; ##### `neq? a b`
+;; ###### `neq? a b`
+;; ** deprecated **: use `!=` instead.
 ;; returns true if both parameters are not equal
 ;; --
-(defn (eq? a b)
-	(if (or (= (type a) "function") (= (type b) "function"))
-		false
-		(with (list-equals (λ (a b)
-			(with (ret true)
-				(if (= (# a) (# b))
-					(for i 1 (# a)
-						(if (!= (nth i a) (nth i b))
-							(def ret false :global))))
-					ret)))
-			(if (or (= (type a) "pair") (= (type a) "list"))
-				(list-equals a b)
-				(= a b)))))
-
-(defn (neq? a b)
-	(not (eq? a b)))
 
 
-;; ##### `nth num list`
+;; ###### `nth num list`
 ;; get num-th element of list
 ;; --
 (defn (nth n l)
@@ -249,7 +235,7 @@
 		(head l)
 		(nth (- n 1) (tail l))))
 
-;; ##### `null? list`
+;; ###### `null? list`
 ;; returns true if list is empty.
 ;; --
 (defn (empty? lst)
@@ -258,7 +244,7 @@
 		(_ true)))
 (def null? empty?)
 
-;; ##### `foldl func accum lst`
+;; ###### `foldl func accum lst`
 ;; combine elements of a list into an accumulator using a function.
 ;; --
 (defn (foldl func accum lst)
@@ -275,7 +261,7 @@
 		fin
 		(func (head lst) (foldr func fin (tail lst)))))
 
-;; ##### `truth?`
+;; ###### `truth?`
 ;; returns true if x is truthy, or:
 ;; - if x is a pair, return if the first element is truthy
 ;; - if x is a list, return if all elements are truthy.
@@ -294,8 +280,22 @@
 
 ; Operators
 
-(defn (^= x y)   (lua-raw "return x == y"))
-(defn (^!= x y)  (lua-raw "return x ~= y"))
+(defn (^= a b)
+	(defn (list-equals a b)
+		(with (ret true)
+			(if (= (# a) (# b))
+				(for i 1 (# a)
+					(if (!= (nth i a) (nth i b))
+						(def ret false :global))))
+			ret))
+	(defn (cmp a b) (lua-raw "return a == b"))
+	(defn (negcmp a b) (lua-raw "return a ~= b"))
+	(if (and (cmp (type a) (type b)) (negcmp (type a) "function"))
+		(cond a
+			([list] (list-equals a b))
+			(_ (cmp a b)))))
+
+(defn (^!= x y)  (not (= x y)))
 (defn (^> x y)   (lua-raw "return x > y"))
 (defn (^< x y)   (lua-raw "return x < y"))
 (defn (^not x)   (lua-raw "return not x"))
@@ -370,7 +370,7 @@
 ;;@warn Compiling without support for bitwise operators!
 ;;@end
 
-;; ### `range end`
+;; ###### `range end`
 ;; create a list of integers from 0 to `end`
 ;; --
 (defn (range fin)
@@ -378,18 +378,18 @@
 		'()
 		(fin . (range (- fin 1)))))
 
-;; ### `partial fn x`
+;; ###### `partial fn x`
 ;; return a function that when invoked applies the given function (`fn`) with parameters `x` and parameters given to the return function.
 ;; --
 (defn (partial fn x)
 	(λ (y) (fn x y)))
 
-;; ### `flip x`
+;; ###### `flip x`
 ;; return a function that when invoked applies the given function (`x`) with it's parameters in reverse order.
 (defn (flip x)
 	(λ (a b) (x b a)))
 
-;; ### `elem? a li`
+;; ###### `elem? a li`
 ;; return true if `a` is an element of `li`, false otherwise.
 ;; --
 (defn (elem? a li)
@@ -401,7 +401,7 @@
 		((eq? a li) true)
 		(_ false)))
 
-;; ### `join li1 li2`
+;; ###### `join li1 li2`
 ;; join the two given lists
 ;; --
 (defn (join li1 li2)
@@ -409,7 +409,7 @@
 		(map li2 (λ (x) (push-tail! x ret)))
 		ret))
 
-;; ### `copy li1`
+;; ###### `copy li1`
 ;; copy a list
 ;; --
 (defn (copy li1)

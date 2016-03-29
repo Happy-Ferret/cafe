@@ -11,19 +11,19 @@ it also features a simple test results screen that displays
 
 test puts all functions in the namespace `tests/`.   
 ## Functions
-#### `tests/fail-test desc value expr`
+###### `tests/fail-test desc value expr`
 internal use function for adding a test to the failed-tests list.
 
 
-#### `tests/fail-test desc value expr`
+###### `tests/fail-test desc value expr`
 internal use function for adding a test to the passed-tests list.
 
 
-#### `tests/print-tests`
+###### `tests/print-tests`
 print tests results as described in the opening paragraph
 
 
-#### `tests/expect! expr value desc`
+###### `tests/expect! expr value desc`
 Compare expected values and given values, then appropriately class the test as passed or failed.
 
 

@@ -215,7 +215,7 @@ module.exports.parse = (string, astf) ->
 								valu: toks2ast n[1]
 							}
 					}
-				else if tokens[0][0] is '\''
+				else if tokens?[0]?[0] is '\''
 					{
 						type: 'call_function'
 						name: symbol 'list'

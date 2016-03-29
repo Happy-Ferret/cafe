@@ -10,7 +10,7 @@
 (def b (λ () (print "hello, world!")))
 (tests/expect! a 1 "a should be bound to 1")
 (tests/expect! (type b) "function" "b should be bound to a value with type of function")
-(tests/expect! (eq? (type a) (type b)) false "a and b shouldn't be the same type")
+(tests/expect! (= (type a) (type b)) false "a and b shouldn't be the same type")
 
 ;; Test defn
 
@@ -31,12 +31,12 @@
 
 ;; Test tests
 
-(tests/expect! (eq? 1 1) true "1 and 1 should be equivalent")
-(tests/expect! (eq? 1 2) false "1 and 2 should not be equivalent")
+(tests/expect! (= 1 1) true "1 and 1 should be equivalent")
+(tests/expect! (= 1 2) false "1 and 2 should not be equivalent")
 (tests/expect! (list? (list 1 2 3)) true "{1, 2, 3} should be list")
 (tests/expect! (pair? (list 1 2 3)) false "{1, 2, 3} should not be a pair")
 (tests/expect! (pair? (1 . 2)) true "1 . 2 should be a pair")
-(tests/expect! (eq? (list 1 2) (1 . 2)) true "1 . 2 and {1, 2} should be equivalent")
+(tests/expect! (= (list 1 2) (1 . 2)) true "1 . 2 and {1, 2} should be equivalent")
 
 ;; Print results
 (tests/print-tests)

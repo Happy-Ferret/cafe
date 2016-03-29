@@ -1,87 +1,87 @@
-prelude
+gprelude
 =======
 import this if you want anything to work
 
 
 ## Symbols
-##### `*standard-output*`
+###### `*standard-output*`
 global symbol bound to the stdout stream
 
 
-##### `*standard-error*`
+###### `*standard-error*`
 global symbol bound to the stderr stream
 
 
-##### `*standard-input*`
+###### `*standard-input*`
 global symbol bound to the stdin stream
 
 
-##### `*version*`
+###### `*version*`
 global symbol bound to the Lua version currently in use, and the semver version of the compiler itself
 
 
 ## Functions
-##### `exit-on-error! erfmt ...` or `fail ...`
+###### `exit-on-error! erfmt ...` or `fail ...`
 exits with a formatted error message and status code 1.
 
 
-##### `print! stream string`
+###### `print! stream string`
 print a string to a stream
 
 
-##### `print! stream fmtstr va_args`
+###### `print! stream fmtstr va_args`
 print a formatted string to a stream
 
 
-#### `format! fmtstr va_args`
+###### `format! fmtstr va_args`
 print a formatted string to *standard-output* unconditionally
 
 
-##### `cons list elem`
+###### `cons list elem`
 cons an element in front of a list
 
 
-##### `head list`
+###### `head list`
 return the first element of a list
 
 
-##### `list`
+###### `list`
 create a list from given values
 
 
-##### `push! car rest`
+###### `push! car rest`
 insert a value at the head of a list, mutating it.
 
 
-##### `! end rest`
+###### `! end rest`
 insert a value at the end of a list, mutating it.
 
 
-##### `tail list`
+###### `tail list`
 return the rest of the list, without head
 
 
-##### `map list fn`
+###### `map list fn`
 modify a list using a function, returning a new list
 
 
-##### `size li`
+###### `size li`
 determine the size of a list.
 
 
-##### `filter list fn`
+###### `filter list fn`
 filter a list using a predicate.
 
 
-##### `curry fna fnb`
+###### `curry fna fnb`
 merge two functions together, applying the second over the result of the first
 
 
-##### `compose fna fnb`
+###### `compose fna fnb`
 merge two functions together, applying the first over the result of the second
 
 
-##### `exists thing`
+###### `exists thing`
 returns false if:
 - thing is a table or a string and thing.length is 0
 - thing is falsy (false, nil)
@@ -89,67 +89,67 @@ returns false if:
 if not, returns true.
 
 
-##### `describe a`
+###### `describe a`
 format `a` for printing.
 
 
-##### `type a`
+###### `type a`
 reimplementation of Lua's `type`
 
 
-##### `pair? a`
+###### `pair? a`
 returns true if a is a pair
 
 
-##### `pair? a`
+###### `pair? a`
 returns true if a is a list
 
 
-##### `eq? a b`
+###### `eq? a b`
+** deprecated **: use `=` instead.
 returns true if both parameters are equal
 
 
-##### `neq? a b`
+###### `neq? a b`
+** deprecated **: use `!=` instead.
 returns true if both parameters are not equal
 
 
-##### `nth num list`
+###### `nth num list`
 get num-th element of list
 
 
-##### `null? list`
+###### `null? list`
 returns true if list is empty.
 
 
-##### `foldl func accum lst`
+###### `foldl func accum lst`
 combine elements of a list into an accumulator using a function.
 
 
-##### `truth?`
+###### `truth?`
 returns true if x is truthy, or:
 - if x is a pair, return if the first element is truthy
 - if x is a list, return if all elements are truthy.
 
 
-### `range end`
+###### `range end`
 create a list of integers from 0 to `end`
 
 
-### `partial fn x`
+###### `partial fn x`
 return a function that when invoked applies the given function (`fn`) with parameters `x` and parameters given to the return function.
 
 
-### `flip x`
+###### `flip x`
 return a function that when invoked applies the given function (`x`) with it's parameters in reverse order.
-### `elem? a li`
+###### `elem? a li`
 return true if `a` is an element of `li`, false otherwise.
 
 
-### `join li1 li2`
+###### `join li1 li2`
 join the two given lists
 
 
-### `copy li1`
+###### `copy li1`
 copy a list
-
-
