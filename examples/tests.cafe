@@ -1,0 +1,42 @@
+;;@import hashmap math test
+
+;; Test let
+(let ((x 1) (y (+ 1 1)))
+	(tests/expect! x 1 "x should be bound to 1")
+	(tests/expect! y 2 "y should be bound to 2"))
+
+;; Test def
+(def a 1)
+(def b (λ () (print "hello, world!")))
+(tests/expect! a 1 "a should be bound to 1")
+(tests/expect! (type b) "function" "b should be bound to a value with type of function")
+(tests/expect! (eq? (type a) (type b)) false "a and b shouldn't be the same type")
+
+;; Test defn
+
+(defn (add-and-sub a b c)
+	(- (+ a b) c))
+
+(tests/expect! (add-and-sub 1 2 3) 0 "add-and-sub called with parameters 1, 2 and 3 should return 0")
+(tests/expect! (type add-and-sub) "function" "add-and-sub should be bound to a function")
+
+;; Test basic list manipulation
+
+(tests/expect! (map (list 1 2 3) (λ ())) {} "mapping λ() over a list of numbers should return an empty list")
+(tests/expect! (tail (1 . 2)) 2 "the tail of 1 . 2 should be 2")
+(tests/expect! (head (1 . 2)) 1 "the head of 1 . 2 should be 1")
+(tests/expect! (tail (list 1 2 3)) (2 . 3) "the tail of {1, 2, 3} should be 2 . 3")
+(tests/expect! (filter (list 1 2 3 4) (λ (n) (= (% n 2) 0))) (list 2 4) "filtering {1, 2, 3, 4} for even numbers should be 2 . 4")
+(tests/expect! (size (list 1 2 3 4)) 4 "the size of {1, 2, 3, 4} should be 4")
+
+;; Test tests
+
+(tests/expect! (eq? 1 1) true "1 and 1 should be equivalent")
+(tests/expect! (eq? 1 2) false "1 and 2 should not be equivalent")
+(tests/expect! (list? (list 1 2 3)) true "{1, 2, 3} should be list")
+(tests/expect! (pair? (list 1 2 3)) false "{1, 2, 3} should not be a pair")
+(tests/expect! (pair? (1 . 2)) true "1 . 2 should be a pair")
+(tests/expect! (eq? (list 1 2) (1 . 2)) true "1 . 2 and {1, 2} should be equivalent")
+
+;; Print results
+(tests/print-tests)
