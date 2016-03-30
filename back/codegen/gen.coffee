@@ -344,9 +344,11 @@ module.exports.codegen = (ast) ->
 			for nam, expr of decd_funs
 				if !/([_\w\d]+)\.([_\w\d])+/gmi.test nam
 					fns.push nam
-				else
-					console.log "not pre-declaring namespaced #{nam}"
 
-		["local #{fns.join ', '}"].concat x
+		decs = ["local #{fns.join ', '};\n"]
+		if fns.length > 0
+			decs.concat x
+		else
+			x
 	else
 		['']
