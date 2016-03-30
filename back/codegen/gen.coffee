@@ -71,6 +71,8 @@ class Generator
 
 
 module.exports.codegen = (ast) ->
+	decd_funs = {}
+
 	should_return = (expr) ->
 		if expr.is_tail?
 			if (expr.type is 'for_loop') and (expr.type is 'assignment') and (expr.type is 'raw')
@@ -101,9 +103,13 @@ module.exports.codegen = (ast) ->
 	codegen_function = (expr) ->
 		gen = new Generator()
 		if expr.name? and expr.args?.join? and expr.body?
-			gen.startBlock "function #{expr.name}(#{expr.args.join ', '})"
-			codegen_function_body expr, gen
-			gen.endBlock "end"
+			if !decd_funs[expr.name]?
+				gen.startBlock "function #{expr.name}(#{expr.args.join ', '})"
+				codegen_function_body expr, gen
+				gen.endBlock "end"
+				decd_funs[expr.name] = {expr}
+			else
+				false
 
 		gen.join ';\n'
 
@@ -329,8 +335,18 @@ module.exports.codegen = (ast) ->
 
 	if ast?
 		if ast?.map?
-			ast.map intermediate_codegen
+			x = ast.map intermediate_codegen
 		else
-			[intermediate_codegen ast]
+			x = [intermediate_codegen ast]
+
+		if decd_funs?
+			fns = []
+			for nam, expr of decd_funs
+				if !/([_\w\d]+)\.([_\w\d])+/gmi.test nam
+					fns.push nam
+				else
+					console.log "not pre-declaring namespaced #{nam}"
+
+		["local #{fns.join ', '}"].concat x
 	else
 		['']
