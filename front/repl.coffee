@@ -8,7 +8,8 @@ readline                = require 'readline'
 arrow = "\x1b[1;31m→\x1b[0m"
 
 ## Install special REPL functions
-compile_cache = [
+compile_cache = []
+repl_special = [
 	"""
 	function io.read()
 		return 'io.read is unimplemented in the REPL'
@@ -52,7 +53,7 @@ eval_string = (str, interp, cb) ->
 	if ast.length >= 1
 		ast[ast.length - 1].is_tail = true
 		code = do ->
-			"#{compile_cache.join ';\n'};\nrepl_describe((function() #{codegen(ast).join ';'} end)(), true)"
+			"#{compile_cache.join ';\n'};#{repl_special.join ';\n'}\nrepl_describe((function() #{codegen(ast).join ';'} end)(), true)"
 
 		if code.length >= 1
 			fs.writeFile file, code, ->
@@ -92,11 +93,11 @@ compile = (module) ->
 	if resolve(module)?
 		compile_cache.push codegen(parse(preprocess fs.readFileSync(resolve(module), {encoding: 'utf8'}), null, null, interpr)).join ';' + '\n'
 	else
-		compile_cache.push codegen(parse(preprocess(module, null, null, interpr))).join ';'
+		compile_cache.push codegen(parse(preprocess(module, null, null, interpr))).join '\n;'
 
 ## Warm compilation cache by compiling the built-in modules
 warm_cache = ->
-	['prelude'].map (x) -> compile x
+	['prelude', 'math', 'hashmap'].map (x) -> compile x
 plural = ->
 	if compile_cache.length is '1'
 		''
@@ -154,12 +155,12 @@ module.exports.repl = (intpt, cb) ->
 				for ast in parsed
 					if ast.type is 'assignment' or ast.type is 'define_function'
 						skip = true
-						compile_cache.push codegen(ast)
+						compile_cache.push codegen(ast).join '\n'
 						do ri.prompt
 					else if ast.type is 'call_function'
 						if ast.name is symbol 'require!'
 							skip = true
-							compile_cache.push codegen ast
+							compile_cache.push codegen(ast).join '\n'
 							do ri.prompt
 				if not skip
 					eval_string do line.trim, interpr, -> do ri.prompt
