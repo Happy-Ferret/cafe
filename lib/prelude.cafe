@@ -197,7 +197,7 @@
 ;; reimplementation of Lua's `type`
 ;; --
 (with (old-type type)
-	(defn (type a)
+	(defn (_G/type a)
 		(if (raweq? (old-type a) "table")
 			(if (= (lua-raw "a._type") "hashmap")
 				"hashmap"
