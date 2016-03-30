@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 for testsuite in $(grep test package.json | sed -re 's|\s*"(\S+)":.*$|\1|g' | grep test); do
 	echo -e "\x1b[1;34m::\x1b[0m Testing with $(lua$(echo $testsuite | sed -re 's/test(.*)$/\1/') -e 'print(_VERSION);') (lua$(echo $testsuite | sed -re 's/test(.*)$/\1/'))"
