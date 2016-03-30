@@ -197,8 +197,8 @@
 ;; reimplementation of Lua's `type`
 ;; --
 (with (old-type type)
-	(defn (_G/type a)
-		(if (lua-raw "__old45type__(a) == 'table'")
+	(defn (type a)
+		(if (raweq? (old-type a) "table")
 			(if (= (lua-raw "a._type") "hashmap")
 				"hashmap"
 					"list")
@@ -225,6 +225,18 @@
 ;; ** deprecated **: use `!=` instead.
 ;; returns true if both parameters are not equal
 ;; --
+
+
+;; ###### `raweq? a b`
+;; returns true if the parameters point to the same object
+;; --
+
+;; ###### `rawneq? a b`
+;; returns true if the parameters do not point to the same object
+;; --
+
+(defn (raweq? x y)   (lua-raw "return x == y"))
+(defn (rawneq? x y)  (lua-raw "return x ~= y"))
 
 
 ;; ###### `nth num list`
@@ -288,14 +300,12 @@
 					(if (!= (nth i a) (nth i b))
 						(def ret false :global))))
 			ret))
-	(defn (cmp a b) (lua-raw "return a == b"))
-	(defn (negcmp a b) (lua-raw "return a ~= b"))
-	(if (and (cmp (type a) (type b)) (negcmp (type a) "function"))
+	(if (and (raweq? (type a) (type b)) (rawneq? (type a) "function"))
 		(cond a
 			([list] (list-equals a b))
-			(_ (cmp a b)))
+			(_ (raweq? a b)))
 		(if (and (= (type a) "function") (= (type a) "function"))
-			(cmp a b)
+			(raweq? a b)
 			false)))
 
 (defn (^!= x y)  (not (= x y)))
