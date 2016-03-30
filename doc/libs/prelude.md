@@ -115,6 +115,14 @@ returns true if both parameters are equal
 returns true if both parameters are not equal
 
 
+###### `raweq? a b`
+returns true if both parameters point to the same object
+
+
+###### `rawneq? a b`
+returns true if both parameters do not point to the same object
+
+
 ###### `nth num list`
 get num-th element of list
 
