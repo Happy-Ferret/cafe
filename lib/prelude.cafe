@@ -378,7 +378,25 @@
 
 (defn (^~ y)     (lua-raw "return ~y"))
 ;;@else
-;;@warn Compiling without support for bitwise operators!
+;;@warn Falling back to bit32 library
+(with (bit (if bit32 bit32 (require "bit32")))
+	(defn (^>> x y ...)
+		(if (> (# args) 2)
+			(foldl ^>> (head args) (tail args))
+			(bit/rshift x y)))
+	(defn (^<< x y ...)
+		(if (> (# args) 2)
+			(foldl ^<< (head args) (tail args))
+			(bit/lshift x y)))
+	(defn (^| x y ...)
+		(if (> (# args) 2)
+			(foldl ^| (head args) (tail args))
+			(bit/bor x y)))
+	(defn (^& x y ...)
+		(if (> (# args) 2)
+			(foldl ^& (head args) (tail args))
+			(bit/band x y)))
+	(defn (^~  y) (bit/bnot y)))
 ;;@end
 
 ;; ###### `range end`
