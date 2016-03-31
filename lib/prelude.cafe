@@ -379,7 +379,12 @@
 (defn (^~ y)     (lua-raw "return ~y"))
 ;;@else
 ;;@warn Falling back to bit32 library
-(with (bit (if bit32 bit32 (require "bit32")))
+(defn (get-bit)
+	(if (>= (tonumber (._VERSION match "Lua ([%d%.]+)")) 5.2)
+		(require "bit")
+		(if bit32
+			bit32 (require "bit32"))))
+(with (bit (get-bit))
 	(defn (^>> x y ...)
 		(if (> (# args) 2)
 			(foldl ^>> (head args) (tail args))
