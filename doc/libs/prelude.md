@@ -116,11 +116,11 @@ returns true if both parameters are not equal
 
 
 ###### `raweq? a b`
-returns true if both parameters point to the same object
+returns true if the parameters point to the same object
 
 
 ###### `rawneq? a b`
-returns true if both parameters do not point to the same object
+returns true if the parameters do not point to the same object
 
 
 ###### `nth num list`

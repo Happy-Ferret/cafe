@@ -288,7 +288,7 @@
 					(if (not n)
 						(def ret false :global))))
 				ret)
-			(?? x false))))
+			(or x false))))
 
 ; Operators
 
@@ -354,7 +354,7 @@
 		(foldl ^^ (head args) (tail args))
 		(lua-raw "return x ^ y")))
 (defn (^# y)     (lua-raw "return #y"))
-(def ^?? ^or :global)
+(def ^?? ^or)
 (defn (^>= x y)  (lua-raw "return x >= y"))
 (defn (^<= x y)  (lua-raw "return x <= y"))
 
@@ -427,7 +427,7 @@
 		([list|x:xs|]
 			(if (= x a) true
 				(elem? a xs)))
-		((eq? a li) true)
+		((= a li) true)
 		(_ false)))
 
 ;; ###### `join li1 li2`

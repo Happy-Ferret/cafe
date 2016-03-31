@@ -250,7 +250,7 @@ module.exports.codegen = (ast) ->
 							matches = n.match(/(\w+)|(\w+):(\w+)|/gmi).filter (x) -> x.length >= 1
 							x = "(type(value) == '#{matches[0]}' and head(value) and tail(value))"
 							if !extra[x]?
-								extra[x] = ["#{matches[1]} = head(value)", "#{matches[2]} = tail(value)"]
+								extra[x] = ["local #{matches[1]} = head(value)", "local #{matches[2]} = tail(value)"]
 							x
 						else if /(\w+)\|(\d+)\|/gmi.test n
 							matches = n.match(/(\w+)|(\d+)|/gmi).filter (x) -> x.length >= 1
@@ -345,7 +345,7 @@ module.exports.codegen = (ast) ->
 				if !/([_\w\d]+)\.([_\w\d])+/gmi.test nam
 					fns.push nam
 
-		decs = ["local #{fns.join ', '};\n"]
+		decs = ["local #{fns.join ', '}"]
 		if fns.length > 0
 			decs.concat x
 		else
