@@ -326,12 +326,15 @@
 	(if (> (# args) 2)
 		(foldl ^+ (head args) (tail args))
 		(cond x
-			([string] (lua-raw "return x .. y"))
-			([list]
-				(cond y
+			([string] (cond y
+				([list] (x . y))
+				(_ (lua-raw "return x .. y"))))
+			([list] (cond y
 					([list] (join x y))
 					(_ (push-tail! y x))))
-			(_ (lua-raw "return x + y")))))
+			(_ (cond y
+				([list] (x . y))
+				(_ (lua-raw "return x + y")))))))
 
 (defn (^- x y ...)
 	(if (> (# args) 2)
