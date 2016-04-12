@@ -145,6 +145,16 @@ returns true if x is truthy, or:
 create a list of integers from 0 to `end`
 
 
+###### `cut fn a <> b <>`
+return a function that when invoked applies the given function (`fn`) with parameters `a`, `b`, etc... and parameters given to the return function
+substituted in place of wildcards. `a` and `b` are evaluated when the returned function is called.
+
+
+###### `cute fn a <> b <>`
+return a function that when invoked applies the given function (`fn`) with parameters `a`, `b`, etc... and parameters given to the return function
+substituted in place of wildcards. `a` and `b` are pre-evaluated.
+
+
 ###### `partial fn x`
 return a function that when invoked applies the given function (`fn`) with parameters `x` and parameters given to the return function.
 

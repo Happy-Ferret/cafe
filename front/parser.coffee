@@ -221,6 +221,69 @@ module.exports.parse = (string, astf) ->
 						name: symbol 'list'
 						args: ([toks2ast tokens[0].slice(1)].concat tokens.slice(1)?.map toks2ast)
 					}
+				else if tokens[0] is 'cut'
+					# Build a list of wildcard arguments
+					args = []
+					toks2wild = (item) ->
+						if item is '<>'
+							id = '__arg' + args.length + '__'
+							args.push(id)
+							id
+						else if item is '...'
+							args.push('...')
+							item
+						else
+							toks2ast item
+					func = toks2wild tokens[1]
+					body = tokens.slice(2).map toks2wild
+
+					{
+						type: 'lambda_expr'
+						args: args
+						body: [
+							{
+								type: 'call_function'
+								name: func
+								args: body
+							}
+						]
+					}
+				else if tokens[0] is 'cute'
+					# Build a list of wildcard arguments
+					args = []
+					vars = []
+					toks2wild = (item) ->
+						if item is '<>'
+							id = '__arg' + args.length + '__'
+							args.push(id)
+							id
+						else if item is '...'
+							args.push('...')
+							item
+						else
+							id = '__var' + vars.length + '__'
+							vars.push([id, toks2ast item])
+							id
+					func = toks2wild tokens[1]
+					body = tokens.slice(2).map toks2wild
+
+					{
+						type: 'scoped_block',
+						vars: vars,
+						body: [
+							{
+								type: 'lambda_expr'
+								args: args
+								body: [
+									{
+										type: 'call_function'
+										name: func
+										args: body
+									}
+								]
+							}
+						]
+					}
 				else
 					if tokens[0]?
 						if tokens[1]? and tokens[2]? and tokens[1] is '.'
