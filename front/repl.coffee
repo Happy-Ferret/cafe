@@ -54,6 +54,8 @@ eval_string = (str, interp, cb) ->
 		ast[ast.length - 1].is_tail = true
 		code = do ->
 			x = codegen(ast).join ';'
+			if x.startsWith '--'
+				x = 'return'
 			if !x.startsWith 'return'
 				x = "return #{x}"
 			"#{compile_cache.join ';\n'};#{repl_special.join ';\n'}\nrepl_describe((function() #{x} end)(), true)"
