@@ -18,12 +18,12 @@ specialChars = ['+', '-', '*', '/',
                 '~', '#', '%']
 
 _sc = {}
-kwda = "and break do else elseif end for function  if in local nil not or repeat return then until while".split ' '
+kwda = "and break do else elseif end for function if in local nil not or repeat return then until while".split ' '
 
 symbol = (str) ->
 	encode = (str) ->
 		ps = puny.encode(str).replace /-$/, ''
-		if /^\d/.test ps
+		if /^\d/.test(ps) || ps in kwda
 			"_#{ps}"
 		else ps
 
@@ -240,7 +240,7 @@ module.exports.parse = (string, astf) ->
 			when 'string'
 				if tokens[0] == '"' and tokens.slice(-1)[0] == '"'
 					tokens
-				else if !isNaN(parseFloat(tokens))
+				else if !isNaN(parseFloat(tokens)) && !(new RegExp("[#{specialChars.join '\\'}]", "gmi").test(tokens))
 					tokens
 				else if tokens[0] is '\''
 					{
