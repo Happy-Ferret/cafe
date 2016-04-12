@@ -103,13 +103,11 @@ module.exports.codegen = (ast) ->
 	codegen_function = (expr) ->
 		gen = new Generator()
 		if expr.name? and expr.args?.join? and expr.body?
-			if !decd_funs[expr.name]?
-				gen.startBlock "function #{expr.name}(#{expr.args.join ', '})"
-				codegen_function_body expr, gen
-				gen.endBlock "end"
-				decd_funs[expr.name] = {expr}
-			else
-				false
+			decd_funs[expr.name] = {expr} if !decd_funs[expr.name]?
+
+			gen.startBlock "function #{expr.name}(#{expr.args.join ', '})"
+			codegen_function_body expr, gen
+			gen.endBlock "end"
 
 		gen.join ';\n'
 
