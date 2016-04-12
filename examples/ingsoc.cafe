@@ -1,0 +1,8 @@
+(let ((old-plus ^+))
+	(def ^+ (λ (x y ...)
+		(if (and (= x y) (= x 2))
+			5
+			(old-plus x y))))
+
+	(print-formatted! *standard-output* "2 + 2 == %d" (+ 2 2))
+	(print-formatted! *standard-output* "3 + 1 == %d" (+ 3 1)))
