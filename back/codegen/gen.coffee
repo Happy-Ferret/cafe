@@ -313,6 +313,7 @@ module.exports.codegen = (ast) ->
 					ret[expect_args[i]] = intermediate_codegen toks2ast x
 				ret
 
+			template_string = (str) -> str.replace /\$,(\w+)/gmi, (orig, gr1, indx, str) -> transfargs[gr1] ? 'nil'
 			replace_internal = (sym) ->
 				if sym?.map?
 					sym.map replace_internal
@@ -321,6 +322,8 @@ module.exports.codegen = (ast) ->
 						transfargs[sym.slice 1]
 					else
 						sym.slice 1
+				else if sym?.startsWith?('`"') and sym.slice(-1)[0] is '"'
+					"\"#{template_string sym.slice 2, -1}\""
 				else
 					sym
 
