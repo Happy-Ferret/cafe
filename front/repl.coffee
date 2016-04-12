@@ -53,7 +53,10 @@ eval_string = (str, interp, cb) ->
 	if ast.length >= 1
 		ast[ast.length - 1].is_tail = true
 		code = do ->
-			"#{compile_cache.join ';\n'};#{repl_special.join ';\n'}\nrepl_describe((function() #{codegen(ast).join ';'} end)(), true)"
+			x = codegen(ast).join ';'
+			if !x.startsWith 'return'
+				x = "return #{x}"
+			"#{compile_cache.join ';\n'};#{repl_special.join ';\n'}\nrepl_describe((function() #{x} end)(), true)"
 
 		if code.length >= 1
 			fs.writeFile file, code, ->
@@ -140,10 +143,10 @@ module.exports.repl = (intpt, cb) ->
 				console.log "#{arrow} Cached #{line.replace /^,cache /gmi, ''}. #{compile_cache.length} module#{do plural} currently compiled."
 				do ri.prompt
 			else if line.startsWith ',view-cache'
-				console.log compile_cache.join ';\n'
+				console.log compile_cache.concat(repl_special).join ';\n'
 				do ri.prompt
 			else if line.startsWith ',save-cache'
-				fs.writeFile line.replace(/^,save-cache /gmi, ''), compile_cache.join ';\n', (err) ->
+				fs.writeFile line.replace(/^,save-cache /gmi, ''), compile_cache.concat(repl_special).join ';\n', (err) ->
 					if err?
 						console.log err
 					else

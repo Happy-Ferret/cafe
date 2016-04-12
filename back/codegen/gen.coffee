@@ -1,4 +1,5 @@
-{ symbol } = require '../../front'
+{ symbol
+, toks2ast } = require '../../front'
 fs         = require 'fs'
 
 actual_opch = (opch) -> opch
@@ -70,6 +71,7 @@ class Generator
 			t
 
 
+macros    = {}
 module.exports.codegen = (ast) ->
 	decd_funs = {}
 
@@ -114,7 +116,11 @@ module.exports.codegen = (ast) ->
 	codegen_call = (expr) ->
 		gen = new Generator()
 		if expr.name? and expr.args?
-			gen.write "#{should_return expr}(#{intermediate_codegen expr.name})(#{expr.args?.map?(intermediate_codegen).join ', '})"
+			if macros[expr.name]?
+				x = macros[expr.name](expr.args)
+				gen.write x
+			else
+				gen.write "#{should_return expr}(#{intermediate_codegen expr.name})(#{expr.args?.map?(intermediate_codegen).join ', '})"
 
 		gen.join ';\n'
 
@@ -298,6 +304,30 @@ module.exports.codegen = (ast) ->
 
 		gen.join ';\n'
 
+	generate_macro = (decl) ->
+		{template, args: expect_args} = decl
+		expand = (args) ->
+			transfargs = do ->
+				ret = {}
+				args.map (x, i) ->
+					ret[expect_args[i]] = intermediate_codegen toks2ast x
+				ret
+
+			replace_internal = (sym) ->
+				if sym?.map?
+					sym.map replace_internal
+				else if sym?[0] is ','
+					if transfargs[sym.slice 1]
+						transfargs[sym.slice 1]
+					else
+						sym.slice 1
+				else
+					sym
+
+			x = template.map replace_internal
+			return x
+
+		(args) -> expand(args).map(toks2ast).map intermediate_codegen
 	intermediate_codegen = (expr) ->
 		if expr?.type?
 			switch expr.type
@@ -323,6 +353,9 @@ module.exports.codegen = (ast) ->
 					codegen_while_loop expr
 				when 'switch'
 					codegen_switch expr
+				when 'macro_declaration'
+					macros[expr.name] = generate_macro(expr)
+					return "-- macro declaration of #{expr.name}"
 				else
 					symbol expr # either unimplemented construct or literal. either way, just emit.
 		else
@@ -337,11 +370,12 @@ module.exports.codegen = (ast) ->
 		else
 			x = [intermediate_codegen ast]
 
-		if decd_funs?
+		if decd_funs.length >= 1?
 			fns = []
 			for nam, expr of decd_funs
 				if !/([_\w\d]+)\.([_\w\d])+/gmi.test nam
 					fns.push symbol nam
+		else fns = []
 
 		decs = ["local #{fns.join ', '}"]
 		if fns.length > 0

@@ -423,8 +423,8 @@
 ;; ###### `partial fn x`
 ;; return a function that when invoked applies the given function (`fn`) with parameters `x` and parameters given to the return function.
 ;; --
-(defn (partial fn x)
-	(cut fn x <>))
+(defmacro partial (fn x)
+	(cut ,fn ,x <>))
 
 ;; ###### `flip x`
 ;; return a function that when invoked applies the given function (`x`) with it's parameters in reverse order.
@@ -500,7 +500,7 @@
 ;; ###### `id x`
 ;; The [identity](https://en.wikipedia.org/wiki/Identity_function) function.
 ;; --
-(defn (id x) x)
+(defmacro id (x) ,x)
 
 ;; ###### `apply (fn ...)`
 ;; Apply the first function of a list to the rest of the list.
