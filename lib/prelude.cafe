@@ -491,3 +491,10 @@
 ;; The [identity](https://en.wikipedia.org/wiki/Identity_function) function.
 ;; --
 (defn (id x) x)
+
+;; ###### `apply (fn ...)`
+;; Apply the first function of a list to the rest of the list.
+;; The arguments to the function are unpacked.
+;; --
+(defn (apply li)
+	((head li) (table/unpack (tail li))))
