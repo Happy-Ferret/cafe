@@ -180,3 +180,8 @@ if `x` is not an integer, then `int x` returns x.
 The [identity](https://en.wikipedia.org/wiki/Identity_function) function.
 
 
+###### `apply (fn ...)`
+Apply the first function of a list to the rest of the list.
+The arguments to the function are unpacked.
+
+
