@@ -343,7 +343,7 @@ module.exports.codegen = (ast) ->
 			fns = []
 			for nam, expr of decd_funs
 				if !/([_\w\d]+)\.([_\w\d])+/gmi.test nam
-					fns.push nam
+					fns.push symbol nam
 
 		decs = ["local #{fns.join ', '}"]
 		if fns.length > 0
