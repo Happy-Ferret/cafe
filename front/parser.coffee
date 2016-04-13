@@ -49,10 +49,8 @@ symbol = (str) ->
 	else
 		if str?.split?
 			str.split(/\s*[./]\s*/).map(_symbol).filter((x) -> x.length >= 1).join '.'
-		else if str?[0]?
-			throw "Expected identifier, got #{str[0]}"
 		else
-			throw "Expected identifier, got #{str}"
+			throw new Error("Expected identifier, got #{str}")
 
 module.exports.symbol = symbol
 
@@ -246,12 +244,14 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 					template: tokens.slice 3
 				}
 
+			else if tokens.type?
+				tokens
 			else
 				if tokens[0]?
 					if tokens[1]? and tokens[2]? and tokens[1] is '.'
 						{
 							type: 'call_function'
-							name: symbol 'cons'
+							name: { type: 'variable', name: symbol 'cons' }
 							args: [toks2ast(tokens[0])].concat [toks2ast(tokens[2])]
 						}
 					else
@@ -270,13 +270,13 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 			else if tokens[0] is '\''
 				{
 					type: 'call_function'
-					name: symbol 'list'
+					name: { type: 'variable', name: symbol 'list'}
 					args: ["'#{tokens.slice 1}'"]
 				}
 			else if tokens[0] is '[' and tokens.slice(-1)[0] is ']'
 				tokens
 			else
-				symbol tokens
+				{ type: 'variable', name: symbol tokens }
 module.exports.parse = (string, astf) ->
 	str2tok = (str) ->
 		sexpr = [[]]

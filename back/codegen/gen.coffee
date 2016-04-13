@@ -71,24 +71,19 @@ class Generator
 			t
 
 
+is_lua_expr = (node) ->
+	typeof node isnt "object" or node.type in ['call_function', 'lambda_expr', 'variable', 'switch']
+
 macros    = {}
 module.exports.codegen = (ast) ->
 	decd_funs = {}
 
-	should_return = (expr) ->
-		if expr.is_tail?
-			if (expr.type is 'for_loop') and (expr.type is 'assignment') and (expr.type is 'raw')
-				''
-			else
-				'return '
-		else
-			''
 	codegen_function_body = (expr, gen) ->
 		body = expr.body.slice(0, -1).map block_codegen
 		last_expr = expr.body.slice(-1)[0]
 
 		if not ('args' in expr.args)
-			gen.write "local args = {#{expr.args.join ', '}}"
+			gen.write "local args, _ = {#{expr.args.join ', '}}"
 		if body? and last_expr?
 			last_expr = intermediate_codegen last_expr, "return "
 
@@ -113,11 +108,11 @@ module.exports.codegen = (ast) ->
 	codegen_call = (expr, terminate) ->
 		gen = new Generator()
 		if expr.name? and expr.args?
-			if macros[expr.name]?
-				x = macros[expr.name](expr.args)
+			if expr.name?.type == "variable" and macros[expr.name.name]?
+				x = macros[expr.name.name](expr.args)
 				gen.write x
 			else
-				gen.write "#{terminate ? ""}(#{intermediate_codegen expr.name})(#{expr.args?.map?(block_codegen).join ', '})"
+				gen.write "#{terminate ? ""}(#{expr_codegen expr.name})(#{expr.args?.map?(expr_codegen).join ', '})"
 
 		gen.join ';\n'
 
@@ -136,7 +131,7 @@ module.exports.codegen = (ast) ->
 				else if terminate is "return "
 					gen.write last_expr
 				else
-					throw (new Error("Cannot use raw statement '#{last_expr} as an expression for " + terminate))
+					throw (new Error("Cannot use raw statement '#{last_expr}' as an expression for #{terminate}"))
 			else
 				gen.write last_expr
 			gen.join ';\n'
@@ -146,11 +141,20 @@ module.exports.codegen = (ast) ->
 		if expr.vars? and expr.body?
 			vars = expr.vars.map (v) ->
 				if v[0]? and v[1]? # Gracefully handle empty variables
-					if typeof v[1] isnt "object" or v[1].type in ["call_function", "lambda_expr"]
-						"local #{v[0]} = #{intermediate_codegen v[1]}"
+					if is_lua_expr v[1]
+						"local #{v[0]} = #{expr_codegen v[1]}"
 					else
 						"local __temp\n#{intermediate_codegen v[1], "__temp = "}\n#{v[0]} = __temp"
 
+			wrap = false
+			if terminate is ''
+				# If an expression is required then we wrap in a function
+				# This will only occur in function calls.
+				wrap = true
+				terminate = "return "
+				gen.startBlock "(function(...)"
+			else
+				gen.startBlock "do"
 
 			if expr.body.length >= 1 # Gracefully handle empty blocks
 				body = expr.body.slice(0, -1).map block_codegen
@@ -160,30 +164,44 @@ module.exports.codegen = (ast) ->
 				body = ''
 				last_expr = ''
 
-			gen.startBlock "do"
 			gen.write vars
 			gen.write body
 			gen.write last_expr
-			do gen.endBlock
+			if wrap
+				gen.endBlock 'end)(table.unpack(args or {}))'
+			else
+				do gen.endBlock
 		gen.join ';\n'
 
 	codegen_conditional = (expr, terminate) ->
 		gen = new Generator()
 
-		if expr.cond? and expr.trueb?
-			if typeof expr.cond isnt "object" or expr.cond.type in ["call_function", "lambda_expr"]
+		if expr.cond? and (expr.trueb? or expr.falseb?)
+			wrap = false
+			if terminate is ''
+				# If an expression is required then we wrap in a function
+				# This will only occur in function calls.
+				wrap = true
+				terminate = "return "
+				gen.startBlock "(function(...)"
+			if is_lua_expr expr.cond
 				gen.startBlock "if #{expr_codegen expr.cond} then"
 			else
 				gen.write "local __cond"
 				gen.write intermediate_codegen expr.cond, "__cond = "
 				gen.startBlock "if __cond then"
-			gen.write intermediate_codegen expr.trueb, terminate
+
+			if expr.trueb?
+				gen.write intermediate_codegen expr.trueb, terminate
+
 			if expr.falsb?
 				gen.endBlock "else"
 				gen.startBlock intermediate_codegen expr.falsb, terminate
-				do gen.endBlock
-			else
-				do gen.endBlock
+
+			do gen.endBlock
+
+			if wrap
+				gen.endBlock 'end)(table.unpack(args or {}))'
 		gen.join ';\n'
 
 	codegen_lambda_expr = (expr, terminate) ->
@@ -200,7 +218,7 @@ module.exports.codegen = (ast) ->
 		gen = new Generator()
 		if expr.name? and expr.value?
 			if expr.local? and expr.local
-				if typeof expr.value isnt "object" or expr.value.type in ["call_function", "lambda_expr"]
+				if is_lua_expr expr.value
 					gen.write "local #{expr.name} = #{expr_codegen expr.value}"
 				else
 					gen.write "local __temp"
@@ -219,6 +237,7 @@ module.exports.codegen = (ast) ->
 		gen.join ';\n'
 
 	codegen_for_loop = (expr) ->
+		if terminate? and terminate isnt "return " then throw new Error("Cannot use for loop as an expression: " + terminate)
 		gen = new Generator()
 		if expr.name? and expr.start? and expr.end and expr.body?
 			gen.startBlock "for #{expr.name} = #{expr_codegen expr.start}, #{expr_codegen expr.end} do"
@@ -227,6 +246,7 @@ module.exports.codegen = (ast) ->
 		gen.join ';\n'
 
 	codegen_while_loop = (expr) ->
+		if terminate? and terminate isnt "return " then throw new Error("Cannot use while loop as an expression: " + terminate)
 		gen = new Generator()
 		if expr.cond? and expr.body?
 			gen.startBlock "while #{expr_codegen expr.cond}"
@@ -267,7 +287,7 @@ module.exports.codegen = (ast) ->
 				else if /^".+"$/gmi.test n
 					"type(value) == 'string' and value:match(#{n})"
 				else if n.type?
-					intermediate_codegen n
+					expr_codegen n
 				else
 					n
 
@@ -302,13 +322,19 @@ module.exports.codegen = (ast) ->
 
 		gen.join ';\n'
 
+	codegen_variable = (expr, terminate) ->
+		if terminate?
+			"#{terminate}#{expr.name}"
+		else
+			"_ = #{expr.name}"
+
 	generate_macro = (decl) ->
 		{template, args: expect_args} = decl
 		expand = (args) ->
 			transfargs = do ->
 				ret = {}
 				args.map (x, i) ->
-					ret[expect_args[i]] = intermediate_codegen toks2ast x
+					ret[expect_args[i].name] = x
 				ret
 
 			template_string = (str) -> str.replace /\$,(\w+)/gmi, (orig, gr1, indx, str) -> transfargs[gr1] ? 'nil'
@@ -322,6 +348,8 @@ module.exports.codegen = (ast) ->
 						sym.slice 1
 				else if sym?.startsWith?('`"') and sym.slice(-1)[0] is '"'
 					"\"#{template_string sym.slice 2, -1}\""
+				else if sym?.type is "variable"
+					{ type: "variable", name: replace_internal sym.name }
 				else
 					sym
 
@@ -359,6 +387,8 @@ module.exports.codegen = (ast) ->
 				when 'macro_declaration'
 					macros[expr.name] = generate_macro(expr)
 					return "-- macro declaration of #{expr.name}"
+				when 'variable'
+					codegen_variable expr, terminate
 				else
 					(terminate ? "") + symbol expr # either unimplemented construct or literal. either way, just emit.
 		else
