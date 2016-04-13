@@ -52,6 +52,7 @@
 (tests/expect! ((partial (lambda (x y) (^^ x y)) 2) 3) 8 "Partial application of a lambda")
 (tests/expect! (id (if 1 2 3) 2) 2 "If statement in a function")
 (tests/expect! (with (x 2) x x) 2 "Lone variable")
+(tests/expect! (do 2 2) 2 "Lone constant")
 
 ;; Print results
 (tests/print-tests)

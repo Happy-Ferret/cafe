@@ -83,7 +83,7 @@ module.exports.codegen = (ast) ->
 		last_expr = expr.body.slice(-1)[0]
 
 		if not ('args' in expr.args)
-			gen.write "local args, _ = {#{expr.args.join ', '}}"
+			gen.write "local args = {#{expr.args.join ', '}}"
 		if body? and last_expr?
 			last_expr = intermediate_codegen last_expr, "return "
 
@@ -326,7 +326,7 @@ module.exports.codegen = (ast) ->
 		if terminate?
 			"#{terminate}#{expr.name}"
 		else
-			"_ = #{expr.name}"
+			null
 
 	generate_macro = (decl) ->
 		{template, args: expect_args} = decl
@@ -393,9 +393,9 @@ module.exports.codegen = (ast) ->
 					(terminate ? "") + symbol expr # either unimplemented construct or literal. either way, just emit.
 		else
 			if not isNaN(parseFloat expr) or (expr?[0] is '"' and expr.slice(-1)?[0] is '"')
-				(terminate ? "") + expr
+				if terminate? then terminate + expr else null
 			else
-				(terminate ? "") + symbol expr
+				if terminate? then terminate + symbol expr else null
 
 	if ast?
 		if ast?.map?
@@ -403,15 +403,13 @@ module.exports.codegen = (ast) ->
 		else
 			x = [intermediate_codegen ast]
 
-		if decd_funs.length >= 1?
-			fns = []
-			for nam, expr of decd_funs
-				if !/([_\w\d]+)\.([_\w\d])+/gmi.test nam
-					fns.push symbol nam
-		else fns = []
+		fns = []
+		for nam, expr of decd_funs
+			if !/([_\w\d]+)\.([_\w\d])+/gmi.test nam
+				fns.push symbol nam
 
-		decs = ["local #{fns.join ', '}"]
-		if fns.length > 0
+		if fns.length >= 1
+			decs = ["local #{fns.join ', '}"]
 			decs.concat x
 		else
 			x
