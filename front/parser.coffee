@@ -81,13 +81,6 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 					base.local = false
 
 				base
-			else if tokens[0] is 'ns'
-				{
-					type: 'assignment'
-					name: symbol tokens[1]
-					value: '{}'
-					local: false
-				}
 			else if tokens[0] in ['let', 'with']
 				if tokens[0] is 'let'
 					{
@@ -263,11 +256,18 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 								args: tokens.slice(1)
 							}
 						else
-							{
-								type: 'call_function'
-								name: toks2ast tokens[0]
-								args: tokens.slice(1)?.map?(toks2ast)
-							}
+							if macros[toks2ast tokens[0]]?
+								{
+									type: 'call_function'
+									name: toks2ast tokens[0]
+									args: tokens.slice(1)
+								}
+							else
+								{
+									type: 'call_function'
+									name: toks2ast tokens[0]
+									args: tokens.slice(1)?.map?(toks2ast)
+								}
 				else
 					''
 		when 'string'

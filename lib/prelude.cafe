@@ -508,3 +508,6 @@
 ;; --
 (defn (apply li)
 	((head li) (table/unpack (tail li))))
+
+(defmacro ns (nm)
+	(lua-raw `"local $,nm = {};"))
