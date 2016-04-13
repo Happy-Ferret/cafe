@@ -166,24 +166,22 @@ module.exports.codegen = (ast) ->
 	codegen_conditional = (expr) ->
 		gen = new Generator()
 		can_return = (exp) ->
-			if (exp.type isnt 'for_loop') and (exp.type isnt 'assignment') and (exp.type isnt 'scoped_block') and (exp.type isnt 'raw')
+			if (exp.type isnt 'for_loop') and (exp.type isnt 'assignment') and (exp.type isnt 'scoped_block') and (exp.type isnt 'raw') and (exp.type isnt 'conditional')
 				'return '
 			else
 				''
 
 		if expr.cond? and expr.trueb?
-			if expr.is_tail?
-				base = 'return '
-			else
-				base = ''
+			if not expr.is_tail?
+				gen.startBlock "(function(...)"
 
-			if expr.trueb.type is 'scoped_block'
+			if expr.trueb.type in ['scoped_block', 'conditional']
 				expr.trueb.is_tail = true
-			gen.startBlock "#{base}(function(...)"
+
 			gen.startBlock "if #{intermediate_codegen expr.cond} then"
 			gen.write "#{can_return expr.trueb}#{intermediate_codegen expr.trueb}"
 			if expr.falsb?
-				if expr.falsb.type is 'scoped_block'
+				if expr.falsb.type in ['scoped_block', 'conditional']
 					expr.falsb.is_tail = true
 				gen.endBlock "else"
 				gen.startBlock "#{can_return expr.falsb}#{intermediate_codegen expr.falsb}"
@@ -191,7 +189,8 @@ module.exports.codegen = (ast) ->
 			else
 				do gen.endBlock
 
-			gen.endBlock 'end)(table.unpack(args or {}))'
+			if not expr.is_tail?
+				gen.endBlock 'end)(table.unpack(args or {}))'
 		gen.join ';\n'
 
 	codegen_lambda_expr = (expr) ->
