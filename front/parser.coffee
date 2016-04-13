@@ -50,7 +50,7 @@ symbol = (str) ->
 		if str?.split?
 			str.split(/\s*[./]\s*/).map(_symbol).filter((x) -> x.length >= 1).join '.'
 		else
-			str
+			throw new Error("Expected identifier, got #{str}")
 
 module.exports.symbol = symbol
 
@@ -58,18 +58,18 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 	switch typeof tokens
 		when 'object'
 			if tokens[0] is 'defn'
-					{
-						type: 'define_function'
-						name: symbol tokens[1][0]
-						args: tokens[1].slice 1
-						body: tokens.slice(2).map toks2ast
-					}
+				{
+					type: 'define_function'
+					name: symbol tokens[1][0]
+					args: tokens[1].slice(1).map symbol
+					body: tokens.slice(2).map toks2ast
+				}
 			else if operator tokens[0]
-					{
-						type: 'call_function'
-						name: symbol "^#{tokens[0]}"
-						args: tokens.slice(1).map toks2ast
-					}
+				{
+					type: 'call_function'
+					name: symbol "^#{tokens[0]}"
+					args: tokens.slice(1).map toks2ast
+				}
 			else if tokens[0] is 'def'
 				base = {
 					type: 'assignment'
@@ -243,13 +243,15 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 					args: tokens[2].map toks2ast
 					template: tokens.slice 3
 				}
-				
+
+			else if tokens.type?
+				tokens
 			else
 				if tokens[0]?
 					if tokens[1]? and tokens[2]? and tokens[1] is '.'
 						{
 							type: 'call_function'
-							name: symbol 'cons'
+							name: { type: 'variable', name: symbol 'cons' }
 							args: [toks2ast(tokens[0])].concat [toks2ast(tokens[2])]
 						}
 					else
@@ -268,13 +270,13 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 			else if tokens[0] is '\''
 				{
 					type: 'call_function'
-					name: symbol 'list'
+					name: { type: 'variable', name: symbol 'list'}
 					args: ["'#{tokens.slice 1}'"]
 				}
 			else if tokens[0] is '[' and tokens.slice(-1)[0] is ']'
 				tokens
 			else
-				symbol tokens
+				{ type: 'variable', name: symbol tokens }
 module.exports.parse = (string, astf) ->
 	str2tok = (str) ->
 		sexpr = [[]]

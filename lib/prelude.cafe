@@ -199,7 +199,7 @@
 (with (old-type type)
 	(defn (_G/type a)
 		(if (raweq? (old-type a) "table")
-			(if (= (lua-raw "a._type") "hashmap")
+			(if (= (lua-raw "return a._type") "hashmap")
 				"hashmap"
 					"list")
 				(old-type a))))
@@ -500,7 +500,7 @@
 ;; ###### `id x`
 ;; The [identity](https://en.wikipedia.org/wiki/Identity_function) function.
 ;; --
-(defmacro id (x) ,x)
+(defn (id x) x)
 
 ;; ###### `apply (fn ...)`
 ;; Apply the first function of a list to the rest of the list.
