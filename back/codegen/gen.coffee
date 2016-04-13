@@ -1,5 +1,6 @@
 { symbol
 , toks2ast } = require '../../front'
+{ macro_common } = require './macros'
 fs         = require 'fs'
 
 actual_opch = (opch) -> opch
@@ -327,36 +328,7 @@ module.exports.codegen = (ast) ->
 			"#{terminate}#{expr.name}"
 		else
 			null
-
-	generate_macro = (decl) ->
-		{template, args: expect_args} = decl
-		expand = (args) ->
-			transfargs = do ->
-				ret = {}
-				args.map (x, i) ->
-					ret[expect_args[i].name] = x
-				ret
-
-			template_string = (str) -> str.replace /\$,(\w+)/gmi, (orig, gr1, indx, str) -> transfargs[gr1] ? 'nil'
-			replace_internal = (sym) ->
-				if sym?.map?
-					sym.map replace_internal
-				else if sym?[0] is ','
-					if transfargs[sym.slice 1]
-						transfargs[sym.slice 1]
-					else
-						sym.slice 1
-				else if sym?.startsWith?('`"') and sym.slice(-1)[0] is '"'
-					"\"#{template_string sym.slice 2, -1}\""
-				else if sym?.type is "variable"
-					{ type: "variable", name: replace_internal sym.name }
-				else
-					sym
-
-			x = template.map replace_internal
-			return x
-
-		(args) -> expand(args).map(toks2ast).map block_codegen
+	generate_macro = (expr) -> (args) -> macro_common(expr, block_codegen)(args).map(toks2ast).map block_codegen
 	block_codegen = (expr) -> intermediate_codegen expr
 	expr_codegen = (expr) -> intermediate_codegen expr, ""
 	intermediate_codegen = (expr, terminate) ->

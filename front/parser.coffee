@@ -53,7 +53,7 @@ symbol = (str) ->
 			throw new Error("Expected identifier, got #{str}")
 
 module.exports.symbol = symbol
-
+macros = {}
 module.exports.toks2ast = toks2ast = (tokens) ->
 	switch typeof tokens
 		when 'object'
@@ -237,13 +237,14 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 					]
 				}
 			else if tokens[0] is 'defmacro'
-				x = {
+				expr = {
 					type: 'macro_declaration'
 					name: symbol tokens[1]
 					args: tokens[2].map toks2ast
 					template: tokens.slice 3
 				}
-
+				macros[symbol tokens[1]] = expr
+				expr
 			else if tokens.type?
 				tokens
 			else
@@ -255,11 +256,18 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 							args: [toks2ast(tokens[0])].concat [toks2ast(tokens[2])]
 						}
 					else
-						{
-							type: 'call_function'
-							name: toks2ast tokens[0]
-							args: tokens.slice(1)?.map(toks2ast)
-						}
+						if macros[toks2ast tokens[0]]?
+							{
+								type: 'call_function'
+								name: toks2ast tokens[0]
+								args: tokens.slice(1)
+							}
+						else
+							{
+								type: 'call_function'
+								name: toks2ast tokens[0]
+								args: tokens.slice(1)?.map?(toks2ast)
+							}
 				else
 					''
 		when 'string'

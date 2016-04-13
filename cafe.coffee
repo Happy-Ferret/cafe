@@ -1,7 +1,6 @@
 #!/usr/bin/env coffee
 { parse, preprocess } = require './front'
 { codegen, emit }     = require './back'
-{ optimize }          = require './middle'
 { resolve }           = require 'path'
 { repl }              = require './front/repl'
 { argv }              = require 'optimist'
@@ -73,7 +72,7 @@ else
 				throw err
 
 			fs.writeFile out, hashbang + "\n", ->
-				emit out, (codegen(optimize parse preprocess(";;@import prelude\n#{data}", inp, null, interp), ast)), ->
+				emit out, (codegen(parse preprocess(";;@import prelude\n#{data}", inp, null, interp), ast)), ->
 					if argv.run?
 						process.stdout.write "\x1b[0m"
 						proc = child_process.spawn "#{interp}", ["#{out}"], {encoding: 'utf-8', stdio: 'inherit'}
