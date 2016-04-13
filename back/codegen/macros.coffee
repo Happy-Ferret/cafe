@@ -4,7 +4,10 @@ template_string = (str, tfa, ic) ->
 		if tfa[gr1]?
 			x = tfa[gr1]
 			if x.type?
-				ic x
+				if x.type is 'variable'
+					x.name
+				else
+					ic x
 			else x
 		else 'nil'
 
