@@ -428,14 +428,14 @@
 
 ;; ###### `flip x`
 ;; return a function that when invoked applies the given function (`x`) with it's parameters in reverse order.
-(defn (flip x)
-	(λ (a b) (x b a)))
+(defmacro flip (x)
+	(λ (a b) (,x b a)))
 
 ;; ###### `elem? a li`
 ;; return true if `a` is an element of `li`, false otherwise.
 ;; --
 (defn (elem? a li)
-	(cond li
+	(cond lt
 		([list|0|] false)
 		([list|x:xs|]
 			(if (= x a) true

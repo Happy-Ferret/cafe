@@ -170,10 +170,8 @@ module.exports.repl = (intpt, cb) ->
 				if not skip
 					eval_string do line.trim, interpr, -> do ri.prompt
 		catch error
-			console.error "\x1b[1;31m#{error}\x1b[0m"
-			save_history ri
-			cb file
-			process.exit 1
+			console.error "\x1b[1;31mAn exception happened: #{error}\x1b[0m"
+			do ri.prompt
 
 	ri.on 'close', ->
 		console.log "Have a great day!"

@@ -117,7 +117,7 @@ module.exports.codegen = (ast) ->
 		gen = new Generator()
 		if expr.name? and expr.args?
 			if macros[expr.name]?
-				x = macros[expr.name](expr.args)
+				x = macros[expr.name](expr.args, expr)
 				gen.write x
 			else
 				gen.write "#{should_return expr}(#{intermediate_codegen expr.name})(#{expr.args?.map?(intermediate_codegen).join ', '})"
@@ -306,31 +306,35 @@ module.exports.codegen = (ast) ->
 
 	generate_macro = (decl) ->
 		{template, args: expect_args} = decl
-		expand = (args) ->
+		expand = (args, callexpr) ->
 			transfargs = do ->
 				ret = {}
 				args.map (x, i) ->
-					ret[expect_args[i]] = intermediate_codegen toks2ast x
+					ret[expect_args[i]] = x
 				ret
 
-			template_string = (str) -> str.replace /\$,(\w+)/gmi, (orig, gr1, indx, str) -> transfargs[gr1] ? 'nil'
+			template_string = (str) ->
+				str.replace /\$,(\w+)/gmi, (orig, gr1, indx, str) ->
+					"#{intermediate_codegen toks2ast transfargs[gr1]}"
+
 			replace_internal = (sym) ->
-				if sym?.map?
-					sym.map replace_internal
-				else if sym?[0] is ','
-					if transfargs[sym.slice 1]
-						transfargs[sym.slice 1]
-					else
-						sym.slice 1
-				else if sym?.startsWith?('`"') and sym.slice(-1)[0] is '"'
-					"\"#{template_string sym.slice 2, -1}\""
-				else
-					sym
+				repl = do ->
+					if sym?.map?
+						sym.map replace_internal
+					else if sym?[0] is ','
+						if transfargs[sym.slice 1]
+							transfargs[sym.slice 1]
+						else
+							sym.slice 1
+					else if sym?.startsWith?('`"') and sym.slice(-1)[0] is '"'
+						template_string sym
+					else sym
+				repl
 
 			x = template.map replace_internal
+			console.log JSON.stringify x, null, '\t'
 			return x
-
-		(args) -> expand(args).map(toks2ast).map intermediate_codegen
+		(args, ce) -> expand(args, ce).map(toks2ast).map intermediate_codegen
 	intermediate_codegen = (expr) ->
 		if expr?.type?
 			switch expr.type
@@ -360,6 +364,7 @@ module.exports.codegen = (ast) ->
 					macros[expr.name] = generate_macro(expr)
 					return "-- macro declaration of #{expr.name}"
 				else
+					console.log expea
 					symbol expr # either unimplemented construct or literal. either way, just emit.
 		else
 			if not isNaN(parseFloat expr) or (expr?[0] is '"' and expr.slice(-1)?[0] is '"')
