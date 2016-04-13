@@ -49,8 +49,10 @@ symbol = (str) ->
 	else
 		if str?.split?
 			str.split(/\s*[./]\s*/).map(_symbol).filter((x) -> x.length >= 1).join '.'
+		else if str?[0]?
+			throw "Expected identifier, got #{str[0]}"
 		else
-			str
+			throw "Expected identifier, got #{str}"
 
 module.exports.symbol = symbol
 
@@ -58,18 +60,18 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 	switch typeof tokens
 		when 'object'
 			if tokens[0] is 'defn'
-					{
-						type: 'define_function'
-						name: symbol tokens[1][0]
-						args: tokens[1].slice 1
-						body: tokens.slice(2).map toks2ast
-					}
+				{
+					type: 'define_function'
+					name: symbol tokens[1][0]
+					args: tokens[1].slice(1).map symbol
+					body: tokens.slice(2).map toks2ast
+				}
 			else if operator tokens[0]
-					{
-						type: 'call_function'
-						name: symbol "^#{tokens[0]}"
-						args: tokens.slice(1).map toks2ast
-					}
+				{
+					type: 'call_function'
+					name: symbol "^#{tokens[0]}"
+					args: tokens.slice(1).map toks2ast
+				}
 			else if tokens[0] is 'def'
 				base = {
 					type: 'assignment'
@@ -243,7 +245,7 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 					args: tokens[2].map toks2ast
 					template: tokens.slice 3
 				}
-				
+
 			else
 				if tokens[0]?
 					if tokens[1]? and tokens[2]? and tokens[1] is '.'

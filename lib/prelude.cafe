@@ -500,7 +500,7 @@
 ;; ###### `id x`
 ;; The [identity](https://en.wikipedia.org/wiki/Identity_function) function.
 ;; --
-(defmacro id (x) ,x)
+(defn (id x) x)
 
 ;; ###### `apply (fn ...)`
 ;; Apply the first function of a list to the rest of the list.
