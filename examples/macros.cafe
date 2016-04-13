@@ -1,0 +1,16 @@
+(defmacro identify (a)
+	(`cond a
+		(ast (`cond a
+			(-lambda_expr "lambda expression")
+			(-conditional "conditional expression")
+			(-scoped_block "scoped block")
+			(-define_function "function definition")))
+		(const (lua-raw `"'constant ' .. type($,a)"))))
+
+
+(print (identify "hello"))
+(print (identify 123))
+(print (identify (λ () 1)))
+(print (identify (defn (x) 1)))
+(print (identify (do)))
+(print (identify (if if then else)))
