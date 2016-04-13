@@ -53,7 +53,7 @@ symbol = (str) ->
 			str
 
 module.exports.symbol = symbol
-macros = {}
+
 module.exports.toks2ast = toks2ast = (tokens) ->
 	switch typeof tokens
 		when 'object'
@@ -243,9 +243,7 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 					args: tokens[2].map toks2ast
 					template: tokens.slice 3
 				}
-				macros[symbol tokens[1]] = x
-
-				return x
+				
 			else
 				if tokens[0]?
 					if tokens[1]? and tokens[2]? and tokens[1] is '.'
@@ -255,14 +253,10 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 							args: [toks2ast(tokens[0])].concat [toks2ast(tokens[2])]
 						}
 					else
-						if macros[symbol tokens[0]]
-							args = tokens.slice(1)
-						else
-							args = tokens.slice(1)?.map(toks2ast)
 						{
 							type: 'call_function'
 							name: toks2ast tokens[0]
-							args: args
+							args: tokens.slice(1)?.map(toks2ast)
 						}
 				else
 					''
