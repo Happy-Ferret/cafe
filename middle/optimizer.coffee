@@ -27,14 +27,6 @@ module.exports.optimize = (ast) ->
 				called: 1
 			}
 		e
-	optimize_binary = (e, destructive) ->
-		intermediate_optimize e.lhs
-		intermediate_optimize e.rhs
-		e
-
-	optimize_unary = (e, destructive) ->
-		intermediate_optimize e.arg
-		e
 
 	optimize_assignment = (e, destructive) ->
 		intermediate_optimize e.value
@@ -83,10 +75,6 @@ module.exports.optimize = (ast) ->
 					optimize_function expr, destructive
 				when 'call_function'
 					optimize_call expr, destructive
-				when 'binary_operator'
-					optimize_binary expr, destructive
-				when 'unary_operator'
-					optimize_unary expr, destructive
 				when 'assignment'
 					optimize_assignment expr, destructive
 				when 'scoped_block'
