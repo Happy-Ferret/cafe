@@ -49,11 +49,11 @@ module.exports.macro_common = (decl, ic) ->
 						if arr.push?
 							arr.push x
 						else
-							ret[expect_args[expect_args.length - 1].slice(4, -2)] = ['do', arr, x]
+							ret[expect_args[expect_args.length - 1].slice(4, -2)] = [arr, x]
 					else ret.varargs.push x
 				else
 					if expect_args[i].startsWith '__38'
-						ret[expect_args[i].slice(4, -2)] = ['let', [['']], x]
+						ret[expect_args[i].slice(4, -2)] = [x]
 					else
 						ret[expect_args[i]] = x
 			ret
@@ -66,12 +66,21 @@ module.exports.macro_common = (decl, ic) ->
 					sym.map replace_internal
 				else if sym?[0] is ','
 					if transfargs[sym.slice 1]?
-						transfargs[sym.slice 1]
+						arg = transfargs[sym.slice 1]
+						if arg.map?
+							arg.map replace_internal
+						else
+							arg
 					else
 						sym.slice 1
 				else if sym?[0] is '~'
 					if transfargs[sym.slice 1]?
 						symbol transfargs[sym.slice 1]
+					else
+						'nil'
+				else if sym?[0] is ':'
+					if transfargs[sym.slice 1]?.map?
+						['let', [['']]].concat transfargs[sym.slice 1]
 					else
 						'nil'
 				else if sym?.startsWith?('`"') and sym.slice(-1)[0] is '"'
@@ -88,4 +97,5 @@ module.exports.macro_common = (decl, ic) ->
 				x
 
 		x = template.map(replace_internal).map cleanup
+		console.log JSON.stringify x, null, '\t'
 		return x
