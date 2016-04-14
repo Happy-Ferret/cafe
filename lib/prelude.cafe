@@ -44,7 +44,8 @@
 	(λ (...) (,a (,b ...))))
 
 (defmacro (ns nm)
-	(def ~nm {}))
+	(def ,~nm {}))
+
 ;; ###### `partial fn x`
 ;; return a function that when invoked applies the given function (`fn`) with parameters `x` and parameters given to the return function.
 ;; --
