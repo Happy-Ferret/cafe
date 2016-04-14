@@ -65,7 +65,41 @@ module.exports.macro_common = (decl, ic) ->
 				if sym?.map?
 					sym.map replace_internal
 				else if sym?[0] is ','
-					if transfargs[sym.slice 1]?
+					if sym?[1] is '~'
+						if transfargs[sym.slice 2]?
+							symbol transfargs[sym.slice 2]
+						else
+							'nil'
+					else if sym?[1] is '@'
+						if transfargs[sym.slice 2]?.map?
+							['let', [['']]].concat replace_internal transfargs[sym.slice 2]
+						else
+							'nil'
+					else if /^\[[\d:]+\]/.test sym.slice(1)
+						x = sym.slice(1).match /^\[([\d:]+)\]/
+						indexes = x[1].split(':').map((x) -> parseInt x).map (x) -> if isNaN x then undefined else x
+						[_, rest] = sym.slice(1).match /^\[[\d:]+\]([\w-@]+)/
+						indexes[0] = 0 if indexes[0] is undefined
+						if rest[0] is '@'
+							rest = rest.slice 1
+							if transfargs[rest]?.slice?
+								x = transfargs[rest]?.slice(indexes[0], indexes[1])
+								if x.length == 1
+									x[0]
+								else
+									['let', [['']]].concat replace_internal transfargs[rest]?.slice(indexes[0], indexes[1])
+							else
+								'nil'
+						else
+							if transfargs[rest]?.slice?
+								x = transfargs[rest]?.slice(indexes[0], indexes[1])
+								if x.length == 1
+									x[0]
+								else
+									replace_internal transfargs[rest]?.slice(indexes[0], indexes[1])
+							else
+								'nil'
+					else if transfargs[sym.slice 1]?
 						arg = transfargs[sym.slice 1]
 						if arg.map?
 							arg.map replace_internal
@@ -73,16 +107,6 @@ module.exports.macro_common = (decl, ic) ->
 							arg
 					else
 						sym.slice 1
-				else if sym?[0] is '~'
-					if transfargs[sym.slice 1]?
-						symbol transfargs[sym.slice 1]
-					else
-						'nil'
-				else if sym?[0] is ':'
-					if transfargs[sym.slice 1]?.map?
-						['let', [['']]].concat replace_internal transfargs[sym.slice 1]
-					else
-						'nil'
 				else if sym?.startsWith?('`"') and sym.slice(-1)[0] is '"'
 					"\"#{template_string sym.slice(2, -1), transfargs, ic}\""
 				else if sym?.type is "variable"
@@ -97,5 +121,4 @@ module.exports.macro_common = (decl, ic) ->
 				x
 
 		x = template.map(replace_internal).map cleanup
-		console.log JSON.stringify x, null, '\t'
 		return x
