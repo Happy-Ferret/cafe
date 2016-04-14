@@ -1,6 +1,9 @@
 (defmacro (defn* nam argsl &expr)
 	(def ~nam (coroutine/wrap (λ (,argsl) ,expr))))
 
+(defmacro (lambda* nam argsl &expr)
+	(coroutine/wrap (λ (,argsl) ,expr)))
+
 (defmacro (yield val) (coroutine/yield ,val))
 
 
@@ -10,6 +13,11 @@
 			(push-tail! (gen) ret))
 		ret))
 
-(defn* ones ()
-	(loop true
-		(yield 1)))
+(defn* powers-of-2 ()
+	(with (counter 1)
+		(loop true
+			(def counter (+ 1 counter) :global)
+			(yield (^ 2 counter)))))
+
+(for i 1 64
+	(print (powers-of-2)))
