@@ -80,7 +80,7 @@ module.exports.macro_common = (decl, ic) ->
 						'nil'
 				else if sym?[0] is ':'
 					if transfargs[sym.slice 1]?.map?
-						['let', [['']]].concat transfargs[sym.slice 1]
+						['let', [['']]].concat replace_internal transfargs[sym.slice 1]
 					else
 						'nil'
 				else if sym?.startsWith?('`"') and sym.slice(-1)[0] is '"'
