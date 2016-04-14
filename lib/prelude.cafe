@@ -273,7 +273,9 @@
 		(cond lst
 			([~list] (func accum lst))
 			(_ accum))
-		(foldl func (func accum (head lst)) (tail lst))))
+		(cond func
+			([function] (foldl func (func accum (head lst)) (tail lst)))
+			(_ accum))))
 
 (def reduce foldl)
 
@@ -419,7 +421,7 @@
 (defn (range fin)
 	(if (= fin 0)
 		'()
-		(join (range (- fin 1)) fin)))
+		(cons (range (- fin 1)) fin)))
 
 ;; ###### `cut fn a <> b <>`
 ;; return a function that when invoked applies the given function (`fn`) with parameters `a`, `b`, etc... and parameters given to the return function
