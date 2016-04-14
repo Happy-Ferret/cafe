@@ -232,11 +232,11 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 			else if tokens[0] is 'defmacro'
 				expr = {
 					type: 'macro_declaration'
-					name: symbol tokens[1]
-					args: tokens[2].map toks2ast
-					template: tokens.slice 3
+					name: symbol tokens[1][0]
+					args: tokens[1].slice(1).map symbol
+					template: tokens.slice 2
 				}
-				macros[symbol tokens[1]] = expr
+				macros[symbol tokens[1][0]] = expr
 				expr
 			else if tokens.type?
 				tokens
@@ -249,14 +249,8 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 							args: [toks2ast(tokens[0])].concat [toks2ast(tokens[2])]
 						}
 					else
-						if macros[toks2ast tokens[0]]?
-							{
-								type: 'call_function'
-								name: toks2ast tokens[0]
-								args: tokens.slice(1)
-							}
-						else
-							if macros[toks2ast tokens[0]]?
+						try
+							if macros[symbol tokens[0]]?
 								{
 									type: 'call_function'
 									name: toks2ast tokens[0]
@@ -268,6 +262,12 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 									name: toks2ast tokens[0]
 									args: tokens.slice(1)?.map?(toks2ast)
 								}
+						catch e
+							{
+								type: 'call_function'
+								name: toks2ast tokens[0]
+								args: tokens.slice(1)?.map?(toks2ast)
+							}
 				else
 					''
 		when 'string'
