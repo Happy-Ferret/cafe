@@ -76,7 +76,7 @@ is_lua_expr = (node) ->
 	typeof node isnt "object" or node.type in ['call_function', 'lambda_expr', 'variable', 'switch']
 
 macros    = {}
-module.exports.codegen = (ast) ->
+module.exports.codegen = (ast, terminate) ->
 	decd_funs = {}
 
 	codegen_function_body = (expr, gen) ->
@@ -110,7 +110,7 @@ module.exports.codegen = (ast) ->
 		gen = new Generator()
 		if expr.name? and expr.args?
 			if expr.name?.type == "variable" and macros[expr.name.name]?
-				x = macros[expr.name.name](expr.args)
+				x = macros[expr.name.name](expr.args, terminate)
 				gen.write x
 			else
 				gen.write "#{terminate ? ""}(#{expr_codegen expr.name})(#{expr.args?.map?(expr_codegen).join ', '})"
@@ -328,7 +328,10 @@ module.exports.codegen = (ast) ->
 			"#{terminate}#{expr.name}"
 		else
 			null
-	generate_macro = (expr) -> (args) -> macro_common(expr, block_codegen)(args).map(toks2ast).map block_codegen
+	generate_macro = (expr) -> (args, terminate) ->
+		macro_common(expr, block_codegen)(args)
+			.map(toks2ast)
+			.map (x) -> intermediate_codegen x, terminate
 	block_codegen = (expr) -> intermediate_codegen expr
 	expr_codegen = (expr) -> intermediate_codegen expr, ""
 	intermediate_codegen = (expr, terminate) ->
@@ -371,9 +374,15 @@ module.exports.codegen = (ast) ->
 
 	if ast?
 		if ast?.map?
-			x = ast.map block_codegen
+			body = ast.slice(0, -1).map block_codegen
+			last_expr = ast.slice(-1)[0]
+
+			if body? and last_expr?
+				x = body.concat (intermediate_codegen last_expr, terminate)
+			else
+				x = []
 		else
-			x = [intermediate_codegen ast]
+			x = [intermediate_codegen ast, terminate]
 
 		fns = []
 		for nam, expr of decd_funs

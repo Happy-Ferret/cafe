@@ -1,4 +1,4 @@
-(defmacro identify (a)
+(defmacro (identify a)
 	(`cond a
 		(ast (`cond a
 			(-lambda_expr "lambda expression")

@@ -53,12 +53,8 @@ eval_string = (str, interp, cb) ->
 	if ast.length >= 1
 		ast[ast.length - 1].is_tail = true
 		code = do ->
-			x = codegen(ast).join ';'
-			if x.startsWith '--'
-				x = 'return'
-			if !x.startsWith 'return'
-				x = "return #{x}"
-			"#{compile_cache.join ';\n'};#{repl_special.join ';\n'}\nrepl_describe((function() #{x} end)(), true)"
+			x = codegen(ast, "return ").join ';'
+			"#{compile_cache.join ';\n'};#{repl_special.join ';\n'}\nrepl_describe((function()\n#{x}\nend)(), true)"
 
 		if code.length >= 1
 			fs.writeFile file, code, ->
