@@ -1,0 +1,15 @@
+(defmacro (defn* nam argsl &expr)
+	(def ~nam (coroutine/wrap (λ (,argsl) ,expr))))
+
+(defmacro (yield val) (coroutine/yield ,val))
+
+
+(defn (take-generator gen times)
+	(with (ret '())
+		(for i 1 times
+			(push-tail! (gen) ret))
+		ret))
+
+(defn* ones ()
+	(loop true
+		(yield 1)))
