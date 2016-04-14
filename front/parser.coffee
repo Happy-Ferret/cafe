@@ -7,7 +7,7 @@ operator = (s) ->
 		'not', 'and', 'or',
 		'>', '<', '+', '-', '*', '/', '%',
 		'>=', '<=', '>>', '<<',
-		'#', '~', '&', '|', '??'
+		'#', '~', '&', '|', '??', '^'
 	]
 	isop
 
@@ -67,7 +67,7 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 			else if operator tokens[0]
 				{
 					type: 'call_function'
-					name: symbol "^#{tokens[0]}"
+					name: symbol "#^#{tokens[0]}"
 					args: tokens.slice(1).map toks2ast
 				}
 			else if tokens[0] is 'def'
