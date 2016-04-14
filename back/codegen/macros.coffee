@@ -1,11 +1,12 @@
-{ toks2ast } = require '../../front'
+{ toks2ast
+, symbol   } = require '../../front'
 template_string = (str, tfa, ic) ->
 	str.replace /\$,(\w+)/gmi, (orig, gr1, indx, str) ->
 		if tfa[gr1]?
 			x = tfa[gr1]
 			if x.type?
 				if x.type is 'variable'
-					x.name
+					x
 				else
 					ic x
 			else x
@@ -40,9 +41,21 @@ module.exports.macro_common = (decl, ic) ->
 	{template, args: expect_args} = decl
 	(args) ->
 		transfargs = do ->
-			ret = {}
+			ret = {varargs: []}
 			args.map (x, i) ->
-				ret[expect_args[i].name] = x
+				if i >= expect_args.length
+					if expect_args[expect_args.length - 1].startsWith '__38'
+						arr = ret[expect_args[expect_args.length - 1].slice(4, -2)]
+						if arr.push?
+							arr.push x
+						else
+							ret[expect_args[expect_args.length - 1].slice(4, -2)] = ['do', arr, x]
+					else ret.varargs.push x
+				else
+					if expect_args[i].startsWith '__38'
+						ret[expect_args[i].slice(4, -2)] = ['do', x]
+					else
+						ret[expect_args[i]] = x
 			ret
 
 		replace_internal = (sym) ->
@@ -52,14 +65,19 @@ module.exports.macro_common = (decl, ic) ->
 				if sym?.map?
 					sym.map replace_internal
 				else if sym?[0] is ','
-					if transfargs[sym.slice 1]
+					if transfargs[sym.slice 1]?
 						transfargs[sym.slice 1]
 					else
 						sym.slice 1
+				else if sym?[0] is '~'
+					if transfargs[sym.slice 1]?
+						symbol transfargs[sym.slice 1]
+					else
+						'nil'
 				else if sym?.startsWith?('`"') and sym.slice(-1)[0] is '"'
 					"\"#{template_string sym.slice(2, -1), transfargs, ic}\""
 				else if sym?.type is "variable"
-					{ type: "variable", name: replace_internal sym.name }
+					{ type: "variable", name: replace_internal sym }
 				else
 					sym
 
