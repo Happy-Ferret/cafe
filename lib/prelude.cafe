@@ -28,6 +28,29 @@
 (def table/unpack unpack :global)
 ;;@end
 
+;; ## Macros
+;; ###### `curry fna fnb`
+;; merge two functions together, applying the second over the result of the first
+;; --
+
+(defmacro (curry a b)
+	(λ (...) (,b (,a ...))))
+
+;; ###### `compose fna fnb`
+;; merge two functions together, applying the first over the result of the second
+;; --
+
+(defmacro (compose a b)
+	(λ (...) (,a (,b ...))))
+
+(defmacro (ns nm)
+	(def ~nm {}))
+;; ###### `partial fn x`
+;; return a function that when invoked applies the given function (`fn`) with parameters `x` and parameters given to the return function.
+;; --
+(defmacro (partial fn x)
+	(cut ,fn ,x <>))
+
 ;; ## Functions
 
 ;; ###### `exit-on-error! erfmt ...` or `fail ...`
@@ -143,20 +166,6 @@
 				(cond x
 					((f x) (x . (filter xs f)))
 					(_ (filter xs f)))))))
-
-;; ###### `curry fna fnb`
-;; merge two functions together, applying the second over the result of the first
-;; --
-
-(defn (curry a b)
-	(λ (...) (b (a ...))))
-
-;; ###### `compose fna fnb`
-;; merge two functions together, applying the first over the result of the second
-;; --
-
-(defn (compose a b)
-	(λ (...) (a (b ...))))
 
 ;; ###### `exists thing`
 ;; returns false if:
@@ -420,12 +429,6 @@
 ;; substituted in place of wildcards. `a` and `b` are pre-evaluated.
 ;; --
 
-;; ###### `partial fn x`
-;; return a function that when invoked applies the given function (`fn`) with parameters `x` and parameters given to the return function.
-;; --
-(defmacro partial (fn x)
-	(cut ,fn ,x <>))
-
 ;; ###### `flip x`
 ;; return a function that when invoked applies the given function (`x`) with it's parameters in reverse order.
 (defn (flip x)
@@ -508,6 +511,3 @@
 ;; --
 (defn (apply li)
 	((head li) (table/unpack (tail li))))
-
-(defmacro ns (nm)
-	(lua-raw `"local $,nm = {};"))
