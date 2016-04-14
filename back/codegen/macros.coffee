@@ -53,7 +53,7 @@ module.exports.macro_common = (decl, ic) ->
 					else ret.varargs.push x
 				else
 					if expect_args[i].startsWith '__38'
-						ret[expect_args[i].slice(4, -2)] = ['do', x]
+						ret[expect_args[i].slice(4, -2)] = ['let', [['']], x]
 					else
 						ret[expect_args[i]] = x
 			ret
