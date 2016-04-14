@@ -250,9 +250,9 @@ module.exports.codegen = (ast) ->
 		if terminate? and terminate isnt "return " then throw new Error("Cannot use while loop as an expression: " + terminate)
 		gen = new Generator()
 		if expr.cond? and expr.body?
-			gen.startBlock "while #{expr_codegen expr.cond}"
+			gen.startBlock "while #{expr_codegen expr.cond} do"
 			gen.write expr.body.map(block_codegen)
-			gen.endBlock
+			gen.endBlock "end"
 		gen.join ';\n'
 
 	codegen_switch = (expr, terminate) ->
