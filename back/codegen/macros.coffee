@@ -99,6 +99,17 @@ module.exports.macro_common = (decl, ic) ->
 									replace_internal transfargs[rest]?.slice(indexes[0], indexes[1])
 							else
 								'nil'
+					else if sym?[1] is '\''
+						if sym?[2] is '~'
+							if transfargs[sym.slice 3].map?
+								['table/unpack', ['list'].concat transfargs[sym.slice 3]]
+							else
+								'nil'
+						else
+							if transfargs[sym.slice 2].map?
+								['list'].concat transfargs[sym.slice 2]
+							else
+								'nil'
 					else if transfargs[sym.slice 1]?
 						arg = transfargs[sym.slice 1]
 						if arg.map?
