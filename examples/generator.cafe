@@ -1,5 +1,5 @@
 (defmacro (defn* argsl &expr)
-	(def ,[0:1]argsl (coroutine/wrap (λ (,[1:2]argsl) ,@expr))))
+	(def ,[0:1]argsl (coroutine/wrap (λ (,[1:]argsl) ,@expr))))
 
 (defmacro (lambda* argsl &expr)
 	(coroutine/wrap (λ (,argsl) ,@expr)))
