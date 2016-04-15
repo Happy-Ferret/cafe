@@ -336,7 +336,7 @@
 
 (defn (#^+ x y ...)
 	(if (> (# args) 2)
-		(foldl ^+ (head args) (tail args))
+		(foldl #^+ (head args) (tail args))
 		(cond x
 			([string] (cond y
 				([list] (x . y))
@@ -350,24 +350,24 @@
 
 (defn (#^- x y ...)
 	(if (> (# args) 2)
-		(foldl ^- (head args) (tail args))
+		(foldl #^- (head args) (tail args))
 		(lua-raw "return x - y")))
 (defn (#^* x y ...)
 	(if (> (# args) 2)
-		(foldl ^* (head args) (tail args))
+		(foldl #^* (head args) (tail args))
 		(lua-raw "return x * y")))
 (defn (#^/ x y ...)
 	(if (> (# args) 2)
-		(foldl ^/ (head args) (tail args))
+		(foldl #^/ (head args) (tail args))
 		(lua-raw "return x / y")))
 (defn (#^% x y ...)
 	(if (> (# args) 2)
-		(foldl ^% (head args) (tail args))
+		(foldl #^% (head args) (tail args))
 		(lua-raw "return x % y")))
 
 (defn (#^^ x y ...)
 	(if (> (# args) 2)
-		(foldl ^^ (head args) (tail args))
+		(foldl #^^ (head args) (tail args))
 		(lua-raw "return x ^ y")))
 
 (defn (#^# y)     (lua-raw "return #y"))
@@ -378,19 +378,19 @@
 ;;@version 5.3 eq
 (defn (#^>> x y ...)
 	(if (> (# args) 2)
-		(foldl ^>> (head args) (tail args))
+		(foldl #^>> (head args) (tail args))
 		(lua-raw "return x >> y")))
 (defn (#^<< x y ...)
 	(if (> (# args) 2)
-		(foldl ^<< (head args) (tail args))
+		(foldl #^<< (head args) (tail args))
 		(lua-raw "return x << y")))
 (defn (#^| x y ...)
 	(if (> (# args) 2)
-		(foldl ^| (head args) (tail args))
+		(foldl #^| (head args) (tail args))
 		(lua-raw "return x | y")))
 (defn (#^& x y ...)
 	(if (> (# args) 2)
-		(foldl ^& (head args) (tail args))
+		(foldl #^& (head args) (tail args))
 		(lua-raw "return x & y")))
 
 (defn (#^~ y)     (lua-raw "return ~y"))
@@ -399,19 +399,19 @@
 (with (bit (if bit32 bit32 (or (and (pcall require "bit32")) nil)))
 	(defn (#^>> x y ...)
 		(if (> (# args) 2)
-			(foldl ^>> (head args) (tail args))
+			(foldl #^>> (head args) (tail args))
 			(bit/rshift x y)))
 	(defn (#^<< x y ...)
 		(if (> (# args) 2)
-			(foldl ^<< (head args) (tail args))
+			(foldl #^<< (head args) (tail args))
 			(bit/lshift x y)))
 	(defn (#^| x y ...)
 		(if (> (# args) 2)
-			(foldl ^| (head args) (tail args))
+			(foldl #^| (head args) (tail args))
 			(bit/bor x y)))
 	(defn (#^& x y ...)
 		(if (> (# args) 2)
-			(foldl ^& (head args) (tail args))
+			(foldl #^& (head args) (tail args))
 			(bit/band x y)))
 	(defn (#^~  y) (bit/bnot y)))
 ;;@end
@@ -422,7 +422,7 @@
 (defn (range fin)
 	(if (= fin 0)
 		'()
-		(cons (range (- fin 1)) fin)))
+		(+ (range (- fin 1)) fin)))
 
 ;; ###### `cut fn a <> b <>`
 ;; return a function that when invoked applies the given function (`fn`) with parameters `a`, `b`, etc... and parameters given to the return function
@@ -494,7 +494,7 @@
 ;; --
 (defn (int? x)
 	(if (< (^ 2 32) x)
-		(head (pcall ^| x 0))
+		(head (pcall #^| x 0))
 		false))
 
 ;; ###### `int x`
