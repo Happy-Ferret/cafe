@@ -36,6 +36,8 @@
 (defmacro (curry a b)
 	(λ (...) (,b (,a ...))))
 
+(defmacro (· a b) (curry ,a ,b))
+
 ;; ###### `compose fna fnb`
 ;; merge two functions together, applying the first over the result of the second
 ;; --
