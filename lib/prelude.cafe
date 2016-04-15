@@ -54,6 +54,12 @@
 (defmacro (partial fn x)
 	(cut ,fn ,x <>))
 
+;; ###### `infix lhs op rhs...`
+;; Apply an operation infixly.
+;; --
+(defmacro (infix lhs op &rhs)
+	(,op ,lhs ,'~rhs))
+
 ;; ## Functions
 
 ;; ###### `exit-on-error! erfmt ...` or `fail ...`
