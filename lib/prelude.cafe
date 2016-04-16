@@ -229,14 +229,14 @@
 ;; ###### `pair? a`
 ;; returns true if a is a pair
 ;; --
-(defn (pair? a)
-	(= (# a) 2))
+(defmacro (pair? a)
+	(= (# ,a) 2))
 
 ;; ###### `pair? a`
 ;; returns true if a is a list
 ;; --
-(defn (list? a)
-	(= "list" (type a)))
+(defmacro (list? a)
+	(= "list" (type ,a)))
 
 ;; ###### `eq? a b`
 ;; ** deprecated **: use `=` instead.
@@ -331,6 +331,7 @@
 		(if (and (= (type a) "function") (= (type a) "function"))
 			(raweq? a b)
 			false)))
+(defmacro (== x y) (#^= ,x ,y))
 
 (defn (#^!= x y)  (not (= x y)))
 (defn (#^> x y)   (lua-raw "return x > y"))
@@ -448,8 +449,8 @@
 
 ;; ###### `flip x`
 ;; return a function that when invoked applies the given function (`x`) with it's parameters in reverse order.
-(defn (flip x)
-	(λ (a b) (x b a)))
+(defmacro (flip x)
+	(λ (a b) (,x b a)))
 
 ;; ###### `elem? a li`
 ;; return true if `a` is an element of `li`, false otherwise.
