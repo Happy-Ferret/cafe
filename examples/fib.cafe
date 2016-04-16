@@ -1,9 +1,8 @@
 (defn (fib n)
+	(defn (fib-iter a b count)
+		(if (= count 0)
+			b (fib-iter (+ a b) a (- count 1))))
 	(fib-iter 1 0 n))
 
-(defn (fib-iter a b count)
-	(if (= count 0)
-		b
-		(fib-iter (+ a b) a (- count 1))))
 
-(map (compose print fib) (range 50))
+(map (fib . print) (range 50))
