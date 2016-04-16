@@ -20,6 +20,23 @@ global symbol bound to the stdin stream
 global symbol bound to the Lua version currently in use, and the semver version of the compiler itself
 
 
+## Macros
+###### `curry fna fnb`
+merge two functions together, applying the second over the result of the first
+
+
+###### `compose fna fnb`
+merge two functions together, applying the first over the result of the second
+
+
+###### `partial fn x`
+return a function that when invoked applies the given function (`fn`) with parameters `x` and parameters given to the return function.
+
+
+###### `infix lhs op rhs...`
+Apply an operation infixly.
+
+
 ## Functions
 ###### `exit-on-error! erfmt ...` or `fail ...`
 exits with a formatted error message and status code 1.
@@ -71,14 +88,6 @@ determine the size of a list.
 
 ###### `filter list fn`
 filter a list using a predicate.
-
-
-###### `curry fna fnb`
-merge two functions together, applying the second over the result of the first
-
-
-###### `compose fna fnb`
-merge two functions together, applying the first over the result of the second
 
 
 ###### `exists thing`
@@ -155,10 +164,6 @@ return a function that when invoked applies the given function (`fn`) with param
 substituted in place of wildcards. `a` and `b` are pre-evaluated.
 
 
-###### `partial fn x`
-return a function that when invoked applies the given function (`fn`) with parameters `x` and parameters given to the return function.
-
-
 ###### `flip x`
 return a function that when invoked applies the given function (`x`) with it's parameters in reverse order.
 ###### `elem? a li`
@@ -183,7 +188,7 @@ returns true if `x` is an integer (below 2³²)
 
 ###### `int x`
 return the integer form of `x` if `x` passes `int?`.
-if `x` is not an integer, then `int x` returns x.
+if `x` is not an integer, then `int x` returns floor(x).
 
 
 ###### `id x`
@@ -193,5 +198,9 @@ The [identity](https://en.wikipedia.org/wiki/Identity_function) function.
 ###### `apply (fn ...)`
 Apply the first function of a list to the rest of the list.
 The arguments to the function are unpacked.
+
+
+###### `zip-with f x y`
+Zip two lists together using the function `f`.
 
 
