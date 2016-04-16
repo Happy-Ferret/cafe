@@ -273,7 +273,7 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 		when 'string'
 			if tokens[0] == '"' and tokens.slice(-1)[0] == '"'
 				tokens
-			else if !isNaN(parseFloat(tokens)) && !(new RegExp("[#{specialChars.join '\\'}]", "gmi").test(tokens))
+			else if !isNaN(parseFloat(tokens)) && /^-/.test(tokens) || !(new RegExp("[#{specialChars.join '\\'}]", "gmi").test(tokens))
 				tokens
 			else if tokens[0] is '\''
 				{
