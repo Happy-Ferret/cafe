@@ -96,6 +96,10 @@
 (defn (cons car cdr)
 	(cond cdr
 		([list,pair] '(car (table/unpack cdr)))
+		([function]
+			(cond car
+				([function] (curry car cdr))
+				(_ (list car cdr))))
 		(_ (list car cdr))))
 
 ;; ###### `head list`
@@ -507,11 +511,12 @@
 
 ;; ###### `int x`
 ;; return the integer form of `x` if `x` passes `int?`.
-;; if `x` is not an integer, then `int x` returns x.
+;; if `x` is not an integer, then `int x` returns floor(x).
 ;; --
 (defn (int x)
 	(if (int? x)
-		(| x 0) x))
+		(| x 0)
+		(math/floor x)))
 
 ;; ###### `id x`
 ;; The [identity](https://en.wikipedia.org/wiki/Identity_function) function.
@@ -524,3 +529,18 @@
 ;; --
 (defn (apply li)
 	((head li) (table/unpack (tail li))))
+
+;; ###### `zip-with f x y`
+;; Zip two lists together using the function `f`.
+;; --
+
+(defn (zip-with f x y)
+	(cond x
+		([list|0|] '())
+		([list|x:xs|] (cond y
+			([list|0|] (print "y is empty¿"))
+			([list|y:ys|] (cond ys
+				([list] ((f x y) . (zip-with f xs ys)))
+				(_ (cond xs
+					([list] ((f x y) . (zip-with xs '(ys))))
+					(_ ((f x y) . (f xs ys)))))))))))

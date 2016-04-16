@@ -15,7 +15,7 @@ specialChars = ['+', '-', '*', '/',
                 '?', '!', '&', ':',
                 '=', '!', '$', '^',
                 '\\', '>', '<', '|',
-                '~', '#', '%']
+                '~', '#', '%', '\'']
 
 _sc = {}
 kwda = "and break do else elseif end for function if in local nil not or repeat return then until while".split ' '
