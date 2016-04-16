@@ -21,7 +21,7 @@
 ;; ###### `*version*`
 ;; global symbol bound to the Lua version currently in use, and the semver version of the compiler itself
 ;; --
-(def *version* (string/format "%s - %s" _VERSION "Café v1.0.0"))
+(def *version* (string/format "%s - %s" _VERSION "Café v1.1.0"))
 
 ;;@version 5.1 eq
 ;;@warn Compiling for Lua 5.1: Copying unpack to table/unpack
