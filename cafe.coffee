@@ -31,6 +31,8 @@ if argv?._[0]?
 	inp = argv._[0]
 else if argv?.run? and typeof argv.run is 'string'
 	inp = argv.run
+else if argv?.mini? and typeof argv.mini is 'string'
+	inp = argv.mini
 else
 	inp = '-'
 
@@ -71,8 +73,13 @@ else
 			if err?
 				throw err
 
+			if argv.mini?
+				data = ";;@import minilib\n#{data}"
+			else
+				data = ";;@import prelude\n#{data}"
+
 			fs.writeFile out, hashbang + "\n", ->
-				emit out, (codegen(parse preprocess(";;@import prelude\n#{data}", inp, null, interp), ast)), ->
+				emit out, (codegen(parse preprocess(data, inp, null, interp), ast)), ->
 					if argv.run?
 						process.stdout.write "\x1b[0m"
 						proc = child_process.spawn "#{interp}", ["#{out}"], {encoding: 'utf-8', stdio: 'inherit'}

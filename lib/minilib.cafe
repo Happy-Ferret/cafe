@@ -1,0 +1,42 @@
+;;@doc minilib.md
+;; # minilib
+;; The minilib contains simple implementations of the buitlin functions needed
+;; for Café programs to work. To use the minilib instead of the standard
+;; prelude, pass the `--mini` flag to the compiler.
+
+(with (old-type type)
+	(defn (_G/type a)
+		(if (= (old-type a) "table")
+			(if (= (lua-raw "return a._type") "hashmap")
+				"hashmap"
+					"list")
+				(old-type a))))
+(defn (#^= x y)   (lua-raw "return x == y"))
+(defn (#^!= x y)  (lua-raw "return x ~= y"))
+(defn (#^not x)   (lua-raw "return not x"))
+(defn (#^and x y) (lua-raw "return x and y"))
+(defn (#^or x y)  (lua-raw "return x or y"))
+(defn (#^> x y)   (lua-raw "return x > y"))
+(defn (#^< x y)   (lua-raw "return x < y"))
+(defn (#^+ x y)
+	(cond x
+		([string] (lua-raw "return x .. y"))
+		(_        (lua-raw "return x + y"))))
+
+(defn (#^- x y)   (lua-raw "return x - y"))
+(defn (#^* x y)   (lua-raw "return x * y"))
+(defn (#^/ x y)   (lua-raw "return x / y"))
+(defn (#^% x y)   (lua-raw "return x % y"))
+(defn (#^^ x y)   (lua-raw "return x % y"))
+(defn (#^# y)     (lua-raw "return #y"))
+(defn (#^>= x y)  (lua-raw "return x >= y"))
+(defn (#^<= x y)  (lua-raw "return x <= y"))
+;;@version 5.3 eq
+(defn (#^>> x y)  (lua-raw "return x >> y"))
+(defn (#^<< x y)  (lua-raw "return x << y"))
+(defn (#^~ y)     (lua-raw "return ~y"))
+(defn (#^| x y)   (lua-raw "return x | y"))
+(def ?? #^or)
+;;@else
+;;@warn minilib - compiling without support for bitwise operators. please provide your own implementations of >>, <<, ~ and |.
+;;@end
