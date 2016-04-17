@@ -384,7 +384,7 @@
 		(lua-raw "return x ^ y")))
 
 (defn (#^# y)     (lua-raw "return #y"))
-(def ^?? ^or)
+(def #^?? #^or)
 (defn (#^>= x y)  (lua-raw "return x >= y"))
 (defn (#^<= x y)  (lua-raw "return x <= y"))
 
