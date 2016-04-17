@@ -20,6 +20,7 @@ Available options are:
 	\x1b[1;32m-?/-h/--help\x1b[0m     Print this help and exit.
 	\x1b[1;32m--hashbang\x1b[0m       Specify a custom #! line for executables.
 	\x1b[1;32m--run\x1b[0m            Evaluate the compiled output.
+	\x1b[1;32m--mini\x1b[0m           Compile with minilib instead of the prelude.
 """
 
 
