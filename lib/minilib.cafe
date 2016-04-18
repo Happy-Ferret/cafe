@@ -40,3 +40,6 @@
 ;;@else
 ;;@warn minilib - compiling without support for bitwise operators. please provide your own implementations of >>, <<, ~ and |.
 ;;@end
+
+(defn (list ...) args)
+(defn (cons a b) (list a b))
