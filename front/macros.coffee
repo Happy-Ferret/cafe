@@ -1,5 +1,8 @@
-{ toks2ast
-, symbol   } = require '../../front'
+# Lazy loading of symbol
+symbol = (e) ->
+	{ symbol } = require './parser'
+	symbol e
+
 template_string = (str, tfa, ic) ->
 	str.replace /\$,(\w+)/gmi, (orig, gr1, indx, str) ->
 		if tfa[gr1]?
@@ -8,7 +11,7 @@ template_string = (str, tfa, ic) ->
 				if x.type is 'variable'
 					x
 				else
-					ic x
+					throw new Error("Cannot use #{x.type} in template string")
 			else x
 		else 'nil'
 
