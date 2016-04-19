@@ -52,7 +52,7 @@ replace_internal = (sym, args, ic) ->
 		else
 			throw "Can not map over a non-array macro argument"
 	else if sym[0] is '`cat'
-		sym[1].concat replace_internal(sym.slice(2), args, ic)[0]
+		replace_internal(sym[1], args, ic).concat replace_internal(sym.slice(2), args, ic)[0]
 	else
 		if sym?.map?
 			sym.map (x) -> replace_internal x, args, ic
@@ -145,4 +145,5 @@ module.exports.macro_common = (decl, ic) ->
 				x
 
 		x = template.map((x) -> replace_internal x, transfargs, ic).map cleanup
+		console.log JSON.stringify x, null, '\t'
 		return x
