@@ -1,6 +1,5 @@
 { symbol
 , toks2ast } = require '../../front'
-{ macro_common } = require './macros'
 fs         = require 'fs'
 
 actual_opch = (opch) -> opch
@@ -75,7 +74,6 @@ class Generator
 is_lua_expr = (node) ->
 	typeof node isnt "object" or node.type in ['call_function', 'lambda_expr', 'variable', 'switch']
 
-macros    = {}
 module.exports.codegen = (ast, terminate) ->
 	decd_funs = {}
 
@@ -83,7 +81,7 @@ module.exports.codegen = (ast, terminate) ->
 		body = expr.body.slice(0, -1).map block_codegen
 		last_expr = expr.body.slice(-1)[0]
 
-		if not ('args' in expr.args)
+		if not ('args' in expr.args) and expr.arg_var?.should_emit isnt false
 			gen.write "local args = {#{expr.args.join ', '}}"
 		if body? and last_expr?
 			last_expr = intermediate_codegen last_expr, "return "
@@ -96,6 +94,8 @@ module.exports.codegen = (ast, terminate) ->
 
 	codegen_function = (expr, terminate) ->
 		if terminate? and terminate isnt "" and terminate isnt "return " then throw new Error("Cannot use function as an expression: " + terminate)
+		if expr.variable?.should_emit is false
+			return "--skipping func #{expr.name}" # Cannot be "function" as that mucks up the indenter
 		gen = new Generator()
 		if expr.name? and expr.args?.join? and expr.body?
 			decd_funs[expr.name] = {expr} if !decd_funs[expr.name]?
@@ -109,11 +109,9 @@ module.exports.codegen = (ast, terminate) ->
 	codegen_call = (expr, terminate) ->
 		gen = new Generator()
 		if expr.name? and expr.args?
-			if expr.name?.type == "variable" and macros[expr.name.name]?
-				x = macros[expr.name.name](expr.args, terminate)
-				gen.write x
-			else
-				gen.write "#{terminate ? ""}(#{expr_codegen expr.name})(#{expr.args?.map?(expr_codegen).join ', '})"
+			if undefined in expr.args
+				console.log expr
+			gen.write "#{terminate ? ""}(#{expr_codegen expr.name})(#{expr.args?.map?(expr_codegen).join ', '})"
 
 		gen.join ';\n'
 
@@ -142,7 +140,13 @@ module.exports.codegen = (ast, terminate) ->
 		if expr.vars? and expr.body?
 			vars = expr.vars.map (v) ->
 				if v[0]? and v[1]? # Gracefully handle empty variables
-					if is_lua_expr v[1]
+					if v[2]?.should_emit is false
+						format = intermediate_codegen v[1]
+						if format?
+							"--skipping local #{v[0]}\n#{format}"
+						else
+							"--skipping local #{v[0]}"
+					else if is_lua_expr v[1]
 						"local #{v[0]} = #{expr_codegen v[1]}"
 					else
 						"local __temp\n#{intermediate_codegen v[1], "__temp = "}\n#{v[0]} = __temp"
@@ -219,7 +223,10 @@ module.exports.codegen = (ast, terminate) ->
 		gen = new Generator()
 		if expr.name? and expr.value?
 			if expr.local? and expr.local
-				if is_lua_expr expr.value
+				if expr.variable?.should_emit is false
+					gen.write "--skipping definition of #{expr.name}"
+					gen.write intermediate_codegen expr.value
+				else if is_lua_expr expr.value
 					gen.write "local #{expr.name} = #{expr_codegen expr.value}"
 				else
 					gen.write "local __temp"
@@ -328,10 +335,7 @@ module.exports.codegen = (ast, terminate) ->
 			"#{terminate}#{expr.name}"
 		else
 			null
-	generate_macro = (expr) -> (args, terminate) ->
-		macro_common(expr, block_codegen)(args)
-			.map(toks2ast)
-			.map (x) -> intermediate_codegen x, terminate
+
 	block_codegen = (expr) -> intermediate_codegen expr
 	expr_codegen = (expr) -> intermediate_codegen expr, ""
 	intermediate_codegen = (expr, terminate) ->
@@ -360,7 +364,6 @@ module.exports.codegen = (ast, terminate) ->
 				when 'switch'
 					codegen_switch expr, terminate
 				when 'macro_declaration'
-					macros[expr.name] = generate_macro(expr)
 					return "-- macro declaration of #{expr.name}"
 				when 'variable'
 					codegen_variable expr, terminate

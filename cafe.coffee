@@ -3,6 +3,7 @@
 { codegen, emit }     = require './back'
 { resolve }           = require 'path'
 { repl }              = require './front/repl'
+{ optimize }          = require './middle/optimizer'
 { argv }              = require 'optimist'
 fs                    = require 'fs'
 readline              = require 'readline'
@@ -80,7 +81,7 @@ else
 				data = ";;@import prelude\n#{data}"
 
 			fs.writeFile out, hashbang + "\n", ->
-				emit out, (codegen(parse preprocess(data, inp, null, interp), ast)), ->
+				emit out, (codegen(optimize parse(preprocess(data, inp, null, interp), ast))), ->
 					if argv.run?
 						process.stdout.write "\x1b[0m"
 						proc = child_process.spawn "#{interp}", ["#{out}"], {encoding: 'utf-8', stdio: 'inherit'}

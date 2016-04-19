@@ -345,11 +345,11 @@
 
 (defn (#^and x y ...)
 	(if (> (# args) 2)
-		(foldl ^and (head args) (tail args))
+		(foldl #^and (head args) (tail args))
 		(lua-raw "return x and y")))
 (defn (#^or x y ...)
 	(if (> (# args) 2)
-		(foldl ^or (head args) (tail args))
+		(foldl #^or (head args) (tail args))
 		(lua-raw "return x or y")))
 
 (defn (#^+ x y ...)
