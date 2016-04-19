@@ -72,7 +72,7 @@ annotate  = (ast) ->
 
 		variable = add_variable root, name
 		variable.global = true
-		console.log "\x1b[1;33mwarning:\x1b[0m Using global #{name}"
+		console.log "\x1b[1;33mwarning:\x1b[0m Using global #{name}" if process.env.CAFE_WARN_GLOBAL?
 		variable
 
 	use_variable = (scope, name) ->
@@ -172,7 +172,10 @@ annotate  = (ast) ->
 						traverse e
 					else
 						e.visited = false
-				when "call_function", "self_call", "conditional", "for_loop"
+				when "for_loop"
+					add_variable e.body_scope, e.name
+					traverse e
+				when "call_function", "self_call", "conditional"
 					traverse e
 				when "assignment"
 					if e.value?.type is "variable"
