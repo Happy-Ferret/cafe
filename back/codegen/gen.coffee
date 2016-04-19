@@ -95,7 +95,7 @@ module.exports.codegen = (ast, terminate) ->
 		gen.join ';\n'
 
 	codegen_function = (expr, terminate) ->
-		if terminate? and terminate isnt "return " then throw new Error("Cannot use function as an expression: " + terminate)
+		if terminate? and terminate isnt "" and terminate isnt "return " then throw new Error("Cannot use function as an expression: " + terminate)
 		gen = new Generator()
 		if expr.name? and expr.args?.join? and expr.body?
 			decd_funs[expr.name] = {expr} if !decd_funs[expr.name]?
