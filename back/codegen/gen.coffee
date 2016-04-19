@@ -95,7 +95,7 @@ module.exports.codegen = (ast, terminate) ->
 	codegen_function = (expr, terminate) ->
 		if terminate? and terminate isnt "" and terminate isnt "return " then throw new Error("Cannot use function as an expression: " + terminate)
 		if expr.variable?.should_emit is false
-			return "--skipping func #{expr.name}" # Cannot be "function" as that mucks up the indenter
+			return "-- skipping func #{expr.name}" # Cannot be "function" as that mucks up the indenter
 		gen = new Generator()
 		if expr.name? and expr.args?.join? and expr.body?
 			decd_funs[expr.name] = {expr} if !decd_funs[expr.name]?
@@ -111,7 +111,12 @@ module.exports.codegen = (ast, terminate) ->
 		if expr.name? and expr.args?
 			if undefined in expr.args
 				console.log expr
-			gen.write "#{terminate ? ""}(#{expr_codegen expr.name})(#{expr.args?.map?(expr_codegen).join ', '})"
+			gen_name = (x) ->
+				if x.type is 'variable'
+					x.name
+				else
+					"(#{expr_codegen expr.name})"
+			gen.write "#{terminate ? ""}#{gen_name expr.name}(#{expr.args?.map?(expr_codegen).join ', '})"
 
 		gen.join ';\n'
 
@@ -143,9 +148,9 @@ module.exports.codegen = (ast, terminate) ->
 					if v[2]?.should_emit is false
 						format = intermediate_codegen v[1]
 						if format?
-							"--skipping local #{v[0]}\n#{format}"
+							"-- skipping local #{v[0]}\n#{format}"
 						else
-							"--skipping local #{v[0]}"
+							"-- skipping local #{v[0]}"
 					else if is_lua_expr v[1]
 						"local #{v[0]} = #{expr_codegen v[1]}"
 					else
