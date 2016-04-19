@@ -64,7 +64,14 @@ replace_internal = (sym, args, ic) ->
 		else
 			throw "Can not map over a non-array macro argument"
 	else if sym[0] is '`cat'
-		replace_internal(sym[1], args, ic).concat replace_internal(sym.slice(2), args, ic)[0]
+		first = replace_internal(sym[1], args, ic)
+		for elem in sym.slice(2)
+			x = replace_internal(elem, args, ic)
+			if x[0]?.map?
+				first = first.concat x
+			else
+				first.push x
+		first
 	else
 		if sym?.map?
 			sym.map (x) -> replace_internal x, args, ic
