@@ -52,6 +52,8 @@ macro_map = (expr, args, ic) ->
 		context[symbol expr[2]] = x
 		replace_internal(expr.slice(3), context, ic)[0]
 
+symbols = {}
+last_sym = 0
 
 replace_internal = (sym, args, ic) ->
 	if sym[0] is '`cond'
@@ -118,8 +120,8 @@ replace_internal = (sym, args, ic) ->
 					arg.map (x) -> replace_internal x, args, ic
 				else
 					arg
-			else if sym?[1] is 's'
-				symbol sym.slice(2).replace('$', last_sym++)
+			else if sym?[1] is ':'
+				return if symbols[sym.slice(2)]? then symbols[sym.slice(2)] else symbols[sym.slice(2)] = symbol sym.slice(2).replace('$', last_sym++)
 			else
 				sym.slice 1
 		else if sym?.startsWith?('`"') and sym.slice(-1)[0] is '"'
