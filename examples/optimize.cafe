@@ -1,0 +1,37 @@
+;; Should be removed
+(defn (unused-func a b) (+ a b))
+
+;; Should be removed
+(with (unused-let "hello") ())
+
+;; Should be removed
+(def unused-def "Hello")
+
+;; Everything but last should be removed
+(let (
+		(unused-constant 2)
+		(unused-lambda (lambda (a b) (+ a b)))
+		(unused-variable y)
+		(unused-call (assert 2)))
+		())
+
+;; All should be used
+(let (
+	(a 2)
+	(b a)
+	(c (assert b)))
+	())
+
+;; All should be used
+(let (
+	(masked 2)
+	(masked masked)
+	(masked (assert masked)))
+	())
+
+;; All should be used
+(let (
+	(b a)
+	(a 2) ;; Should be removed
+	(c (assert (not b))))
+	())
