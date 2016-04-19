@@ -200,8 +200,9 @@ annotate  = (ast) ->
 				when "switch"
 					visit e.test
 					for clause in e.clauses
-						if /^\[(?:~?[\w|:]+,?)*\]$/gmi.test n
-							for n in n.slice(1, -1).split(',')
+						test = clause.test
+						if /^\[(?:~?[\w|:]+,?)*\]$/gmi.test test
+							for n in test.slice(1, -1).split(',')
 								use_variable e.scope, 'type'
 								if /(\w+)\|(\w+):(\w+)\|/gmi.test n
 									matches = n.match(/(\w+)|(\w+):(\w+)|/gmi).filter (x) -> x.length >= 1
@@ -210,14 +211,14 @@ annotate  = (ast) ->
 									use_variable e.scope, 'tail'
 
 									# This will probably duplicate variables. Eh.
-									add_variable e.body_scope, matches[1]
-									add_variable e.body_scope, matches[2]
-						else if /^".+"$/gmi.test n
+									add_variable clause.body_scope, matches[1]
+									add_variable clause.body_scope, matches[2]
+						else if /^".+"$/gmi.test test
 							use_variable e.scope, 'type'
-						else if n.type?
-							visit n
+						else if test.type?
+							visit test
 
-						visit e.valu
+						visit clause.valu
 
 				when "macro_declaration" then
 				when "variable"
