@@ -232,7 +232,7 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 				tokens
 			else
 				if tokens[0]?
-					if tokens[1]? and tokens[2]? and tokens[1] is '.'
+					if tokens[1]? and tokens[2]? and tokens[1] in ['.', '·']
 						{
 							type: 'call_function'
 							name: { type: 'variable', name: symbol 'cons' }
