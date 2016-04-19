@@ -34,6 +34,8 @@ macro_test = (str, tfa, ic) ->
 							return true
 						else
 							return false
+					if x[0] is '_'
+						return true
 					else throw "No such macro clause #{x[0]}"
 
 		for i in [0..clauses.length]
@@ -150,5 +152,5 @@ module.exports.macro_common = (decl, ic) ->
 				x
 
 		x = template.map((x) -> replace_internal x, transfargs, ic).map cleanup
-		console.log JSON.stringify x, null, '\t'
+		console.log JSON.stringify x, null, '\t' if process.env.CAFE_DEBUG_MACRO?
 		return x
