@@ -60,6 +60,11 @@
 (defmacro (infix lhs op rhs)
 	(,op ,lhs ,rhs))
 
+(defmacro (do &body)
+	(`cat (let ((_))) ,body))
+
+(defmacro (with bind &body)
+	(`cat (let (,bind)) ,body))
 ;; ## Functions
 
 ;; ###### `exit-on-error! erfmt ...` or `fail ...`

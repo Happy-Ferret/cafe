@@ -4,6 +4,12 @@
 ;; for Café programs to work. To use the minilib instead of the standard
 ;; prelude, pass the `--mini` flag to the compiler.
 
+(defmacro (do &body)
+	(`cat (let ((_))) ,body))
+
+(defmacro (with bind &body)
+	(`cat (let (,bind)) ,body))
+
 (with (old-type type)
 	(defn (_G/type a)
 		(if (= (old-type a) "table")
