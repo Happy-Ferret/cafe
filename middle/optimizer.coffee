@@ -24,6 +24,9 @@ escape_name = (name) ->
 	else
 		name
 
+is_pure = (expr) ->
+	expr?.type is "variable" or expr?.type is "lambda_expr"
+
 annotate  = (ast) ->
 	scope = null
 	root = null
@@ -111,9 +114,9 @@ annotate  = (ast) ->
 				when "assignment"
 					do_annotate e.value
 				when "scoped_block"
+					e.body_scope = push_scope()
 					for n in e.vars
 						do_annotate n[1]
-					e.body_scope = push_scope()
 					do_annotate n for n in e.body
 					pop_scope()
 				when "conditional"
@@ -178,8 +181,9 @@ annotate  = (ast) ->
 				when "call_function", "self_call", "conditional"
 					traverse e
 				when "assignment"
-					if e.value?.type is "variable"
-						e.value.variable = get_variable e.value.scope, e.value.name
+					if is_pure e.value?.type
+						if e.value?.type is "variable"
+							e.value.variable = get_variable e.value.scope, e.value.name
 						e.value.visited = false
 					else
 						visit e.value
@@ -190,17 +194,18 @@ annotate  = (ast) ->
 						get_variable e.scope, e.name
 					variable.definitions.push e.value
 
-					if variable.visited and e.value?.visited is false
+					if variable.should_emit and e.value?.visited is false
 						visit e.value
 
-					if e.value?.type isnt "variable" and typeof e.value isnt "string"
+					if (not is_pure e.value) and (typeof e.value isnt "string")
 						use_variable_ref variable
 					e.variable = variable
 				when "scoped_block"
 					for [name, value], i in e.vars
 						if name? and value?
-							if value?.type is "variable"
-								value.variable = get_variable value.scope, value.name
+							if is_pure value
+								if value?.type is "variable"
+									value.variable = get_variable value.scope, value.name
 								value.visited = false
 							else
 								visit value
@@ -209,9 +214,9 @@ annotate  = (ast) ->
 							variable.definitions.push value
 							e.vars[i].push(variable) # Kinda hack to share variable state
 
-							if variable.visited and value?.visited is false
+							if variable.should_emit and value?.visited is false
 								visit value
-							if value?.type isnt "variable" and typeof value isnt "string"
+							if (not is_pure value) and (typeof value isnt "string")
 								use_variable_ref variable
 					visit n for n in e.body
 				when "lambda_expr"

@@ -210,6 +210,10 @@ module.exports.codegen = (ast, terminate) ->
 		gen.join ';\n'
 
 	codegen_lambda_expr = (expr, terminate) ->
+		# Lambdas can be ignored
+		if not terminate?
+			return null
+
 		gen = new Generator()
 		if expr.args? and expr.body?
 			gen.startBlock "#{terminate ? ""}function(#{expr.args.join ', '})"
