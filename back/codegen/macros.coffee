@@ -36,6 +36,86 @@ macro_test = (str, tfa, ic) ->
 			if clause
 				return str[2 + i][1]
 
+macro_map = (expr, args, ic) ->
+	context = args
+	args[expr[1]].map (x) ->
+		context[symbol expr[2]] = x
+		replace_internal(expr.slice(3), context, ic)[0]
+
+
+replace_internal = (sym, args, ic) ->
+	if sym[0] is '`cond'
+		replace_internal macro_test sym, args, ic
+	else if sym[0] is '`map' || sym[0] is '`*'
+		if args[sym[1]]?.map?
+			macro_map sym, args, ic
+		else
+			throw "Can not map over a non-array macro argument"
+	else if sym[0] is '`cat'
+		sym[1].concat replace_internal(sym.slice(2), args, ic)[0]
+	else
+		if sym?.map?
+			sym.map (x) -> replace_internal x, args, ic
+		else if sym?[0] is ','
+			if sym?[1] is '~'
+				if args[sym.slice 2]?
+					symbol args[sym.slice 2]
+				else
+					'nil'
+			else if sym?[1] is '@'
+				if args[sym.slice 2]?.map?
+					['let', [['']]].concat replace_internal args[sym.slice 2], args, ic
+				else
+					'nil'
+			else if /^\[[\d:]+\]/.test sym.slice(1)
+				x = sym.slice(1).match /^\[([\d:]+)\]/
+				indexes = x[1].split(':').map((x) -> parseInt x).map (x) -> if isNaN x then undefined else x
+				[_, rest] = sym.slice(1).match /^\[[\d:]+\]([\w-@]+)/
+				indexes[0] = 0 if indexes[0] is undefined
+				if rest[0] is '@'
+					rest = rest.slice 1
+					if args[rest]?.slice?
+						x = args[rest]?.slice(indexes[0], indexes[1])
+						if x.length == 1
+							x[0]
+						else
+							['let', [['']]].concat replace_internal args[rest]?.slice(indexes[0], indexes[1]), args, ic
+					else
+						'nil'
+				else
+					if args[rest]?.slice?
+						x = args[rest]?.slice(indexes[0], indexes[1])
+						if x.length == 1
+							x[0]
+						else
+							replace_internal args[rest]?.slice(indexes[0], indexes[1]), args, ic
+					else
+						'nil'
+			else if sym?[1] is '\''
+				if sym?[2] is '~'
+					if args[sym.slice 3].map?
+						['table/unpack', ['list'].concat args[sym.slice 3]]
+					else
+						'nil'
+				else
+					if args[sym.slice 2].map?
+						['list'].concat args[sym.slice 2]
+					else
+						'nil'
+			else if args[sym.slice 1]?
+				arg = args[sym.slice 1]
+				if arg.mape
+					arg.map (x) -> replace_internal x, args, ic
+				else
+					arg
+			else
+				sym.slice 1
+		else if sym?.startsWith?('`"') and sym.slice(-1)[0] is '"'
+			"\"#{template_string sym.slice(2, -1), args, ic}\""
+		else if sym?.type is "variable"
+			{ type: "variable", name: replace_internal sym, args, ic }
+		else
+			sym
 
 module.exports.macro_common = (decl, ic) ->
 	{template, args: expect_args} = decl
@@ -58,78 +138,11 @@ module.exports.macro_common = (decl, ic) ->
 						ret[expect_args[i]] = x
 			ret
 
-		replace_internal = (sym) ->
-			if sym[0] is '`cond'
-				replace_internal macro_test sym, transfargs, ic
-			else
-				if sym?.map?
-					sym.map replace_internal
-				else if sym?[0] is ','
-					if sym?[1] is '~'
-						if transfargs[sym.slice 2]?
-							symbol transfargs[sym.slice 2]
-						else
-							'nil'
-					else if sym?[1] is '@'
-						if transfargs[sym.slice 2]?.map?
-							['let', [['']]].concat replace_internal transfargs[sym.slice 2]
-						else
-							'nil'
-					else if /^\[[\d:]+\]/.test sym.slice(1)
-						x = sym.slice(1).match /^\[([\d:]+)\]/
-						indexes = x[1].split(':').map((x) -> parseInt x).map (x) -> if isNaN x then undefined else x
-						[_, rest] = sym.slice(1).match /^\[[\d:]+\]([\w-@]+)/
-						indexes[0] = 0 if indexes[0] is undefined
-						if rest[0] is '@'
-							rest = rest.slice 1
-							if transfargs[rest]?.slice?
-								x = transfargs[rest]?.slice(indexes[0], indexes[1])
-								if x.length == 1
-									x[0]
-								else
-									['let', [['']]].concat replace_internal transfargs[rest]?.slice(indexes[0], indexes[1])
-							else
-								'nil'
-						else
-							if transfargs[rest]?.slice?
-								x = transfargs[rest]?.slice(indexes[0], indexes[1])
-								if x.length == 1
-									x[0]
-								else
-									replace_internal transfargs[rest]?.slice(indexes[0], indexes[1])
-							else
-								'nil'
-					else if sym?[1] is '\''
-						if sym?[2] is '~'
-							if transfargs[sym.slice 3].map?
-								['table/unpack', ['list'].concat transfargs[sym.slice 3]]
-							else
-								'nil'
-						else
-							if transfargs[sym.slice 2].map?
-								['list'].concat transfargs[sym.slice 2]
-							else
-								'nil'
-					else if transfargs[sym.slice 1]?
-						arg = transfargs[sym.slice 1]
-						if arg.map?
-							arg.map replace_internal
-						else
-							arg
-					else
-						sym.slice 1
-				else if sym?.startsWith?('`"') and sym.slice(-1)[0] is '"'
-					"\"#{template_string sym.slice(2, -1), transfargs, ic}\""
-				else if sym?.type is "variable"
-					{ type: "variable", name: replace_internal sym }
-				else
-					sym
-
 		cleanup = (x) ->
 			if x[0][0] is '"' and x[0].slice(-1)[0] is '"'
 				['lua-raw', "\"#{x}\""]
 			else
 				x
 
-		x = template.map(replace_internal).map cleanup
+		x = template.map((x) -> replace_internal x, transfargs, ic).map cleanup
 		return x
