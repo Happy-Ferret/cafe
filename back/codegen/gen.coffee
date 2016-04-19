@@ -81,7 +81,7 @@ module.exports.codegen = (ast, terminate) ->
 		body = expr.body.slice(0, -1).map block_codegen
 		last_expr = expr.body.slice(-1)[0]
 
-		if not ('args' in expr.args) and expr.arg_var?.used isnt 0
+		if not ('args' in expr.args) and expr.arg_var?.should_emit isnt false
 			gen.write "local args = {#{expr.args.join ', '}}"
 		if body? and last_expr?
 			last_expr = intermediate_codegen last_expr, "return "
@@ -94,7 +94,7 @@ module.exports.codegen = (ast, terminate) ->
 
 	codegen_function = (expr, terminate) ->
 		if terminate? and terminate isnt "" and terminate isnt "return " then throw new Error("Cannot use function as an expression: " + terminate)
-		if expr.variable?.used is 0
+		if expr.variable?.should_emit is false
 			return "--skipping func #{expr.name}" # Cannot be "function" as that mucks up the indenter
 		gen = new Generator()
 		if expr.name? and expr.args?.join? and expr.body?
@@ -140,7 +140,13 @@ module.exports.codegen = (ast, terminate) ->
 		if expr.vars? and expr.body?
 			vars = expr.vars.map (v) ->
 				if v[0]? and v[1]? # Gracefully handle empty variables
-					if is_lua_expr v[1]
+					if v[2]?.should_emit is false
+						format = intermediate_codegen v[1]
+						if format?
+							"--skipping local #{v[0]}\n#{format}"
+						else
+							"--skipping local #{v[0]}"
+					else if is_lua_expr v[1]
 						"local #{v[0]} = #{expr_codegen v[1]}"
 					else
 						"local __temp\n#{intermediate_codegen v[1], "__temp = "}\n#{v[0]} = __temp"
@@ -217,7 +223,7 @@ module.exports.codegen = (ast, terminate) ->
 		gen = new Generator()
 		if expr.name? and expr.value?
 			if expr.local? and expr.local
-				if expr.variable?.used is 0
+				if expr.variable?.should_emit is false
 					gen.write "--skipping definition of #{expr.name}"
 					gen.write intermediate_codegen expr.value
 				else if is_lua_expr expr.value

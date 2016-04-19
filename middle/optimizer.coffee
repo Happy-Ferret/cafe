@@ -47,7 +47,8 @@ annotate  = (ast) ->
 			scope = root
 
 		scope.variables[name] = {
-			used: 0
+			name: name
+			should_emit: false # If this symbol should be emitted.
 			definitions: []
 			scope: scope
 		}
@@ -69,25 +70,27 @@ annotate  = (ast) ->
 			else
 				scope = scope.parent
 
-		# Force global variables to be emitted
 		variable = add_variable root, name
 		variable.global = true
-		variable.used = 1
+		console.log "\x1b[1;33mwarning:\x1b[0m Using global #{name}"
 		variable
+
 	use_variable = (scope, name) ->
 		# Use all parent tables in indexed expressions
 		if '.' in name
 			use_variable scope, (name.slice 0, name.lastIndexOf '.')
 
-		variable = get_variable scope, name
-		variable.used++
-		for def in variable.definitions
-			if def.visited is false
-				def.visited = true
-				if def.type is "variable"
-					use_variable def.scope, def.name
-				else
-					traverse def
+		use_variable_ref(get_variable scope, name)
+
+	use_variable_ref = (variable) ->
+		if not variable.should_emit
+			variable.should_emit = true
+			for def in variable.definitions
+				if def?.visited is false # We might just not set it
+					if def.type is "variable"
+						use_variable_ref def.variable
+					else
+						traverse def
 
 	root = scope = push_scope()
 	macros = {}
@@ -99,7 +102,6 @@ annotate  = (ast) ->
 			switch e.type
 				when "define_function"
 					e.variable = root.variables[escape_name e.name] ? add_variable root, e.name
-					e.visited = false
 					e.body_scope = push_scope()
 					do_annotate n for n in e.body
 					pop_scope()
@@ -157,21 +159,25 @@ annotate  = (ast) ->
 		if e?.type?
 			switch e.type
 				when "define_function"
-					vari = root.variables[escape_name e.name]
-					vari.definitions.push(e)
 					e.arg_var = add_variable e.body_scope, "args"
 					for arg in e.args
 						variable = add_variable e.body_scope, arg
 						variable.argument = true
 
-					if vari.used isnt 0 and e.visited is false
+					vari = root.variables[escape_name e.name]
+					vari.definitions.push(e)
+
+					if vari.should_emit
 						e.visited = true
 						traverse e
+					else
+						e.visited = false
 				when "call_function", "self_call", "conditional", "for_loop"
 					traverse e
 				when "assignment"
 					if e.value?.type is "variable"
-						e.visited = false
+						e.value.variable = get_variable e.value.scope, e.value.name
+						e.value.visited = false
 					else
 						visit e.value
 
@@ -179,15 +185,31 @@ annotate  = (ast) ->
 						add_variable e.scope, e.name
 					else
 						get_variable e.scope, e.name
+					variable.definitions.push e.value
 
-					variable.definitions.push e
+					if variable.visited and e.value?.visited is false
+						visit e.value
+
+					if e.value?.type isnt "variable" and typeof e.value isnt "string"
+						use_variable_ref variable
 					e.variable = variable
 				when "scoped_block"
-					for [name, value] in e.vars
+					for [name, value], i in e.vars
 						if name? and value?
-							visit value
+							if value?.type is "variable"
+								value.variable = get_variable value.scope, value.name
+								value.visited = false
+							else
+								visit value
+
 							variable = add_variable e.body_scope, name
 							variable.definitions.push value
+							e.vars[i].push(variable) # Kinda hack to share variable state
+
+							if variable.visited and value?.visited is false
+								visit value
+							if value?.type isnt "variable" and typeof value isnt "string"
+								use_variable_ref variable
 					visit n for n in e.body
 				when "lambda_expr"
 					e.arg_var = add_variable e.body_scope, "args"
@@ -215,8 +237,8 @@ annotate  = (ast) ->
 									add_variable clause.body_scope, matches[2]
 						else if /^".+"$/gmi.test test
 							use_variable e.scope, 'type'
-						else if test.type?
-							visit test
+						else if test.type? and (test.type isnt "variable" or test.name isnt "_")
+								visit test
 
 						visit clause.valu
 
