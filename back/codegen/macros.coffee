@@ -1,5 +1,6 @@
 { toks2ast
 , symbol   } = require '../../front'
+last_sym = 0
 template_string = (str, tfa, ic) ->
 	str.replace /\$,(\w+)/gmi, (orig, gr1, indx, str) ->
 		if tfa[gr1]?
@@ -115,6 +116,8 @@ replace_internal = (sym, args, ic) ->
 					arg.map (x) -> replace_internal x, args, ic
 				else
 					arg
+			else if sym?[1] is 's'
+				symbol sym.slice(2).replace('$', last_sym++)
 			else
 				sym.slice 1
 		else if sym?.startsWith?('`"') and sym.slice(-1)[0] is '"'
