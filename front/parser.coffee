@@ -81,29 +81,21 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 					base.local = false
 
 				base
-			else if tokens[0] in ['let', 'with']
-				if tokens[0] is 'let'
-					{
-						type: 'scoped_block'
-						vars: tokens[1].map (tok) ->
-							arr = [symbol tok[0]]
-							if arr[0]?
-								otherv = toks2ast tok[1]
-								if otherv
-									arr.push otherv
+			else if tokens[0] is 'let'
+				{
+					type: 'scoped_block'
+					vars: tokens[1].map (tok) ->
+						arr = [symbol tok[0]]
+						if arr[0]?
+							otherv = toks2ast tok[1]
+							if otherv
+								arr.push otherv
 
-									arr
-								else []
+								arr
 							else []
-						body: tokens.slice(2).map toks2ast
-					}
-				else
-					{
-						type: 'scoped_block',
-						vars: [[symbol(tokens[1][0]), toks2ast(tokens[1][1])]],
-						body: tokens.slice(2).map toks2ast
-					}
-
+						else []
+					body: tokens.slice(2).map toks2ast
+				}
 			else if tokens[0] is 'if'
 				{
 					type: 'conditional'
@@ -143,12 +135,6 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 					type: 'while_loop'
 					cond: toks2ast tokens[1]
 					body: tokens.slice(2).map toks2ast
-				}
-			else if tokens[0] is 'do'
-				{
-					type: 'scoped_block',
-					vars: [],
-					body: tokens.slice(1).map toks2ast
 				}
 			else if tokens[0] is 'cond'
 				{
