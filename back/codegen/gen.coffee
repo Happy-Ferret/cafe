@@ -81,7 +81,7 @@ module.exports.codegen = (ast, terminate) ->
 		body = expr.body.slice(0, -1).map block_codegen
 		last_expr = expr.body.slice(-1)[0]
 
-		if not ('args' in expr.args)
+		if not ('args' in expr.args) and expr.arg_var?.used isnt 0
 			gen.write "local args = {#{expr.args.join ', '}}"
 		if body? and last_expr?
 			last_expr = intermediate_codegen last_expr, "return "

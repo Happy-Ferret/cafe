@@ -140,8 +140,10 @@ annotate  = (ast) ->
 				when "switch"
 					do_annotate e.thing
 					for x in e.clauses
+						x.body_scope = push_scope()
 						do_annotate x.test
 						do_annotate x.valu
+						pop_scope()
 				when "variable" then
 				when "macro_declaration" then
 
@@ -157,12 +159,13 @@ annotate  = (ast) ->
 				when "define_function"
 					vari = root.variables[escape_name e.name]
 					vari.definitions.push(e)
-					add_variable e.body_scope, "args"
+					e.arg_var = add_variable e.body_scope, "args"
 					for arg in e.args
 						variable = add_variable e.body_scope, arg
 						variable.argument = true
 
-					if vari.used isnt 0
+					if vari.used isnt 0 and e.visited is false
+						e.visited = true
 						traverse e
 				when "call_function", "self_call", "conditional", "for_loop"
 					traverse e
@@ -187,7 +190,7 @@ annotate  = (ast) ->
 							variable.definitions.push value
 					visit n for n in e.body
 				when "lambda_expr"
-					add_variable e.body_scope, "args"
+					e.arg_var = add_variable e.body_scope, "args"
 					for arg in e.args
 						variable = add_variable e.body_scope, arg
 						variable.argument = true
@@ -195,9 +198,27 @@ annotate  = (ast) ->
 					visit n for n in e.body
 				when "raw" then
 				when "switch"
-					# TODO: Implement this
-					console.log "\x1b[1;33mwarning:\x1b[0m Switch is not implemented"
-					traverse e
+					visit e.test
+					for clause in e.clauses
+						if /^\[(?:~?[\w|:]+,?)*\]$/gmi.test n
+							for n in n.slice(1, -1).split(',')
+								use_variable e.scope, 'type'
+								if /(\w+)\|(\w+):(\w+)\|/gmi.test n
+									matches = n.match(/(\w+)|(\w+):(\w+)|/gmi).filter (x) -> x.length >= 1
+
+									use_variable e.scope, 'head'
+									use_variable e.scope, 'tail'
+
+									# This will probably duplicate variables. Eh.
+									add_variable e.body_scope, matches[1]
+									add_variable e.body_scope, matches[2]
+						else if /^".+"$/gmi.test n
+							use_variable e.scope, 'type'
+						else if n.type?
+							visit n
+
+						visit e.valu
+
 				when "macro_declaration" then
 				when "variable"
 					use_variable e.scope, e.name

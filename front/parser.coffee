@@ -56,9 +56,7 @@ symbol = (str) ->
 module.exports.symbol = symbol
 macros = {}
 
-generate_macro = (expr) -> (args) ->
-	# TODO: Handle non-variables in template string
-	macro_common(expr)(args).map(toks2ast)
+generate_macro = (expr) -> (args) -> macro_common(expr)(args).map(toks2ast)
 
 module.exports.toks2ast = toks2ast = (tokens) ->
 	switch typeof tokens

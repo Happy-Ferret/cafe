@@ -11,8 +11,7 @@ template_string = (str, tfa, ic) ->
 				if x.type is 'variable'
 					x
 				else
-					# TODO: Fix the template string handling
-					ic x
+					throw new Error("Cannot use #{x.type} in template string")
 			else x
 		else 'nil'
 
