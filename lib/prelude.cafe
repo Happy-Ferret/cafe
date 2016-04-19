@@ -129,7 +129,7 @@
 	(table/insert rest 1 car)
 	rest)
 
-;; ###### `! end rest`
+;; ###### `push-tail! end rest`
 ;; insert a value at the end of a list, mutating it.
 ;; --
 (defn (push-tail! fin rest)

@@ -70,7 +70,7 @@ create a list from given values
 insert a value at the head of a list, mutating it.
 
 
-###### `! end rest`
+###### `push-tail! end rest`
 insert a value at the end of a list, mutating it.
 
 
