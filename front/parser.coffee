@@ -1,4 +1,5 @@
 { writeFile } = require 'fs'
+{ macro_common } = require './macros'
 puny = require 'punycode'
 
 operator = (s) ->
@@ -54,6 +55,11 @@ symbol = (str) ->
 
 module.exports.symbol = symbol
 macros = {}
+
+generate_macro = (expr) -> (args) ->
+	# TODO: Handle non-variables in template string
+	macro_common(expr)(args).map(toks2ast)
+
 module.exports.toks2ast = toks2ast = (tokens) ->
 	switch typeof tokens
 		when 'object'
@@ -67,7 +73,7 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 			else if operator tokens[0]
 				{
 					type: 'call_function'
-					name: symbol "#^#{tokens[0]}"
+					name: { type: 'variable', name: symbol "#^#{tokens[0]}" }
 					args: tokens.slice(1).map toks2ast
 				}
 			else if tokens[0] is 'def'
@@ -149,7 +155,7 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 			else if tokens?[0]?[0] is '\''
 				{
 					type: 'call_function'
-					name: symbol 'list'
+					name: { type: 'variable', name: symbol 'list' }
 					args: ([toks2ast tokens[0].slice(1)].concat tokens.slice(1)?.map toks2ast)
 				}
 			else if tokens[0] is 'cut'
@@ -222,7 +228,7 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 					args: tokens[1].slice(1).map symbol
 					template: tokens.slice 2
 				}
-				macros[symbol tokens[1][0]] = expr
+				macros[symbol tokens[1][0]] = generate_macro expr
 				expr
 			else if tokens.type?
 				tokens
@@ -235,20 +241,21 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 							args: [toks2ast(tokens[0])].concat [toks2ast(tokens[2])]
 						}
 					else
-						try
-							if macros[symbol tokens[0]]?
-								{
-									type: 'call_function'
-									name: toks2ast tokens[0]
-									args: tokens.slice(1)
-								}
+						name = try symbol tokens[0] catch e
+						if name? and macros[name]?
+							replace = macros[name](tokens.slice 1)
+							if replace instanceof Array
+								if replace.length is 1
+									replace[0]
+								else
+									{
+										type: 'scoped_block'
+										vars: []
+										body: replace
+									}
 							else
-								{
-									type: 'call_function'
-									name: toks2ast tokens[0]
-									args: tokens.slice(1)?.map?(toks2ast)
-								}
-						catch e
+								replace
+						else
 							{
 								type: 'call_function'
 								name: toks2ast tokens[0]
