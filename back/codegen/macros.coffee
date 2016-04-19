@@ -29,6 +29,11 @@ macro_test = (str, tfa, ic) ->
 							return true
 						else
 							return false
+					if x[0][0] is '='
+						if condarg.toString() == x[0].slice(1).toString()
+							return true
+						else
+							return false
 					else throw "No such macro clause #{x[0]}"
 
 		for i in [0..clauses.length]
