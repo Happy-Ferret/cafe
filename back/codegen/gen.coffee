@@ -289,7 +289,7 @@ module.exports.codegen = (ast, terminate) ->
 							matches = n.match(/(\w+)|(\w+):(\w+)|/gmi).filter (x) -> x.length >= 1
 							x = "(type(value) == '#{matches[0]}' and head(value) and tail(value))"
 							if !extra[x]?
-								extra[x] = ["local #{matches[1]} = head(value)", "local #{matches[2]} = tail(value)"]
+								extra[x] = ["local #{matches[1]}, #{matches[2]} = head(value), tail(value)"]
 							x
 						else if /(\w+)\|(\d+)\|/gmi.test n
 							matches = n.match(/(\w+)|(\d+)|/gmi).filter (x) -> x.length >= 1
