@@ -37,7 +37,12 @@
 	())
 
 
+;; Masked arguments
 (let (
 	(masked-arg 2) ; Should be removed
 	(func (lambda (masked-arg) masked-arg)))
 	(func 2))
+
+
+;; Nested do blocks
+(print (do (do (do (do 2)))))

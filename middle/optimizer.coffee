@@ -14,7 +14,7 @@
 #  - Give each variable a unique suffix. This would mean there
 #  - are no name collisions
 
-{ traverser } = require "./traverse"
+{ traverser, modify } = require "./traverse"
 
 escape_name = (name) ->
 	if name.startsWith '_G.'
@@ -27,7 +27,7 @@ escape_name = (name) ->
 is_pure = (expr) ->
 	expr?.type is "variable" or expr?.type is "lambda_expr"
 
-annotate  = (ast) ->
+annotate = (ast) ->
 	scope = null
 	root = null
 	push_scope = () ->
@@ -276,6 +276,37 @@ annotate  = (ast) ->
 	visit n for n in ast
 	root
 
+non_pure = (e) -> (not is_pure e) and (typeof e isnt "string")
+
+filter_block = (block) ->
+	if block.length <= 1
+		block
+	else
+		last = block[block.length - 1]
+		init = block.slice(0, -1).filter non_pure
+		init.push last
+		init
+mutator = (e) ->
+	e = modify e, mutator
+	switch e?.type
+		when "scoped_block"
+			e.vars = e.vars.filter (x) -> x[0]? and x[1]? and (x[2]?.should_emit isnt false)
+			e.body = filter_block e.body
+			if e.vars.length is 0
+				return e.body
+		when "define_function"
+			if e.variable?.should_emit is false
+				return undefined
+			e.body = filter_block e.body
+		when "assignment"
+			if e.variable?.should_emit is false
+				return undefined
+		when "lambda_expr", "for_loop", "while_loop"
+			e.body = filter_block e.body
+
+	e
+
 module.exports.optimize = (ast) ->
 	scope = annotate ast
+	ast = modify ast, mutator
 	ast

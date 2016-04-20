@@ -67,10 +67,7 @@ replace_internal = (sym, args, ic) ->
 		first = replace_internal(sym[1], args, ic)
 		for elem in sym.slice(2)
 			x = replace_internal(elem, args, ic)
-			if x[0]?.map?
-				first = first.concat x
-			else
-				first.push x
+			first = first.concat x
 		first
 	else
 		if sym?.map?
