@@ -287,20 +287,24 @@
 ;; combine elements of a list into an accumulator using a function.
 ;; --
 (defn (foldl func accum lst)
-	(if (null? lst)
-		(cond lst
-			([~list] (func accum lst))
-			(_ accum))
-		(cond func
-			([function] (foldl func (func accum (head lst)) (tail lst)))
-			(_ accum))))
+	(if (and (= (type accum) "list") (= nil lst))
+		(foldl func (head accum) (tail accum))
+		(if (null? lst)
+			(cond lst
+				([~list] (func accum lst))
+				(_ accum))
+			(cond func
+				([function] (foldl func (func accum (head lst)) (tail lst)))
+				(_ accum)))))
 
 (def reduce foldl)
 
 (defn (foldr func fin lst)
-	(if (null? lst)
-		fin
-		(func (head lst) (foldr func fin (tail lst)))))
+	(if (and (= (type fin) "list") (= nil lst))
+		(foldr func (head fin) (tail lst))
+		(if (null? lst)
+			fin
+			(func (head lst) (foldr func fin (tail lst))))))
 
 ;; ###### `truth?`
 ;; returns true if x is truthy, or:
@@ -550,3 +554,25 @@
 				(_ (cond xs
 					([list] ((f x y) . (zip-with xs '(ys))))
 					(_ ((f x y) . (f xs ys)))))))))))
+
+;; ###### `init li`
+;; Return all the elements of a list except the last one. The list must be non-empty.
+;; --
+(defn (init li)
+	(cond li
+		([list|0|] '())
+		([list|x:xs|] (x . (init xs)))))
+
+;; ###### `last li`
+;; Return the last element of a list.
+;; --
+
+(defn (last xs)
+	(foldl (λ (_ x) x) (head xs) (tail xs)))
+
+; Buncha numerical utilities stolen from Scheme
+(def zero?       (partial #^= 0))
+(def positive?   (partial #^< 0))
+(def negative?   (partial #^> 0))
+(defn (odd? num)  (= (mod num 2) 1))
+(defn (even? num) (= (mod num 2) 0))
