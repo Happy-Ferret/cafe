@@ -204,3 +204,11 @@ The arguments to the function are unpacked.
 Zip two lists together using the function `f`.
 
 
+###### `init li`
+Return all the elements of a list except the last one. The list must be non-empty.
+
+
+###### `last li`
+Return the last element of a list.
+
+
