@@ -41,7 +41,7 @@ annotate  = (ast) ->
 		else
 			throw new Error("Scope overflow")
 
-	add_variable = (scope, name) ->
+	add_variable = (scope, name, lookup_scope) ->
 		if name.startsWith '_G.'
 			name = name.substring 3
 			scope = root
@@ -49,11 +49,18 @@ annotate  = (ast) ->
 			name = name.substring 5
 			scope = root
 
+		parent = if '.' in name and name isnt '...'
+			scope = lookup_scope if lookup_scope?
+			get_variable scope, (name.slice 0, name.lastIndexOf '.')
+		else
+			null
+
 		scope.variables[name] = {
 			name: name
 			should_emit: false # If this symbol should be emitted.
 			definitions: []
 			scope: scope
+			parent: parent
 		}
 
 	get_variable = (scope, name) ->
@@ -67,26 +74,27 @@ annotate  = (ast) ->
 			name = name.substring 5
 			scope = root
 
+		base = scope
 		while scope?
 			if scope.variables[name]?
 				return scope.variables[name]
 			else
 				scope = scope.parent
 
-		variable = add_variable root, name
+		variable = add_variable root, name, base
 		variable.global = true
 		console.log "\x1b[1;33mwarning:\x1b[0m Using global #{name}" if process.env.CAFE_WARN_GLOBAL?
 		variable
 
 	use_variable = (scope, name) ->
-		# Use all parent tables in indexed expressions
-		if '.' in name
-			use_variable scope, (name.slice 0, name.lastIndexOf '.')
-
 		use_variable_ref(get_variable scope, name)
 
 	use_variable_ref = (variable) ->
 		if not variable.should_emit
+			# Use all parent tables in indexed expressions
+			if variable.parent?
+				use_variable_ref variable.parent
+
 			variable.should_emit = true
 			for def in variable.definitions
 				if def?.visited is false # We might just not set it
@@ -105,7 +113,8 @@ annotate  = (ast) ->
 			e.scope = scope
 			switch e.type
 				when "define_function"
-					e.variable = root.variables[escape_name e.name] ? add_variable root, e.name
+					if !/([_\w\d]+)\.([_\w\d])+/gmi.test e.name
+						e.variable = root.variables[escape_name e.name] ? add_variable root, e.name
 					e.body_scope = push_scope()
 					do_annotate n for n in e.body
 					pop_scope()
@@ -163,6 +172,8 @@ annotate  = (ast) ->
 		if e?.type?
 			switch e.type
 				when "define_function"
+					if not e.variable?
+						e.variable = root.variables[escape_name e.name] ? add_variable root, e.name
 					e.arg_var = add_variable e.body_scope, "args"
 					for arg in e.args
 						variable = add_variable e.body_scope, arg
