@@ -90,10 +90,11 @@ annotate  = (ast) ->
 			variable.should_emit = true
 			for def in variable.definitions
 				if def?.visited is false # We might just not set it
-					if def.type is "variable"
-						use_variable_ref def.variable
-					else
-						traverse def
+					switch def.type
+						when "variable", "lambda_expr"
+							visit def
+						else
+							traverse def
 
 	root = scope = push_scope()
 	macros = {}
@@ -252,7 +253,9 @@ annotate  = (ast) ->
 
 				when "macro_declaration" then
 				when "variable"
-					use_variable e.scope, e.name
+					if not e.variable?
+						e.variable = get_variable e.scope, e.name
+					use_variable_ref e.variable
 				else
 					throw new Error("Unknown node #{e.type}")
 

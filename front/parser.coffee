@@ -110,7 +110,7 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 			else if tokens[0] in ['λ', 'lambda']
 				{
 					type: 'lambda_expr'
-					args: tokens[1]
+					args: tokens[1].map symbol
 					body: tokens.slice(2).map toks2ast
 				}
 			else if tokens[0]?[0]? and tokens[0][0] is '.'

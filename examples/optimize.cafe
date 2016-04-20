@@ -29,9 +29,15 @@
 	(masked (assert masked)))
 	())
 
-;; All should be used
+;; b and c should be used
 (let (
 	(b a)
 	(a 2) ;; Should be removed
 	(c (assert (not b))))
 	())
+
+
+(let (
+	(masked-arg 2) ; Should be removed
+	(func (lambda (masked-arg) masked-arg)))
+	(func 2))
