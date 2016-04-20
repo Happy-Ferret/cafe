@@ -4,6 +4,33 @@
 ;; for Café programs to work. To use the minilib instead of the standard
 ;; prelude, pass the `--mini` flag to the compiler.
 
+(defmacro (curry a b)
+	(λ (...) (,b (,a ...))))
+
+(defmacro (· a b) (curry ,a ,b))
+
+;; ###### `compose fna fnb`
+;; merge two functions together, applying the first over the result of the second
+;; --
+
+(defmacro (compose a b)
+	(λ (...) (,a (,b ...))))
+
+(defmacro (ns nm)
+	(def ,~nm {}))
+
+;; ###### `partial fn x`
+;; return a function that when invoked applies the given function (`fn`) with parameters `x` and parameters given to the return function.
+;; --
+(defmacro (partial fn x)
+	(cut ,fn ,x <>))
+
+;; ###### `infix lhs op rhs...`
+;; Apply an operation infixly.
+;; --
+(defmacro (infix lhs op rhs)
+	(,op ,lhs ,rhs))
+
 (defmacro (do &body)
 	(`cat (let ((_))) ,body))
 
