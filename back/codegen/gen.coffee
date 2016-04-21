@@ -56,7 +56,7 @@ class Generator
 			@write 'end'
 
 	write: (txt) =>
-		if typeof txt is 'string'
+		if typeof txt is 'string' and txt.length > 0
 			_ = @text.push txt
 			null
 		else
