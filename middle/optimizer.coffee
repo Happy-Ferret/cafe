@@ -98,6 +98,7 @@ annotate = (ast) ->
 			variable.should_emit = true
 			for def in variable.definitions
 				if def?.visited is false # We might just not set it
+					def.visited = true
 					switch def.type
 						when "variable", "lambda_expr"
 							visit def
@@ -207,6 +208,7 @@ annotate = (ast) ->
 					variable.definitions.push e.value
 
 					if variable.should_emit and e.value?.visited is false
+						e.value.visited = true
 						visit e.value
 
 					if (not is_pure e.value) and (typeof e.value isnt "string")
@@ -222,14 +224,26 @@ annotate = (ast) ->
 							else
 								visit value
 
-							variable = add_variable e.body_scope, name
-							variable.definitions.push value
-							e.vars[i].push(variable) # Kinda hack to share variable state
+							handle_variable = (name) ->
+								variable = add_variable e.body_scope, name
+								variable.definitions.push value
 
-							if variable.should_emit and value?.visited is false
-								visit value
-							if (not is_pure value) and (typeof value isnt "string")
-								use_variable_ref variable
+								if variable.should_emit and value?.visited is false
+									value.visited = true
+									visit value
+								if (not is_pure value) and (typeof value isnt "string")
+									use_variable_ref variable
+								variable
+
+							variables = if name instanceof Array
+								name.map handle_variable
+							else
+								handle_variable name
+
+							# Kinda hack to share variable state
+							e.vars[i].push(variables)
+
+
 					visit n for n in e.body
 				when "lambda_expr"
 					e.arg_var = add_variable e.body_scope, "args"

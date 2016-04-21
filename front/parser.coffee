@@ -89,8 +89,9 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 				{
 					type: 'scoped_block'
 					vars: tokens[1].map (tok) ->
-						arr = [symbol tok[0]]
-						if arr[0]?
+						name = if tok[0] instanceof Array then tok[0].map symbol else symbol tok[0]
+						arr = [name]
+						if arr[0]? and arr[0]?.length isnt 0
 							otherv = toks2ast tok[1]
 							if otherv
 								arr.push otherv
