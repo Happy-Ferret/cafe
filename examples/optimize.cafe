@@ -55,3 +55,10 @@
 (cond '(1 2 3)
 	([list|top:bottom|] (print top (describe bottom)))
 	(_ (error "Expected list")))
+
+;; Multiple values
+(print (with ((a b) 2) 2)) ; Unused vars
+(print (with ((a b) 2) a)) ; Single used var
+
+(print (do (def (a b) 2) 2)) ; Unused vars
+(print (do (def (a b) 2) a)) ; Single used var

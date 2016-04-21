@@ -77,7 +77,12 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 			else if tokens[0] is 'def'
 				base = {
 					type: 'assignment'
-					name: symbol tokens[1]
+					name: if tokens[1] instanceof Array
+							if tokens[1].length is 0
+								throw new Error("Cannot assign to empty list!")
+							tokens[1].map symbol
+						else
+							symbol tokens[1]
 					value: toks2ast tokens[2]
 					local: true
 				}
@@ -89,8 +94,9 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 				{
 					type: 'scoped_block'
 					vars: tokens[1].map (tok) ->
-						arr = [symbol tok[0]]
-						if arr[0]?
+						name = if tok[0] instanceof Array then tok[0].map symbol else symbol tok[0]
+						arr = [name]
+						if arr[0]? and arr[0]?.length isnt 0
 							otherv = toks2ast tok[1]
 							if otherv
 								arr.push otherv

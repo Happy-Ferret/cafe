@@ -415,7 +415,10 @@
 (defn (#^~ y)     (lua-raw "return ~y"))
 ;;@else
 ;;@warn Falling back to bit32 library
-(with (bit (if bit32 bit32 (or (and (pcall require "bit32")) nil)))
+(with
+	(bit (if bit32 bit32 (with
+		((success res) (pcall require "bit32"))
+		(if success res nil))))
 	(defn (#^>> x y ...)
 		(if (> (# args) 2)
 			(foldl #^>> (head args) (tail args))

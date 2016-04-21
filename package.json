@@ -11,6 +11,7 @@
     "test5.1": "coffee cafe.coffee --run examples/tests.cafe -o tests51.lua -i lua5.1",
     "test5.2": "coffee cafe.coffee --run examples/tests.cafe -o tests52.lua -i lua5.2",
     "testjit": "coffee cafe.coffee --run examples/tests.cafe -o testsjit.lua -i luajit",
+    "gen-optimize": "coffee cafe.coffee examples/optimize.cafe -o optimize.lua",
     "docs": "coffee docy.coffee -f lib/ -d doc/libs/",
     "precommit": "sh runtests.sh"
   },
