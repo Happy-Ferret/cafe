@@ -46,8 +46,4 @@
 (defn (math/percent val total) (* 100 (/ val total)))
 ;; ###### `math/mean ...`
 ;; Take the arithmetic mean of a set, given as variadic arguments.
-(defn (math/mean ...)
-	(with (tot 0)
-		(for i 1 (# args)
-			(def tot (+ (nth i args) tot) :global))
-		(/ tot (# args))))
+(defn (math/mean ...) (/ (foldl #^+ args) (# args)))
