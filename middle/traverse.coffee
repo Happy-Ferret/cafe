@@ -98,7 +98,7 @@ module.exports.modify = (e, mutator) ->
 				e.body = map_multi e.body, mutator
 			when "raw" then
 			when "while_loop"
-				e.cond = emit_expr mutator, e.cond
+				e.cond = emit_expr mutator e.cond
 				e.body = map_multi e.body, mutator
 			when "switch"
 				e.thing =  e.thing

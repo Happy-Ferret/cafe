@@ -46,3 +46,12 @@
 
 ;; Nested do blocks
 (print (do (do (do (do 2)))))
+
+;; Basic constructs to check the compile
+(print (if 1 (+ 2 3) (- 2 3)))
+(with (x 0) (loop (<= x 3)
+	(print x)
+	(def x (+ x 1) :global)))
+(cond '(1 2 3)
+	([list|top:bottom|] (print top (describe bottom)))
+	(_ (error "Expected list")))

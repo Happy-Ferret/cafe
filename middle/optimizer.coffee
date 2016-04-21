@@ -190,7 +190,7 @@ annotate = (ast) ->
 				when "for_loop"
 					add_variable e.body_scope, e.name
 					traverse e
-				when "call_function", "self_call", "conditional"
+				when "call_function", "self_call", "conditional", "while_loop"
 					traverse e
 				when "assignment"
 					if is_pure e.value?.type
