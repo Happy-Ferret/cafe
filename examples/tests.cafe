@@ -54,5 +54,13 @@
 (tests/expect! (with (x 2) x x) 2 "Lone variable")
 (tests/expect! (do 2 2) 2 "Lone constant")
 
+(tests/expect! (with ((a b) (unpack '(1 2))) '(a b)) '(1 2) "Multiple assigns")
+(tests/expect! (with ((a b) (if 1 (unpack '(1 2)))) '(a b)) '(1 2) "Multiple assigns from if")
+(tests/expect! (with (a (if 1 2 3)) a) 2 "Assign from if")
+
+(tests/expect! (do (def (a b) (unpack '(1 2))) '(a b)) '(1 2) "Multiple defs")
+(tests/expect! (do (def (a b) (if 1 (unpack '(1 2)))) '(a b)) '(1 2) "Multiple defs from if")
+(tests/expect! (do (def a (if 1 2 3)) a) 2 "Def from if")
+
 ;; Print results
 (tests/print-tests)

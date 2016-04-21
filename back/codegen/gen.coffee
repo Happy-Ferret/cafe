@@ -143,10 +143,12 @@ module.exports.codegen = (ast, terminate) ->
 		if expr.vars? and expr.body?
 			vars = expr.vars.map (v) ->
 				if v[0]? and v[1]? # Gracefully handle empty variables
+					names = if v[0] instanceof Array then v[0].join ", " else v[0]
 					if is_lua_expr v[1]
-						"local #{v[0]} = #{expr_codegen v[1]}"
+						"local #{names} = #{expr_codegen v[1]}"
 					else
-						"local __temp\n#{intermediate_codegen v[1], "__temp = "}\n#{v[0]} = __temp"
+						temps = if v[0] instanceof Array then v[0].map((x) -> "__temp_" + x).join ", " else "__temp_" + v[0]
+						"local #{temps}\n#{intermediate_codegen v[1], "#{temps} = "}\n#{names} = #{temps}"
 
 			wrap = false
 			if terminate is ''
@@ -223,15 +225,17 @@ module.exports.codegen = (ast, terminate) ->
 
 		gen = new Generator()
 		if expr.name? and expr.value?
+			names = if expr.name instanceof Array then expr.name.join ", " else expr.name
 			if expr.local? and expr.local
 				if is_lua_expr expr.value
-					gen.write "local #{expr.name} = #{expr_codegen expr.value}"
+					gen.write "local #{names} = #{expr_codegen expr.value}"
 				else
-					gen.write "local __temp"
-					gen.write(intermediate_codegen expr.value, "__temp = ")
-					gen.write "local #{expr.name} = __temp"
+					temps = if expr.name instanceof Array then expr.name.map((x) -> "__temp_" + x).join ", " else "__temp_" + expr.name
+					gen.write "local #{temps}"
+					gen.write(intermediate_codegen expr.value, "#{temps} = ")
+					gen.write "local #{names} = #{temps}"
 			else
-				gen.write(intermediate_codegen expr.value, "#{expr.name} = ")
+				gen.write(intermediate_codegen expr.value, "#{names} = ")
 
 
 		gen.join '\n'
