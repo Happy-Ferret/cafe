@@ -269,11 +269,8 @@
 ;; ###### `nth num list`
 ;; get num-th element of list
 ;; --
-(defn (nth n l)
-	(if (= n 1)
-		(head l)
-		(nth (- n 1) (tail l))))
-
+(defn (nth i l) (lua-raw "return l[i]"))
+(defn (set-nth l i v) (lua-raw "l[i] = v") nil)
 ;; ###### `null? list`
 ;; returns true if list is empty.
 ;; --
