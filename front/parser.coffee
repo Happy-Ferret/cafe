@@ -19,7 +19,8 @@ specialChars = ['+', '-', '*', '/',
                 '~', '#', '%', '\'']
 
 _sc = {}
-kwda = "and break do else elseif end for function if in local nil not or repeat return then until while".split ' '
+kwda = "and break do else elseif end for function if in local not or repeat return then until while".split ' '
+reserved_names = "nil true false".split ' '
 
 symbol = (str) ->
 	encode = (str) ->
@@ -53,6 +54,11 @@ symbol = (str) ->
 		else
 			throw new Error("Expected identifier, got #{str}")
 
+name_symbol = (str) ->
+	str = symbol str
+	if str in reserved_names
+		throw new Error("#{str} is a reserved name")
+	str
 module.exports.symbol = symbol
 macros = {}
 
@@ -64,8 +70,8 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 			if tokens[0] is 'defn'
 				{
 					type: 'define_function'
-					name: symbol tokens[1][0]
-					args: tokens[1].slice(1).map symbol
+					name: name_symbol tokens[1][0]
+					args: tokens[1].slice(1).map name_symbol
 					body: tokens.slice(2).map toks2ast
 				}
 			else if operator tokens[0]
@@ -80,9 +86,9 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 					name: if tokens[1] instanceof Array
 							if tokens[1].length is 0
 								throw new Error("Cannot assign to empty list!")
-							tokens[1].map symbol
+							tokens[1].map name_symbol
 						else
-							symbol tokens[1]
+							name_symbol tokens[1]
 					value: toks2ast tokens[2]
 					local: true
 				}
@@ -94,7 +100,7 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 				{
 					type: 'scoped_block'
 					vars: tokens[1].map (tok) ->
-						name = if tok[0] instanceof Array then tok[0].map symbol else symbol tok[0]
+						name = if tok[0] instanceof Array then tok[0].map name_symbol else name_symbol tok[0]
 						arr = [name]
 						if arr[0]? and arr[0]?.length isnt 0
 							otherv = toks2ast tok[1]
@@ -116,7 +122,7 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 			else if tokens[0] in ['λ', 'lambda']
 				{
 					type: 'lambda_expr'
-					args: tokens[1].map symbol
+					args: tokens[1].map name_symbol
 					body: tokens.slice(2).map toks2ast
 				}
 			else if tokens[0]?[0]? and tokens[0][0] is '.'
@@ -130,7 +136,7 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 			else if tokens[0] is 'for'
 				{
 					type: 'for_loop'
-					name: symbol tokens[1]
+					name: name_symbol tokens[1]
 					start: toks2ast tokens[2]
 					end: toks2ast tokens[3]
 					body: tokens.slice(4).map toks2ast
@@ -268,7 +274,7 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 				else
 					''
 		when 'string'
-			if tokens[0] == '"' and tokens.slice(-1)[0] == '"'
+			if tokens[0] == '"' and tokens.slice(-1)[0] == '"' or tokens in reserved_names
 				tokens
 			else if !isNaN(parseFloat(tokens)) && (/^-/.test(tokens) || !(new RegExp("[#{specialChars.join '\\'}]", "gmi").test(tokens)))
 				tokens
