@@ -193,7 +193,7 @@ annotate = (ast) ->
 				when "call_function", "self_call", "conditional", "while_loop"
 					traverse e
 				when "assignment"
-					if is_pure e.value?.type
+					if is_pure e.value
 						if e.value?.type is "variable"
 							e.value.variable = get_variable e.value.scope, e.value.name
 						e.value.visited = false
