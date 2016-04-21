@@ -225,15 +225,17 @@ module.exports.codegen = (ast, terminate) ->
 
 		gen = new Generator()
 		if expr.name? and expr.value?
+			names = if expr.name instanceof Array then expr.name.join ", " else expr.name
 			if expr.local? and expr.local
 				if is_lua_expr expr.value
-					gen.write "local #{expr.name} = #{expr_codegen expr.value}"
+					gen.write "local #{names} = #{expr_codegen expr.value}"
 				else
-					gen.write "local __temp"
-					gen.write(intermediate_codegen expr.value, "__temp = ")
-					gen.write "local #{expr.name} = __temp"
+					temps = if expr.name instanceof Array then expr.name.map((x) -> "__temp_" + x).join ", " else "__temp_" + expr.name
+					gen.write "local #{temps}"
+					gen.write(intermediate_codegen expr.value, "#{temps} = ")
+					gen.write "local #{names} = #{temps}"
 			else
-				gen.write(intermediate_codegen expr.value, "#{expr.name} = ")
+				gen.write(intermediate_codegen expr.value, "#{names} = ")
 
 
 		gen.join '\n'

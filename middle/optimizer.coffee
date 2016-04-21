@@ -201,19 +201,25 @@ annotate = (ast) ->
 					else
 						visit e.value
 
-					variable = if e.local
-						add_variable e.scope, e.name
+					handle_variable = (name) ->
+						variable =  if e.local
+							add_variable e.scope, name
+						else
+							get_variable e.scope, name
+						variable.definitions.push e.value
+
+						if variable.should_emit and e.value?.visited is false
+							e.value.visited = true
+							visit e.value
+						if (not is_pure e.value) and (typeof e.value isnt "string")
+							use_variable_ref variable
+						variable
+
+					variables = if e.name instanceof Array
+						e.name.map handle_variable
 					else
-						get_variable e.scope, e.name
-					variable.definitions.push e.value
-
-					if variable.should_emit and e.value?.visited is false
-						e.value.visited = true
-						visit e.value
-
-					if (not is_pure e.value) and (typeof e.value isnt "string")
-						use_variable_ref variable
-					e.variable = variable
+						handle_variable e.name
+					e.variable = variables
 				when "scoped_block"
 					for [name, value], i in e.vars
 						if name? and value?
@@ -242,7 +248,6 @@ annotate = (ast) ->
 
 							# Kinda hack to share variable state
 							e.vars[i].push(variables)
-
 
 					visit n for n in e.body
 				when "lambda_expr"
@@ -291,6 +296,7 @@ annotate = (ast) ->
 	root
 
 non_pure = (e) -> (not is_pure e) and (typeof e isnt "string")
+should_emit = (v) -> if v instanceof Array then v.find((v) -> v.should_emit isnt false)? else v?.should_emit isnt false
 
 filter_block = (block) ->
 	if block.length <= 1
@@ -304,7 +310,7 @@ mutator = (e) ->
 	e = modify e, mutator
 	switch e?.type
 		when "scoped_block"
-			e.vars = e.vars.filter (x) -> x[0]? and x[1]? and (x[2]?.should_emit isnt false)
+			e.vars = e.vars.filter (x) -> x[0]? and x[1]? and should_emit x[2]
 			e.body = filter_block e.body
 			if e.vars.length is 0
 				return e.body
@@ -313,7 +319,7 @@ mutator = (e) ->
 				return undefined
 			e.body = filter_block e.body
 		when "assignment"
-			if e.variable?.should_emit is false
+			if not should_emit e.variable
 				return undefined
 		when "lambda_expr", "for_loop", "while_loop"
 			e.body = filter_block e.body
