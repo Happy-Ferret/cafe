@@ -1,6 +1,21 @@
-(defmacro (vec! &elems)
-	(`cat (let ((__vector '())))
-		(`map elems elem (push-tail! ,elem __vector))))
+(defmacro (defn:memo argsl body)
+	(do
+		(defn (,[0:1]argsl ,[1:]argsl)
+			(def internal (λ (,[1:]argsl) ,body))
+			(def cache '())
+			(with (fn internal)
+				(λ (n)
+					(if (nth n cache)
+						(nth n cache)
+						(do
+							(set-nth cache n (internal n))
+							(nth n cache))))))
+		(def ,[0:1]argsl (,[0:1]argsl) :global)))
 
-(with (vec (vec! 1 2 3))
-	(map vec print))
+(defn:memo (factorial n)
+	(if (<= n 1)
+		1
+		(* (factorial (- n 1)) n)))
+
+(for i 1 15
+	(print (string/format "%d! = %d" i (factorial i))))
