@@ -321,6 +321,18 @@ mutator = (e) ->
 		when "assignment"
 			if not should_emit e.variable
 				return undefined
+		when "variable"
+			# Inline variables
+			if e.variable?
+				defs = e.variable.definitions
+				if defs.length is 1 and typeof defs[0] is "string"
+					return defs[0]
+		when "conditional"
+			if typeof e.cond is "string"
+				if e.cond is "nil" or e.cond is "false"
+					return e.falsb
+				else
+					return e.trueb
 		when "lambda_expr", "for_loop", "while_loop"
 			e.body = filter_block e.body
 
