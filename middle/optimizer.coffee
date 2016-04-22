@@ -9,10 +9,8 @@
 #    if it is used anywhere.
 #
 # Further optimisations/beautification:
-#  - Merge nested "scoped_blocks" into single blocks
 #  - Inline functions
-#  - Give each variable a unique suffix. This would mean there
-#  - are no name collisions
+#  - Give each variable a unique suffix. This would mean there are no name collisions
 
 { traverser, modify } = require "./traverse"
 
@@ -25,7 +23,10 @@ escape_name = (name) ->
 		name
 
 is_pure = (expr) ->
-	expr?.type is "variable" or expr?.type is "lambda_expr"
+	switch expr?.type
+		when "variable", "lambda_expr" then true
+		when "raw" then expr.pure is true
+		else false
 
 annotate = (ast) ->
 	scope = null
@@ -175,7 +176,6 @@ annotate = (ast) ->
 				when "define_function"
 					if not e.variable?
 						e.variable = root.variables[escape_name e.name] ? add_variable root, e.name
-					e.arg_var = add_variable e.body_scope, "args"
 					for arg in e.args
 						variable = add_variable e.body_scope, arg
 						variable.argument = true

@@ -64,15 +64,36 @@ macros = {}
 
 generate_macro = (expr) -> (args) -> macro_common(expr)(args).map(toks2ast)
 
+make_body = (args, body) ->
+	if "args" in args
+		body.map toks2ast
+	else
+		out = []
+		out.push {
+			type: 'assignment'
+			name: 'args'
+			local: true
+			value: {
+				type: 'raw'
+				body: [ '"return {' + (args.join ", ") + '}"' ]
+				pure: true
+			}
+		}
+
+		for node in body
+			out.push toks2ast node
+		out
+
 module.exports.toks2ast = toks2ast = (tokens) ->
 	switch typeof tokens
 		when 'object'
 			if tokens[0] is 'defn'
+				args = tokens[1].slice(1).map name_symbol
 				{
 					type: 'define_function'
 					name: name_symbol tokens[1][0]
-					args: tokens[1].slice(1).map name_symbol
-					body: tokens.slice(2).map toks2ast
+					args: args
+					body: make_body args, tokens.slice(2), tokens[1][0]
 				}
 			else if operator tokens[0]
 				{
@@ -120,10 +141,11 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 					falsb: toks2ast tokens[3]
 				}
 			else if tokens[0] in ['λ', 'lambda']
+				args = tokens[1].map name_symbol
 				{
 					type: 'lambda_expr'
-					args: tokens[1].map name_symbol
-					body: tokens.slice(2).map toks2ast
+					args: args
+					body: make_body args, tokens.slice(2)
 				}
 			else if tokens[0]?[0]? and tokens[0][0] is '.'
 				{
