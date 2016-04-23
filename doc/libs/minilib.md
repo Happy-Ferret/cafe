@@ -12,5 +12,3 @@ return a function that when invoked applies the given function (`fn`) with param
 
 ###### `infix lhs op rhs...`
 Apply an operation infixly.
-
-
