@@ -12,6 +12,11 @@
 							(nth n cache))))))
 		(def ,[0:1]argsl (,[0:1]argsl) :global)))
 
+(defn:memo (fib n)
+	(if (<= n 2)
+		1
+		(+ (fib (- n 2)) (fib (- n 1)))))
+
 (defn:memo (factorial n)
 	(if (<= n 1)
 		1
@@ -19,3 +24,6 @@
 
 (for i 1 15
 	(print (string/format "%d! = %d" i (factorial i))))
+
+(for i 1 15
+	(print (string/format "fib(%d) = %d" i (fib i))))
