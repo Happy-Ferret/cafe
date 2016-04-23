@@ -72,7 +72,7 @@ class Generator
 
 
 is_lua_expr = (node) ->
-	typeof node isnt "object" or node.type in ['call_function', 'lambda_expr', 'variable', 'switch']
+	typeof node isnt "object" or node.type in ['call_function', 'lambda_expr', 'variable', 'switch', 'raw']
 
 module.exports.codegen = (ast, terminate) ->
 	decd_funs = {}
@@ -81,8 +81,6 @@ module.exports.codegen = (ast, terminate) ->
 		body = expr.body.slice(0, -1).map block_codegen
 		last_expr = expr.body.slice(-1)[0]
 
-		if not ('args' in expr.args) and expr.arg_var?.should_emit isnt false
-			gen.write "local args = {#{expr.args.join ', '}}"
 		if body? and last_expr?
 			last_expr = intermediate_codegen last_expr, "return "
 
@@ -221,7 +219,7 @@ module.exports.codegen = (ast, terminate) ->
 		gen.join ';\n'
 
 	codegen_assignment = (expr, terminate) ->
-		if terminate? and terminate isnt "return " then throw new Error("Cannot use assignement as an expression: " + terminate)
+		if terminate? and terminate isnt "return " then throw new Error("Cannot use assignment as an expression: " + terminate)
 
 		gen = new Generator()
 		if expr.name? and expr.value?
