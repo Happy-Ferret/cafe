@@ -118,12 +118,10 @@ module.exports.codegen = (ast, terminate) ->
 
 	codegen_raw = (expr, terminate) ->
 		gen = new Generator()
-		rem_quots = (str) -> str.slice(1, -1)
-
 		if expr.body.length >= 1
-			gen.write expr.body.slice(0, -1).map(rem_quots)
+			gen.write expr.body.slice(0, -1)
 
-			last_expr = rem_quots expr.body.slice(-1)[0]
+			last_expr = expr.body.slice(-1)[0]
 			if terminate?
 				if last_expr.startsWith "return "
 					last_expr = last_expr.replace /^return /gmi, ''

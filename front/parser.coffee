@@ -75,7 +75,7 @@ make_body = (args, body) ->
 			local: true
 			value: {
 				type: 'raw'
-				body: [ '"return {' + (args.join ", ") + '}"' ]
+				body: [ 'return {' + (args.join ", ") + '}' ]
 				pure: true
 			}
 		}
@@ -166,7 +166,13 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 			else if tokens[0] is 'lua-raw'
 				{
 					type: 'raw'
-					body: tokens.slice(1)
+					body: tokens.slice(1).map (e) ->
+						if (e.startsWith '"') and (e.endsWith '"')
+							e.slice 1, -1
+						else if (e.startsWith "'") and (e.endsWith "'")
+							e.slice 1, -1
+						else
+							e
 				}
 			else if tokens[0] is 'loop'
 				{
