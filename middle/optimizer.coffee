@@ -154,13 +154,6 @@ annotate = (ast) ->
 					e.body_scope = push_scope()
 					do_annotate n for n in e.body
 					pop_scope()
-				when "switch"
-					do_annotate e.thing
-					for x in e.clauses
-						x.body_scope = push_scope()
-						do_annotate x.test
-						do_annotate x.valu
-						pop_scope()
 				when "variable" then
 				when "macro_declaration" then
 
@@ -258,29 +251,6 @@ annotate = (ast) ->
 
 					visit n for n in e.body
 				when "raw" then
-				when "switch"
-					visit e.test
-					for clause in e.clauses
-						test = clause.test
-						if /^\[(?:~?[\w|:]+,?)*\]$/gmi.test test
-							for n in test.slice(1, -1).split(',')
-								use_variable e.scope, 'type'
-								if /(\w+)\|(\w+):(\w+)\|/gmi.test n
-									matches = n.match(/(\w+)|(\w+):(\w+)|/gmi).filter (x) -> x.length >= 1
-
-									use_variable e.scope, 'head'
-									use_variable e.scope, 'tail'
-
-									# This will probably duplicate variables. Eh.
-									add_variable clause.body_scope, matches[1]
-									add_variable clause.body_scope, matches[2]
-						else if /^".+"$/gmi.test test
-							use_variable e.scope, 'type'
-						else if test.type? and (test.type isnt "variable" or test.name isnt "_")
-								visit test
-
-						visit clause.valu
-
 				when "macro_declaration" then
 				when "variable"
 					if not e.variable?

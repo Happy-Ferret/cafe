@@ -178,12 +178,12 @@
 (defn (filter li f)
 	(cond li
 		([list|0|] (do (print "edge case") '()))
-		(_ li)
 		([list|x:xs|]
 			(do
 				(cond x
 					((f x) (x . (filter xs f)))
-					(_ (filter xs f)))))))
+					(_ (filter xs f)))))
+		(_ li)))
 
 ;; ###### `exists thing`
 ;; returns false if:

@@ -48,6 +48,7 @@
 
 (tests/expect! (map (cut #^* 2 <>) '(1 2 3 4)) '(2 4 6 8) "mapping <> * 2 over '(1 2 3 4) should result in '(2 4 6 8)")
 (tests/expect! (zip-with #^+ '("foo" "bar" "buzz") '(" fighters" " hoppers" " aldrin")) '("foo fighters" "bar hoppers" "buzz aldrin") "Zip two lists with #^+")
+
 ;; Various compilation challenges
 (tests/expect! ((partial (lambda (x y) (^ x y)) 2) 3) 8 "Partial application of a lambda")
 (tests/expect! (id (if 1 2 3) 2) 2 "If statement in a function")
@@ -62,5 +63,33 @@
 (tests/expect! (do (def (a b) (if 1 (unpack '(1 2)))) '(a b)) '(1 2) "Multiple defs from if")
 (tests/expect! (do (def a (if 1 2 3)) a) 2 "Def from if")
 
+;; Cond statement
+(tests/expect! (cond "foobar"
+	([string] true)
+	(_ false)) true "String type is correct")
+(tests/expect! (and
+	(cond "foobar"
+		([string,number] true)
+		(_ false))
+	(cond 2
+		([string,number] true)
+		(_ false))) true "Multiple types type is correct")
+(tests/expect! (cond 2
+	([string] true)
+	(_ false)) false "Uses default case on truthy values")
+(tests/expect! (cond nil
+	([string] true)) nil "No match on falsy values")
+(tests/expect! (cond '(1 2 3)
+	([list|3|] true)
+	(_ false)) true "List with length")
+(tests/expect! (cond '(1 2 3)
+	([list|4|] 4)
+	([list|3|] 3)) 3 "List with length fall through")
+(tests/expect! (cond '(1 2 3)
+	([list|h:t|] (cons h t))
+	(_ false)) '(1 2 3)' "List with head and tail")
+(tests/expect! (cond '()
+		([list|h:t|] true)
+		(_ false)) false "Empty list")
 ;; Print results
 (tests/print-tests)

@@ -75,7 +75,7 @@ make_body = (args, body) ->
 			local: true
 			value: {
 				type: 'raw'
-				body: [ '"return {' + (args.join ", ") + '}"' ]
+				body: [ 'return {' + (args.join ", ") + '}' ]
 				pure: true
 			}
 		}
@@ -83,6 +83,9 @@ make_body = (args, body) ->
 		for node in body
 			out.push toks2ast node
 		out
+
+make_raw_expr = (e) -> { type: 'raw', body: [ "return " + e ] }
+make_variable = (e) -> { type: 'variable', name: e }
 
 module.exports.toks2ast = toks2ast = (tokens) ->
 	switch typeof tokens
@@ -166,7 +169,13 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 			else if tokens[0] is 'lua-raw'
 				{
 					type: 'raw'
-					body: tokens.slice(1)
+					body: tokens.slice(1).map (e) ->
+						if (e.startsWith '"') and (e.endsWith '"')
+							e.slice 1, -1
+						else if (e.startsWith "'") and (e.endsWith "'")
+							e.slice 1, -1
+						else
+							e
 				}
 			else if tokens[0] is 'loop'
 				{
@@ -175,14 +184,78 @@ module.exports.toks2ast = toks2ast = (tokens) ->
 					body: tokens.slice(2).map toks2ast
 				}
 			else if tokens[0] is 'cond'
-				{
-					type: 'switch'
-					thing: toks2ast tokens[1]
-					clauses: tokens.slice(2).map (n) ->
+				needs_type = false
+
+				# Walk the conditions in reverse building if statements
+				# TODO: Replace all the raw statements with trees
+				make_cond_clause = (fallback, node) ->
+					value = toks2ast node[1]
+					if node[0] is "_"
+						if fallback isnt "nil"
+							throw new Error("_ must be the last cause in a cond expression")
+						return value
+					test = toks2ast node[0]
+
+					test_node = if /^\[(?:~?[\w|:]+,?)*\]$/gmi.test test
+						needs_type = true
+
+						vars = false
+						test_str = test.slice(1, -1).split(',').map (n) ->
+							if /(\w+)\|(\w+):(\w+)\|/gmi.test n
+								matches = n.match(/(\w+)|(\w+):(\w+)|/gmi).filter (x) -> x.length >= 1
+								vars = matches.slice 1
+								"(__cond_ty == '#{matches[0]}' and head(__cond) and tail(__cond))"
+							else if /(\w+)\|(\d+)\|/gmi.test n
+								matches = n.match(/(\w+)|(\d+)|/gmi).filter (x) -> x.length >= 1
+								"(__cond_ty == '#{matches[0]}' and #__cond == #{matches[1]})"
+							else
+								n = do n.trim
+								if n[0] in "~!"
+									"(__cond_ty ~= '#{n.slice(1)}')"
+								else
+									"(__cond_ty == '#{n}')"
+						.join ' or '
+
+						if vars?
+							value = {
+								type: 'scoped_block'
+								vars: [
+									[ vars[0], { type: 'call_function', name: (make_variable "head"), args: [ make_variable "__cond" ] } ]
+									[ vars[1], { type: 'call_function', name: (make_variable "tail"), args: [ make_variable "__cond" ] } ]
+								]
+								body: [ value ]
+							}
+
+						make_raw_expr test_str
+					else if /^".+"$/gmi.test test
+						needs_type = true
+						make_raw_expr "__cond_ty == 'string' and __cond:match(#{test})"
+					else
+						test
+
+					{
+						type: 'conditional'
+						cond: test_node
+						trueb: value
+						falsb: fallback
+					}
+
+				body = tokens.slice(2).reduceRight(make_cond_clause, "nil")
+				vars = [ [ '__cond', toks2ast tokens[1] ] ]
+				if needs_type
+					vars.push [
+						'__cond_ty'
 						{
-							test: toks2ast n[0]
-							valu: toks2ast n[1]
+							type: 'call_function'
+							name: 'type'
+							args: [ { type: 'variable', name: '__cond' } ]
 						}
+					]
+
+				{
+					type: 'scoped_block'
+					vars: vars
+					body: [ body ]
 				}
 			else if tokens?[0]?[0] is '\''
 				{
