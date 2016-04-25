@@ -72,7 +72,7 @@ class Generator
 
 
 is_lua_expr = (node) ->
-	typeof node isnt "object" or node.type in ['call_function', 'lambda_expr', 'variable', 'switch', 'raw']
+	typeof node isnt "object" or node.type in ['call_function', 'lambda_expr', 'variable', 'raw']
 
 module.exports.codegen = (ast, terminate) ->
 	decd_funs = {}
@@ -266,74 +266,6 @@ module.exports.codegen = (ast, terminate) ->
 			gen.endBlock "end"
 		gen.join ';\n'
 
-	codegen_switch = (expr, terminate) ->
-		gen = new Generator()
-		if expr.thing? and expr.clauses?
-			gen.startBlock "#{terminate ? ""}(function(value) "
-			extra = {}
-			compile_value = (thing) ->
-				if typeof thing is 'object'
-					intermediate_codegen thing, "return ", true
-				else
-					"return " + thing
-
-			compile_test = (n) ->
-				if /^\[(?:~?[\w|:]+,?)*\]$/gmi.test n
-					n.slice(1, -1).split(',').map (n) ->
-						if /(\w+)\|(\w+):(\w+)\|/gmi.test n
-							matches = n.match(/(\w+)|(\w+):(\w+)|/gmi).filter (x) -> x.length >= 1
-							x = "(type(value) == '#{matches[0]}' and head(value) and tail(value))"
-							if !extra[x]?
-								extra[x] = ["local #{matches[1]}, #{matches[2]} = head(value), tail(value)"]
-							x
-						else if /(\w+)\|(\d+)\|/gmi.test n
-							matches = n.match(/(\w+)|(\d+)|/gmi).filter (x) -> x.length >= 1
-							x = "(type(value) == '#{matches[0]}' and #value == #{matches[1]})"
-						else
-							n = do n.trim
-							if n[0] in "~!"
-								"(type(value) ~= '#{n.slice(1)}')"
-							else
-								"(type(value) == '#{n}')"
-					.join ' or '
-				else if /^".+"$/gmi.test n
-					"type(value) == 'string' and value:match(#{n})"
-				else if n.type?
-					expr_codegen n
-				else
-					n
-
-			clauses = do ->
-				ret = {}
-				expr.clauses.forEach (n) ->
-					ret[compile_test n.test] = compile_value n.valu
-				ret
-
-
-			gen_switch_body = ->
-				meat = []
-				for test, value of clauses
-					if test isnt '_'
-						gen.startBlock "if #{test} then"
-						if extra[test]?
-							extra[test].map gen.write
-						gen.write value
-						gen.endBlock 'end'
-
-			gen_switch_catchall = ->
-				if clauses._
-					gen.write clauses._
-				else
-					gen.write "return nil"
-
-			gen.startBlock "if value then"
-			do gen_switch_body
-			gen.endBlock 'end'
-			do gen_switch_catchall
-			gen.endBlock "end)(#{expr_codegen expr.thing})"
-
-		gen.join ';\n'
-
 	codegen_variable = (expr, terminate) ->
 		if terminate?
 			"#{terminate}#{expr.name}"
@@ -365,8 +297,6 @@ module.exports.codegen = (ast, terminate) ->
 					codegen_raw expr, terminate
 				when 'while_loop'
 					codegen_while_loop expr, terminate
-				when 'switch'
-					codegen_switch expr, terminate
 				when 'macro_declaration'
 					return "-- macro declaration of #{expr.name}"
 				when 'variable'

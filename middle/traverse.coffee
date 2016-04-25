@@ -30,11 +30,6 @@ module.exports.traverser = (visitor) ->
 				when "while_loop"
 					visitor e.cond
 					visitor n for n in e.body
-				when "switch"
-					visitor e.thing
-					for n in e.clauses
-						visitor n.test
-						visitor n.valu
 				when "macro_declaration" then
 				when "variable" then
 				else
@@ -100,11 +95,6 @@ module.exports.modify = (e, mutator) ->
 			when "while_loop"
 				e.cond = emit_expr mutator e.cond
 				e.body = map_multi e.body, mutator
-			when "switch"
-				e.thing =  e.thing
-				for n in e.clauses
-					n.test = emit_expr mutator n.test
-					n.valu = emit_expr mutator n.valu
 			when "macro_declaration" then
 			when "variable" then
 			else
