@@ -68,8 +68,8 @@ commands =
 			filt = expect <= got
 
 		filter = not filt
-	warn: (params) ->
-		console.log "\x1b[1;33mwarning:\x1b[0m #{params.slice(1).join ' '}"
+	warn: (params, context) ->
+		console.log "\x1b[1;33mwarning:\x1b[0m #{params.slice(1).join ' '}" if context.do_output
 
 	else: (params) -> filter = !filter
 	end: (params) -> filter = false
@@ -89,6 +89,7 @@ module.exports.preprocess = (contents, fnam, context, interp = 'lua') ->
 		lines: context.lines ? lines
 		interpreter: context.interpreter ? interp
 		interpreter_version: context.interpreter_version ? get_interp_version interp
+		do_output: !context.silent ? true
 
 	contents.split('\n').map (line, ln) ->
 		line = do line.trim
