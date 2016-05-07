@@ -207,7 +207,7 @@
 (defn (describe x pt)
 	(defn (describe-list list)
 		(defn (dli accum elem)
-			(+ (describe-internal accum) ", " (describe-internal elem)))
+			(+ (describe-internal accum) (if elem (+ ", " (describe-internal elem)) "")))
 		(foldl dli (describe-internal (head list)) (tail list)))
 	(defn (describe-internal a)
 		(cond a
@@ -290,7 +290,7 @@
 		(foldl func (head accum) (tail accum))
 		(if (null? lst)
 			(cond lst
-				([~list] (func accum lst))
+				([list,nil] (func accum lst))
 				(_ accum))
 			(cond func
 				([function] (foldl func (func accum (head lst)) (tail lst)))
