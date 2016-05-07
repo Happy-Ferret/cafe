@@ -212,3 +212,7 @@ Return all the elements of a list except the last one. The list must be non-empt
 Return the last element of a list.
 
 
+###### `reverse li`
+reverse the given list.
+
+

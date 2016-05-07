@@ -290,8 +290,8 @@
 		(foldl func (head accum) (tail accum))
 		(if (null? lst)
 			(cond lst
-				([list,nil] (func accum lst))
-				(_ accum))
+				([list,nil] accum)
+				(_ (func accum lst)))
 			(cond func
 				([function] (foldl func (func accum (head lst)) (tail lst)))
 				(_ accum)))))
