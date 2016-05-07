@@ -39,7 +39,7 @@ Café has no concept of _operators_. Really, internally, they're just functions 
 
 To get the operator function of a given operator, prepend `#^` to the name. So the operator `+` is actually a call to `#^+`.
 
-Since built-in operators are just functions, all operators (read: all operators, save for unary `#`, `not` and `~` and binary `>`, `<`, `>=`, `<=`) can take a variable number arguments.
+Since built-in operators are just functions, most operators can take variable number arguments (`#`, `not` and `~` take one argument and `>`, `>`, `>=` and `<=` take 2).
 
 Here's some simple arithmetic:
 
@@ -186,7 +186,7 @@ In the previous section, we covered how to call functions. Now let's make our ow
 λ>
 ```
 
-You see how that `defn` didn't have a result? That's because it isn't evaluated. Instead, it is compiled into a function-definition and stored in the _compile cache_. The compile cache is the REPL's way of maintaining state across several expressions.
+You see how that `defn` didn't have a result? That's because it isn't evaluated. Instead, it is compiled into a function-definition and stored for later use.
 
 Now that this function is loaded, let's call it:
 ```clojure
