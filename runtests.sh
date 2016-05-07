@@ -8,7 +8,7 @@ for testsuite in $(grep test package.json | sed -re 's|\s*"(\S+)":.*$|\1|g' | gr
 			rm -rf "$(echo "$testsuite" | sed -re 's/test/&s/;s/\.//g').lua"
 		else
 			echo -e "  \x1b[1;31m→\x1b[0m Test $testsuite failed!"
-			exit
+			exit 1
 		fi
 	else
 		echo -e "\x1b[1;32m→\x1b[0m No interpreter for $testsuite, skipping.."
