@@ -74,7 +74,7 @@ class Generator
 is_lua_expr = (node) ->
 	typeof node isnt "object" or node.type in ['call_function', 'lambda_expr', 'variable', 'raw']
 
-module.exports.codegen = (ast, terminate) ->
+module.exports.codegen = (ast, terminate, do_predecl = true, allow_local = true) ->
 	decd_funs = {}
 
 	codegen_function_body = (expr, gen) ->
@@ -228,7 +228,7 @@ module.exports.codegen = (ast, terminate) ->
 		gen = new Generator()
 		if expr.name? and expr.value?
 			names = if expr.name instanceof Array then expr.name.join ", " else expr.name
-			if expr.local? and expr.local
+			if expr.local? and expr.local and allow_local
 				if is_lua_expr expr.value
 					gen.write "local #{names} = #{expr_codegen expr.value}"
 				else
@@ -326,7 +326,7 @@ module.exports.codegen = (ast, terminate) ->
 			if !/([_\w\d]+)\.([_\w\d])+/gmi.test nam
 				fns.push symbol nam
 
-		if fns.length >= 1
+		if fns.length >= 1 && do_predecl
 			decs = ["local #{fns.join ', '}"]
 			decs.concat x
 		else

@@ -32,6 +32,7 @@
   },
   "homepage": "https://github.com/demhydraz/cafe#readme",
   "dependencies": {
+    "lua.vm.js": "0.0.1",
     "optimist": "^0.6.1"
   }
 }
