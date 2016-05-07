@@ -34,7 +34,8 @@ repl_special = [
 preproc_context = {
 	file_name: '<REPL>',
 	interpreter: '<REPL>',
-	interpreter_version: '5.2'
+	interpreter_version: '5.2',
+	silent: true
 }
 
 eval_string = (str, state, cb) ->
@@ -49,7 +50,7 @@ eval_string = (str, state, cb) ->
 			state.execute code
 			do cb
 		catch e
-			console.error e.message
+			console.error e.message.replace /\[string "\?"\]:2:/, "#{arrow} \x1b[1;31mlua error:\x1b[0m"
 			do cb
 
 ## Read history from disk
@@ -68,7 +69,6 @@ compile = (module, state) ->
 	else
 		codegen(parse(preprocess(module, null, preproc_context, null)), null, false, false).join '\n;'
 
-	console.log code
 	state.execute code
 
 ## Warm compilation cache by compiling the built-in modules
