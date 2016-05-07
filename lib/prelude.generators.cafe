@@ -4,6 +4,9 @@
 (defmacro (lambda* argsl &expr)
 	(coroutine/wrap (λ ,argsl ,@expr)))
 
+(defmacro (λ* argsl &expr)
+	(lambda* ,argsl ,@expr))
+
 (defmacro (yield val) (coroutine/yield ,val))
 
 (defn (take* times gen)
@@ -18,7 +21,7 @@
 (defn (seq* lim)
 	(def lim (?? lim math/huge) :global)
 
-	(lambda* (_)
+	(lambda* ()
 		(with (counter 0)
 			(loop (infix lim > counter)
 				(def counter (+ 1 counter) :global)
