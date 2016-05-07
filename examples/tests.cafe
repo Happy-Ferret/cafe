@@ -91,5 +91,11 @@
 (tests/expect! (cond '()
 		([list|h:t|] true)
 		(_ false)) false "Empty list")
+
+(tests/expect! (describe '(1)) "(1)" "Describe a singleton list")
+(tests/expect! (describe '(1 2)) "(1, 2)" "Describe a 2-element list")
+(tests/expect! (describe 1) "1" "Describe a number")
+(tests/expect! (describe "string") "string" "Describe a string")
+
 ;; Print results
 (tests/print-tests)
