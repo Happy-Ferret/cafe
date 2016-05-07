@@ -4,7 +4,6 @@
 { codegen }               = require '../back'
 child_process             = require 'child_process'
 readline                  = require 'readline'
-lua                       = require 'lua.vm.js'
 fs                        = require 'fs'
 
 arrow = "\x1b[1;31m→\x1b[0m"
@@ -82,7 +81,7 @@ plural = ->
 		's'
 
 module.exports.repl = (intpt, cb) ->
-	state = new lua.Lua.State
+	state = new (require('lua.vm.js')).Lua.State
 
 	state.pushnil(); state.setglobal 'js'
 
