@@ -84,12 +84,12 @@ get_interp_version = (int) ->
 module.exports.preprocess = (contents, fnam, context, interp = 'lua') ->
 	lines = []
 	command_context =
-		file_name: context.file_name ? fnam
-		file_contents: context.file_contents ? contents
-		lines: context.lines ? lines
-		interpreter: context.interpreter ? interp
-		interpreter_version: context.interpreter_version ? get_interp_version interp
-		do_output: !context.silent ? true
+		file_name: context?.file_name ? fnam
+		file_contents: context?.file_contents ? contents
+		lines: context?.lines ? lines
+		interpreter: context?.interpreter ? interp
+		interpreter_version: context?.interpreter_version ? get_interp_version interp
+		do_output: !context?.silent ? true
 
 	contents.split('\n').map (line, ln) ->
 		line = do line.trim
