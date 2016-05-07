@@ -84,6 +84,8 @@ plural = ->
 module.exports.repl = (intpt, cb) ->
 	state = new lua.Lua.State
 
+	state.pushnil(); state.setglobal 'js'
+
 	console.log "Café REPL - Node #{process.version} - #{state._G.get '_VERSION'}"
 	warm_cache state
 
