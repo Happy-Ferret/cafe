@@ -6,7 +6,7 @@ symbol = (e) ->
 template_string = (str, tfa, ic) ->
 	str.replace /\$,(\w+)/gmi, (orig, gr1, indx, str) ->
 		if tfa[gr1]?
-			x = tfa[gr1]
+			x = tfa[gr1].replace /"/g, '\\"'
 			if x.type?
 				if x.type is 'variable'
 					x
