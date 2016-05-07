@@ -271,6 +271,8 @@
 ;; --
 (defn (nth i l) (lua-raw "return l[i]"))
 (defn (set-nth l i v) (lua-raw "l[i] = v") nil)
+(def !! nth)
+
 ;; ###### `null? list`
 ;; returns true if list is empty.
 ;; --
@@ -576,3 +578,6 @@
 (def negative?   (partial #^> 0))
 (defn (odd? num)  (= (mod num 2) 1))
 (defn (even? num) (= (mod num 2) 0))
+
+(defn (succ n) (+ 1 n))
+(defn (prev n) (- n 1))
