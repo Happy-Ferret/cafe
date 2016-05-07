@@ -10,13 +10,17 @@
 (defmacro (yield val) (coroutine/yield ,val))
 
 (defn (take* times gen)
-	(with (ret '())
-		(for i 1 times
-			(with ((success res) (pcall gen))
-				(if success
-					(push-tail! res ret)
-					(lua-raw "break;"))))
-		ret))
+	(if gen
+		(if (= 1 times)
+			(gen)
+			(with (ret '())
+				(for i 1 times
+					(with ((success res) (pcall gen))
+						(if success
+							(push-tail! res ret)
+							(lua-raw "break;"))))
+				ret))
+		nil))
 
 (defn (seq* lim)
 	(def lim (?? lim math/huge) :global)
@@ -26,3 +30,7 @@
 			(loop (infix lim > counter)
 				(def counter (+ 1 counter) :global)
 				(yield counter)))))
+
+(defn (drop* n gen)
+	(take* n gen) n)
+(def head* (cut take* 1 <>))
