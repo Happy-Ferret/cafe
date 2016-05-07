@@ -1,0 +1,25 @@
+(defmacro (defn* argsl &expr)
+	(def ,[0:1]argsl (coroutine/wrap (λ (,[1:]argsl) ,@expr))))
+
+(defmacro (lambda* argsl &expr)
+	(coroutine/wrap (λ ,argsl ,@expr)))
+
+(defmacro (yield val) (coroutine/yield ,val))
+
+(defn (take* times gen)
+	(with (ret '())
+		(for i 1 times
+			(with ((success res) (pcall gen))
+				(if success
+					(push-tail! res ret)
+					(lua-raw "break;"))))
+		ret))
+
+(defn (seq* lim)
+	(def lim (?? lim math/huge) :global)
+
+	(lambda* (_)
+		(with (counter 0)
+			(loop (infix lim > counter)
+				(def counter (+ 1 counter) :global)
+				(yield counter)))))
