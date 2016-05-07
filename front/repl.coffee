@@ -1,9 +1,10 @@
-{ preprocess, resolve } = require './preproc'
-{ parse, symbol }       = require './parser'
-{ codegen }             = require '../back'
-child_process           = require 'child_process'
-fs                      = require 'fs'
-readline                = require 'readline'
+{ macros, parse, symbol } = require './parser'
+{ preprocess, resolve }   = require './preproc'
+{ ast2cafe }              = require '../back/ast2cafe'
+{ codegen }               = require '../back'
+child_process             = require 'child_process'
+fs                        = require 'fs'
+readline                  = require 'readline'
 
 arrow = "\x1b[1;31m→\x1b[0m"
 
@@ -131,6 +132,13 @@ module.exports.repl = (intpt, cb) ->
 			line = do line.trim
 			if line.startsWith ',dump' # Print the result of code-generating an expression
 				console.log "#{arrow} #{codegen(parse(preprocess(line.replace(/^,dump /g, ''), null, null, interpr))).join ';'}"
+				do ri.prompt
+			else if line.startsWith ',view-ast'
+				console.log "#{arrow} #{JSON.stringify parse(preprocess(line.replace(/^,view-ast /g, ''), null, null, interpr)), null, ' '}"
+				do ri.prompt
+			else if line.startsWith ',macro-expand'
+				code = parse preprocess line.replace(/^,macro-expand /g, ''), null, null, interpr
+				console.log "#{arrow} #{ast2cafe(code).join('')}"
 				do ri.prompt
 			else if line.startsWith ',import' # Import a module into the compile cache
 				compile line.replace /^,import /gmi, ''

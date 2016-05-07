@@ -60,7 +60,7 @@ name_symbol = (str) ->
 		throw new Error("#{str} is a reserved name")
 	str
 module.exports.symbol = symbol
-macros = {}
+module.exports.macros = macros = {}
 
 generate_macro = (expr) -> (args) -> macro_common(expr)(args).map(toks2ast)
 
