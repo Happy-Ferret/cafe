@@ -1,4 +1,4 @@
-Café
+Café  [![Build Status](https://travis-ci.org/demhydraz/cafe.svg?branch=master)](https://travis-ci.org/demhydraz/cafe)
 ---
 
 _/ˈkæfeɪ/_
