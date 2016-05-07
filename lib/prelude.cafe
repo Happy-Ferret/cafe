@@ -561,9 +561,11 @@
 ;; Return all the elements of a list except the last one. The list must be non-empty.
 ;; --
 (defn (init li)
-	(cond li
-		([list|0|] '())
-		([list|x:xs|] (x . (init xs)))))
+	(if (null? li)
+		nil
+		(cond li
+			([list|0|] '())
+			([list|x:xs|] (x . (init xs))))))
 
 ;; ###### `last li`
 ;; Return the last element of a list.
@@ -581,3 +583,10 @@
 
 (defn (succ n) (+ 1 n))
 (defn (prev n) (- n 1))
+
+;; ###### `reverse li`
+;; reverse the given list.
+;; --
+(def reverse (cut reduce (flip cons) l <>))
+
+;;@import prelude.generators
