@@ -26,4 +26,4 @@ The macro system is also implemented as a simple set of substitution over a temp
 Learning
 ---
 
-The official reference for the language resides in this repository, under [doc/tutorial](https://example.com). It is, however, not complete.
+The official reference for the language resides in this repository, under [doc/tutorial](http://github.com/demhydraz/cafe/blob/67bedea43e04e0b08dc1330f69fc576b2ee1ca7d/doc/tutorial/intro.md). It is, however, not complete.
