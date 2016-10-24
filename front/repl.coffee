@@ -92,7 +92,7 @@ module.exports.repl = (intpt, cb) ->
 		input: process.stdin
 		output: process.stdout
 
-	ri.historyFile = "/#{process.env.HOME}/.cafe_history"
+	ri.historyFile = "/#{process.env.HOME || process.env.USERPROFILE}/.cafe_history"
 	ri.setPrompt "\x1b[1;32mλ\x1b[0m> "
 	do ri.prompt
 
