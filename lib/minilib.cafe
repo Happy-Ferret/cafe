@@ -4,10 +4,10 @@
 ;; for Café programs to work. To use the minilib instead of the standard
 ;; prelude, pass the `--mini` flag to the compiler.
 
-(defmacro (curry a b)
+(defmacro (|> a b)
 	(λ (...) (,b (,a ...))))
 
-(defmacro (· a b) (curry ,a ,b))
+(defmacro (· a b) (|> ,a ,b))
 
 (defmacro (compose a b)
 	(λ (...) (,a (,b ...))))

@@ -33,17 +33,17 @@
 ;; merge two functions together, applying the second over the result of the first
 ;; --
 
-(defmacro (curry a b)
+(defmacro (compose a b)
 	(λ (...) (,b (,a ...))))
 
-(defmacro (· a b) (curry ,a ,b))
+(defmacro (· a b) (compose ,a ,b))
 
-;; ###### `compose fna fnb`
-;; merge two functions together, applying the first over the result of the second
+;; ###### `|> fna fnb`
+;; create a pipe between fna and fnb
 ;; --
 
-(defmacro (compose a b)
-	(λ (...) (,a (,b ...))))
+(defmacro (|> a b)
+	(λ (...) (,b (,a ...))))
 
 (defmacro (ns nm)
 	(def ,~nm {}))
