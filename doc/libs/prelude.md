@@ -25,8 +25,8 @@ global symbol bound to the Lua version currently in use, and the semver version 
 merge two functions together, applying the second over the result of the first
 
 
-###### `compose fna fnb`
-merge two functions together, applying the first over the result of the second
+###### `|> fna fnb`
+create a pipe between fna and fnb
 
 
 ###### `partial fn x`

@@ -30,7 +30,7 @@
 (tests/expect! (size '(1 2 3 4)) 4 "the size of '(1 2 3 4) should be 4")
 (tests/expect! (take 2 '(1 2 3 4)) '(1 2) "taking the first 2 elements of '(1 2 3 4) should be 1 . 2")
 (tests/expect! (head (take 1 '(1 2 3 4))) (head '(1 2 3 4)) "taking the first element of a list should be equivalent to taking the head of said list")
-(tests/expect! (take 10 (map (curry (partial #^^ 2) int) (range 20))) '(2 4 8 16 32 64 128 256 512 1024) "taking the first 10 powers of two should be the 10 first powers of two")
+(tests/expect! (take 10 (map (|> (partial #^^ 2) int) (range 20))) '(2 4 8 16 32 64 128 256 512 1024) "taking the first 10 powers of two should be the 10 first powers of two")
 
 ;; Test tests
 
